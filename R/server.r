@@ -11,6 +11,11 @@
 #' @include methods.r
 #' @include plots.r
 
+if(!is_in_package()){
+  source("methods.r")
+  source("plots.r")
+}
+
 empty <- "none"
 
 server <- function(input, output, session) {
@@ -99,6 +104,9 @@ server <- function(input, output, session) {
 
 
   observeEvent(input$mystudies_rows_selected, {
+    updateSelectInput(session, 'attribute_dr', 'Color by', "")
+    updateSelectInput(session, 'attribute_da', 'Color by', "")
+    updateSelectInput(session, 'attribute_ma', 'Color by', "")
     values$phylo <- NULL
     values$selection <- NULL
     values$de_table <- NULL
@@ -181,7 +189,7 @@ server <- function(input, output, session) {
 
   output$attribute_dr <- renderUI({
     if (is.null(values$phylo))
-      return(NULL)
+      NULL
     phylo <- values$phylo
     attributes <-
       if (length(values$attributes) == 0L)
@@ -462,7 +470,7 @@ server <- function(input, output, session) {
     if (any(is.null(phylo), is.null(input$attribute_dr)))
       return(NULL)
 
-    if (study_info[study_info$study == values$study, "sample_size"] > MAX_SAMPLES) {
+    if (study_info[study_info$study == isolate(values$study), "sample_size"] > MAX_SAMPLES) {
       showModal(modalDialog(
         title = "Important message",
         paste(
@@ -474,7 +482,6 @@ server <- function(input, output, session) {
       ))
       return(NULL)
     }
-
     withProgress(session = session, value = 0.5, {
       setProgress(message = "Calculation in progress")
       plot_mds(phylo, input$attribute_dr)

@@ -2,5 +2,5 @@
 #' @importFrom shiny runApp
 #' @export
 launch <- function() {
-	runApp()
+	runApp(list(ui=ui,server=server))
 }

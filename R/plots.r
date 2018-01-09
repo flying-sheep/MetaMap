@@ -1,6 +1,9 @@
 #' @include global.r
 #' @include methods.r
 
+if(!is_in_package()){
+  source("methods.r")
+}
 #' Top relative abundance
 #'
 #' Plot the relative abundance of the \code{top_n} most abundant species.
@@ -87,8 +90,8 @@ plot_volcano <- function(tax_table, de_table) {
 #'
 #' @param phylo \link[phyloseq]{phyloseq} object
 #' @param source \code{c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")}
-#' @param target \code{c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"
-#' @param level_filter \code{c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species"
+#' @param target \code{c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")}
+#' @param level_filter \code{c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")}
 #' @param source_filter String to filter \code{source} values.
 #'
 #' @name metatranscriptome plots
@@ -171,7 +174,7 @@ plot_sankey <-
 #'
 #' @param phylo \link[phyloseq]{phyloseq} object.
 #' @param attribute Column name of the sample table, obtained from \link[phyloseq]{sam_data}.
-#' @param level \code{c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species".
+#' @param level \code{c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species".)}
 #' @param relative logical value.
 #'
 #' @name metatranscriptome plots
