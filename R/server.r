@@ -144,6 +144,7 @@ server <- function(input, output, session) {
           easyClose = TRUE
         )
       )
+      return()
     }
     values$phylo <- phylo
     values$attributes <-  sapply(1:length(sample_data(phylo)),
