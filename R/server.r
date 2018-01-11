@@ -97,7 +97,9 @@ server <- function(input, output, session) {
         source_filter = NULL
       ),
       args_history = list(),
-      undo = F
+      undo = F,
+      cond = empty,
+      attribute = empty
     )
 
 
@@ -294,6 +296,32 @@ server <- function(input, output, session) {
     actionButton('tbc_button', "Generate")
   })
 
+  output$attribute_sankey <- renderUI({
+    if (is.null(values$phylo))
+      NULL
+    phylo <- values$phylo
+    attributes <-
+      if (length(values$attributes) == 0L)
+        empty
+    else
+      c(empty, values$attributes)
+    selectInput('attribute_sankey', 'Select attribute', attributes)
+  })
+
+  output$sankey_condition <- renderUI({
+    phylo <- values$phylo
+    if (any(is.null(phylo), is.null(input$attribute_sankey)))
+      return(NULL)
+    conditions <-
+      if (length(values$attributes) == 0L ||
+          input$attribute_sankey == empty)
+        empty
+    else
+      unique(phylo@sam_data[, input$attribute_sankey])
+    selectInput('sankey_condition', label = 'Select Condition',
+                choices = conditions)
+  })
+
   output$mysamples <- DT::renderDataTable({
     if (is.null(values$phylo))
       return(NULL)
@@ -406,6 +434,8 @@ server <- function(input, output, session) {
         source_filter = NULL,
         level_filter = NULL
       )
+    sankey$cond <- input$sankey_condition
+    sankey$attribute <- input$attribute_sankey
   })
 
   observeEvent(input$sankey_reset_button, {
@@ -668,17 +698,27 @@ server <- function(input, output, session) {
     withProgress(session = session, value = 0.5, {
       setProgress(message = "Calculation in progress")
       # isolate(print(sankey$args_history))
-      if(isolate(!sankey$undo)){
+      if(isolate(!sankey$undo) && length(sankey$args) != 0 && !isolate(identical(sankey$args, sankey$newArgs))){
         isolate(sankey$args_history[[length(sankey$args_history) + 1]] <-
           sankey$args)
       }else{
         # print("test")
         sankey$undo <- F
       }
-      print(sankey$args_history )
+      # print(sankey$args_history )
       sankey$args <- sankey$newArgs
       args <- sankey$args
-      args$phylo = values$phylo
+      phylo = values$phylo
+
+      # filter phylo
+      attribute <- sankey$attribute
+      cond <- sankey$cond
+      if(cond != empty && !is.null(cond)){
+        environment(subset_samples) <- environment()
+        phylo <-
+          subset_samples(phylo, unlist(phylo@sam_data[, attribute]) %in% cond)
+      }
+      args$phylo <- phylo
       tmp <- try(do.call(plot_sankey, args))
       if (class(tmp) == "try-error") {
         showModal(

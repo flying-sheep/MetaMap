@@ -124,6 +124,10 @@ ui <- function() {
       sidebarPanel(
         selectInput('sankey_source', 'Source', c()),
         selectInput('sankey_target', 'Target', c()),
+        fluidRow(column(4, uiOutput(
+          'attribute_sankey'
+        )),
+        column(4, uiOutput('sankey_condition'))),
         fluidRow(
           column(4, actionButton("sankey_apply_button", label = "Apply")),
           column(4,  actionButton("sankey_reset_button", label = "Reset")),
