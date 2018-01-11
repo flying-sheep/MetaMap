@@ -127,6 +127,7 @@ server <- function(input, output, session) {
     row <- input$mystudies_rows_selected
     study <- study_info$study[row]
     values$study <- study
+    print(list.files())
     # load phylo from .RData file
     cls <-
       class(try(loadPhylo(study))

@@ -44,6 +44,4 @@ if(!is_in_package()){
 DIR <- ifelse(is_in_package(), "R/data", "data")
 MAX_SAMPLES <- 150
 
-print('test1')
-
 load(file.path(DIR, 'study_info.RData'))
