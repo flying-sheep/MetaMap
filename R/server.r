@@ -496,10 +496,10 @@ server <- function(input, output, session) {
 
   output$dimred <- renderPlotly({
     phylo <- isolate(values$phylo)
-    if (any(is.null(phylo), is.null(input$attribute_dr)))
+    if (any(is.null(phylo), is.null(input$attribute_dr), input$attribute_dr == ""))
       return(NULL)
 
-    if (study_info[study_info$study == isolate(values$study), "sample_size"] > MAX_SAMPLES) {
+    if (study_info[isolate(study_info$study) == isolate(values$study), "sample_size"] > MAX_SAMPLES) {
       showModal(modalDialog(
         title = "Important message",
         paste(
@@ -519,7 +519,7 @@ server <- function(input, output, session) {
 
   output$diversity <- renderPlotly({
     phylo <- isolate(values$phylo)
-    if (any(is.null(phylo), is.null(input$attribute_da)))
+    if (any(is.null(phylo), is.null(input$attribute_da), input$attribute_da == ""))
       return(NULL)
     attribute <- input$attribute_da
     if (input$attribute_da == empty)
@@ -682,7 +682,7 @@ server <- function(input, output, session) {
   output$top_species_plot <- renderPlot({
     phylo <- isolate(values$phylo)
     attribute <- input$attribute_ma
-    if (any(is.null(attribute), is.null(phylo)))
+    if (any(is.null(attribute), is.null(phylo), input$attribute_ma == ""))
       return(NULL)
     withProgress(session = session, value = 0.5, {
       attribute <-
