@@ -51,6 +51,6 @@ pkg_file <- function(path = '.') {
 DIR <- ifelse(is_in_package(), "R/data", "data")
 MAX_SAMPLES <- 150
 
-print(system.file("R", package = 'metatranscriptome'))
+print(pkg_file(file.path(DIR, 'study_info.RData')))
 
 load(pkg_file(file.path(DIR, 'study_info.RData')))
