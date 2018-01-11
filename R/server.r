@@ -129,9 +129,7 @@ server <- function(input, output, session) {
     values$study <- study
     # load phylo from .RData file
     cls <-
-      class(try(load(file.path(
-        DIR, paste0(study, ".RData")
-      )))
+      class(try(loadPhylo(study))
       )
     if (cls == "try-error")
     {
