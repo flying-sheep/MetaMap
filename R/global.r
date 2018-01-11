@@ -41,7 +41,14 @@ if(!is_in_package()){
   library(shinyjs)
 }
 
+pkg_file <- function(path = '.') {
+  if (is_in_package()) system.file(path, package = 'metatranscriptome')
+  else {
+    path
+  }
+}
+
 DIR <- ifelse(is_in_package(), "R/data", "data")
 MAX_SAMPLES <- 150
 
-load(file.path(DIR, 'study_info.RData'))
+load(pkg_file(file.path(DIR, 'study_info.RData')))

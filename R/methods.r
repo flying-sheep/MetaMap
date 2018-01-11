@@ -209,7 +209,7 @@ getAttributes <- function(phylo) {
 #'
 #' @export
 loadPhylo <- function(study, envir = environment(loadPhylo)) {
-  try(load(file.path(DIR, "studies", paste0(study, ".RData")), envir))
+  try(load(pkg_file(file.path(DIR, "studies", paste0(study, ".RData"))), envir))
 }
 
 #' Generate Lineage
