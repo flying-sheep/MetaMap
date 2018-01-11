@@ -19,6 +19,11 @@ ui <- function() {
     title = 'Meta Transcriptome',
     id = 'dataset',
     tabPanel(
+      "Overview",
+      htmlOutput("overviewText"),
+      img(src='PipelineImage.png', align = "center")
+    ),
+    tabPanel(
       "Query studies",
       htmlOutput("queryHelp") ,
       DT::dataTableOutput("mystudies")
