@@ -19,6 +19,12 @@ if(!is_in_package()){
 empty <- "none"
 
 server <- function(input, output, session) {
+output$overviewText <- renderUI(
+   HTML('<h1 style="color: #5e9ca0;"><span style="color: #000000;">MetaMap - exploring the unexplored</span></h1>
+         <p><span style="color: #000000;">This interactive webtools enables the exploration of viral and microbial traits extracted from human RNA-seq data of over 500 studies relevant to human disease. The data was generated using a two-step alignment pipeline outlined below:</span></p>
+         <h2 style="color: #2e6c80;">&nbsp;</h2>
+         <p>&nbsp;</p>')
+        )
   output$queryHelp <-
     renderUI(
       HTML(

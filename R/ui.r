@@ -16,7 +16,7 @@ ui <- function() {
   navbarPage(
     fluid = T,
     inverse = TRUE,
-    title = 'Meta Transcriptome',
+    title = 'MetaMap',
     id = 'dataset',
     tabPanel(
       "Overview",
