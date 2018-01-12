@@ -49,6 +49,6 @@ pkg_file <- function(path = '.') {
 }
 
 DIR <- ifelse(is_in_package(), "R/data", "data")
-MAX_SAMPLES <- 282
+MAX_SAMPLES <- 250
 
 load(pkg_file(file.path(DIR, 'study_info.RData')))

@@ -120,7 +120,7 @@ ui <- function() {
         tabsetPanel(
           id = "tbc_panel",
           tabPanel("Relative proportion", plotOutput("ntaxa_plot")),
-	  tabPanel("Absolute counts", plotOutput("taxa_plot")),
+	  tabPanel("Absolute counts", plotOutput("taxa_plot"))
           # ntaxa_plot is normalized
         )
       )
