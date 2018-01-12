@@ -119,9 +119,9 @@ ui <- function() {
         condition = "output.cond1",
         tabsetPanel(
           id = "tbc_panel",
-          tabPanel("Value", plotOutput("taxa_plot")),
+          tabPanel("Relative proportion", plotOutput("ntaxa_plot")),
+	  tabPanel("Absolute counts", plotOutput("taxa_plot")),
           # ntaxa_plot is normalized
-          tabPanel("%", plotOutput("ntaxa_plot"))
         )
       )
     ),

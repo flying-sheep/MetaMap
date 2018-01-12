@@ -46,7 +46,7 @@ output$overviewText <- renderUI(
   output$daHelp <-
     renderUI(
       HTML(
-        '<p style="text-align: center"><strong>To change the coloring select sample attribute from <em>Color by</em> drop-down menu.</strong></p>'
+        '<p style="text-align: center"><strong>To change the coloring select sample attribute from <em>Color by</em> drop-down menu. The displayed p-value is calculated from an analysis of variance between the diversity values and the selected sample attribute.</strong></p>'
       )
     )
   output$deHelp <-
