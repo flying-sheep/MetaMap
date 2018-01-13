@@ -414,6 +414,18 @@ output$overviewText <- renderUI(
                       selected = sankey$args$target)
   })
 
+  observeEvent(values$phylo, {
+    sankey$newArgs <-
+      list(
+        source = "Kingdom",
+        target = "Phylum",
+        source_filter = NULL,
+        level_filter = NULL
+      )
+    sankey$args = list()
+    sankey$args_history <- list()
+  })
+
   observeEvent(input$sankey_apply_button, {
     phylo <- values$phylo
     if (is.null(phylo))
@@ -454,7 +466,6 @@ output$overviewText <- renderUI(
       )
     sankey$args = list()
     sankey$args_history <- list()
-
   })
 
   observeEvent(input$sel_button, {
@@ -704,21 +715,21 @@ output$overviewText <- renderUI(
     withProgress(session = session, value = 0.5, {
       setProgress(message = "Calculation in progress")
       # isolate(print(sankey$args_history))
-      if(isolate(!sankey$undo) && length(sankey$args) != 0 && !isolate(identical(sankey$args, sankey$newArgs))){
+      if(isolate(!sankey$undo) && isolate(length(sankey$args)) != 0 && !isolate(identical(sankey$args, sankey$newArgs))){
         isolate(sankey$args_history[[length(sankey$args_history) + 1]] <-
           sankey$args)
       }else{
         # print("test")
         sankey$undo <- F
       }
-      # print(sankey$args_history )
-      sankey$args <- sankey$newArgs
-      args <- sankey$args
-      phylo = values$phylo
+      newArgs <- sankey$newArgs
+      isolate(sankey$args <- newArgs)
+      isolate(args <- sankey$args)
+      phylo <- values$phylo
 
       # filter phylo
-      attribute <- sankey$attribute
-      cond <- sankey$cond
+      attribute <- isolate(sankey$attribute)
+      cond <- isolate(sankey$cond)
       if(cond != empty && !is.null(cond)){
         environment(subset_samples) <- environment()
         phylo <-
@@ -799,7 +810,7 @@ output$overviewText <- renderUI(
   })
 
   output$sankey_cond <- reactive({
-    length(sankey$args_history) > 1
+    length(sankey$args_history) > 0
   })
 
   outputOptions(output, "sankey_cond", suspendWhenHidden = FALSE)
@@ -807,6 +818,7 @@ output$overviewText <- renderUI(
   outputOptions(output, "cond", suspendWhenHidden = FALSE)
 
   observeEvent(event_data("plotly_click", source = "sankey"), {
+    js$resetClick()
     if (sankey$args$target == "Species") {
       showModal(
         modalDialog(
@@ -821,17 +833,17 @@ output$overviewText <- renderUI(
       event_data("plotly_click", source = "sankey")$pointNumber
     source_filter <-
       sankey$sankey_links[link + 1, "Target"] %>% substr(4, nchar(.))
+    level_filter <- sankey$sankey_links[link + 1, "Target_level"]
     levls <- colnames(values$phylo@tax_table)
-    newSource <- sankey$args$target
+    newSource <- levls[which(levls == sankey$args$source) + 1]
     newTarget <- levls[which(levls == sankey$args$target) + 1]
     sankey$newArgs <-
       list(
         source = newSource,
         target = newTarget,
-        level_filter = newSource,
+        level_filter = level_filter,
         source_filter = source_filter
       )
-    js$resetClick()
   })
 
 }

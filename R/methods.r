@@ -81,7 +81,8 @@ deseq2_table <- function(phylo,
   size.factors <-
     log10(tmp@sam_data$Total.Reads) / median(log10(tmp@sam_data$Total.Reads))
   DESeq2::sizeFactors(deseq) <- size.factors
-  de_table <- DESeq2::DESeq(deseq, test = "Wald", fitType = "local") %>%
+  de_table <-
+    DESeq2::DESeq(deseq, test = "Wald", fitType = "local") %>%
     DESeq2::results(cooksCutoff = FALSE) %>%
     .[sort.list(.$padj), ] %>%
     as.data.frame
@@ -158,7 +159,8 @@ generatePhylo <- function(study, counts, sample_info, lineage) {
   tax <- tax_table(lineage)
   rownames(tax) <- rownames(otu)
   tmp <- phyloseq(otu, tax, sam)
-  bla <- strsplit(sample_data(tmp)$sample_attribute, " || ", fixed = T)
+  bla <-
+    strsplit(sample_data(tmp)$sample_attribute, " || ", fixed = T)
   bla <- try(do.call(rbind.fill,
                      lapply(bla, function(x)
                        str_split(x, ": ", n = 2) %>%
@@ -238,3 +240,38 @@ generateLineage <- function(feature_info) {
       'Species')
   lineage
 }
+
+makeSankey_links <-
+  function(tax_table,
+           otu_table,
+           source,
+           target,
+           source_filter,
+           level_filter) {
+    group <- tax_table[, target]
+
+    target_means <- rowsum(otu_table, group) %>% rowMeans() %>%
+    {
+      . / sum(.) * 100
+    }
+
+    # Filter tax_table
+    if (!is.null(source_filter)) {
+      if (is.null(level_filter))
+        level_filter <- source
+      tax_table <-
+        filter(tax_table, tax_table[, level_filter] == source_filter)
+    }
+
+    links <-
+      tax_table[, c(source, target)] %>% data.frame(stringsAsFactors = F) %>%
+      distinct %>% setNames(c("Source", "Target")) %>%
+      mutate(
+        Value = target_means[.$Target],
+        Source_level = rep(source, nrow(.)),
+        Target_level = rep(target, nrow(.))
+      ) %>%
+      .[order(.$Value, decreasing = T),] %>% .[which(.$Value > 0.5),]
+
+    links
+  }
