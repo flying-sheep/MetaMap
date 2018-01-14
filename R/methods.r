@@ -289,3 +289,7 @@ makeSankey_links <-
 
     links
   }
+
+getMetafeautures <- function(study_info, studies_dir){
+
+}

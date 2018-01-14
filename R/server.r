@@ -68,7 +68,7 @@ output$overviewText <- renderUI(
       )
     )
 
-  showColumns <- c('study', 'study_abstract', "sample_size")
+  showColumns <- c('link', 'study_abstract', "sample_size")
 
   output$mystudies <- DT::renderDataTable({
     DT::datatable(
@@ -79,7 +79,8 @@ output$overviewText <- renderUI(
         scrollX = TRUE
       ),
       rownames = FALSE,
-      selection = list(mode = 'single', selected = 1)
+      selection = list(mode = 'single', selected = 1),
+      escape = F
     )
   })
 

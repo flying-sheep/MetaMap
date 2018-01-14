@@ -56,4 +56,18 @@ studies <- list.files(pkg_file(file.path(DIR, 'studies'))) %>%
 
 load(pkg_file(file.path(DIR, 'study_info.RData')))
 
+# only show studies that exist in the data/studie directory
 study_info <- subset(study_info, study %in% studies)
+
+# add links redirecting to the sra website for each study
+study_info$link <-
+  with(
+    study_info,
+    paste0(
+      "<a href='https://trace.ncbi.nlm.nih.gov/Traces/sra/?study=",
+      study,
+      "'>",
+      study,
+      "</a>"
+    )
+  )

@@ -19,6 +19,7 @@ plot_top_species <- function(phylo, top_n = 10L, attribute) {
   if (is.null(phylo))
     return(NULL)
   phylo@otu_table %>%
+    apply(2, function(x) x/sum(x)*100) %>%
     t %>%
     as.data.frame %>%
     mutate(Selection = unlist(phylo@sam_data[, attribute])) %>%
