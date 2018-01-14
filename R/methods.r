@@ -71,7 +71,7 @@ deseq2_table <- function(phylo,
     subset_samples(tmp, unlist(tmp@sam_data[, attribute]) %in% c(cond1, cond2))
 
   # Remove samples with NA
-  tmp <- subset_samples(tmp,!is.na(tmp@sam_data[, attribute]))
+  tmp <- subset_samples(tmp, !is.na(tmp@sam_data[, attribute]))
   tmp <- prune_taxa(taxa_sums(tmp) > 0, tmp)
   # make valid condition names
   tmp@sam_data$ad.type <-
@@ -84,7 +84,7 @@ deseq2_table <- function(phylo,
   de_table <-
     DESeq2::DESeq(deseq, test = "Wald", fitType = "local") %>%
     DESeq2::results(cooksCutoff = FALSE) %>%
-    .[sort.list(.$padj), ] %>%
+    .[sort.list(.$padj),] %>%
     as.data.frame
   # %>% mutate(pvalue = -log10(pvalue), padj = -log10(padj))
   de_table
@@ -100,7 +100,7 @@ de_glm_df <- function(phylo, taxids, attribute, cond1, cond2) {
 
   lapply(taxids, function(x) {
     species_name <- taxids2names(phylo, x)
-    phylo@otu_table[x, ] %>%
+    phylo@otu_table[x,] %>%
       t %>%
       cbind(phylo@sam_data[, c(attribute, "Total.Reads")]) %>%
       set_colnames(c("Transcript", attribute, "Total.Reads")) %>%
@@ -154,7 +154,7 @@ generatePhylo <- function(study, counts, sample_info, lineage) {
   otu <-
     otu_table(round(as.data.table(counts)[, ok, with = F]), taxa_are_rows =
                 TRUE)
-  sam <- sample_data(sample_info[ok, ])
+  sam <- sample_data(sample_info[ok,])
   rownames(sam) <- colnames(otu)
   tax <- tax_table(lineage)
   rownames(tax) <- rownames(otu)
@@ -166,8 +166,8 @@ generatePhylo <- function(study, counts, sample_info, lineage) {
                        str_split(x, ": ", n = 2) %>%
                          data.frame(stringsAsFactors = F) %>%
                          {
-                           colnames(.) <- .[1, ]
-                           as.data.table(.)[2, ]
+                           colnames(.) <- .[1,]
+                           as.data.table(.)[2,]
                          })))
   bla <-
     if (class(bla) == "try-error")
@@ -241,6 +241,20 @@ generateLineage <- function(feature_info) {
   lineage
 }
 
+#' Make Sankey links table
+#'
+#' Creates a table with information about all the links from \code{source} to \code{target}.
+#'     This table can be used to create a shankey plot.
+#'
+#' @param tax_table filtered tax table from a \link[phyloseq]{phyloseq} object
+#' @param otu_table otu_table from a \link[phyloseq]{phyloseq} object
+#' @param source \code{c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")}
+#' @param target \code{c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")}
+#' @param source_filter String to filter \code{source} values.
+#' @param level_filter \code{c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")}
+#'
+#' @return A data.frame with info about the links.
+#' @export
 makeSankey_links <-
   function(tax_table,
            otu_table,
@@ -271,7 +285,7 @@ makeSankey_links <-
         Source_level = rep(source, nrow(.)),
         Target_level = rep(target, nrow(.))
       ) %>%
-      .[order(.$Value, decreasing = T),] %>% .[which(.$Value > 0.5),]
+      .[order(.$Value, decreasing = T), ] %>% .[which(.$Value > 0.5), ]
 
     links
   }
