@@ -51,4 +51,9 @@ pkg_file <- function(path = '.') {
 DIR <- ifelse(is_in_package(), "R/data", "data")
 MAX_SAMPLES <- 250
 
+studies <- list.files(pkg_file(file.path(DIR, 'studies'))) %>%
+  str_split_fixed("\\.", n = 2) %>% .[,1]
+
 load(pkg_file(file.path(DIR, 'study_info.RData')))
+
+study_info <- subset(study_info, study %in% studies)
