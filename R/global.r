@@ -53,7 +53,8 @@ MAX_SAMPLES <- 250
 
 print(DIR)
 print(getwd())
-print(list.files())
+print(list.files("R"))
+print(list.files("R/data"))
 
 STUDIES <- list.files(pkg_file(file.path(DIR, 'studies'))) %>%
   str_split_fixed("\\.", n = 2) %>% .[,1]
