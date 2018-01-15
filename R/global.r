@@ -55,7 +55,7 @@ print(DIR)
 print(getwd())
 print(list.files("R"))
 print(list.files("R/data"))
-
+print(pkg_file(file.path(DIR, 'studies')))
 STUDIES <- list.files(pkg_file(file.path(DIR, 'studies'))) %>%
   str_split_fixed("\\.", n = 2) %>% .[,1]
 
