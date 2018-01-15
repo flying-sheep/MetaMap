@@ -14,6 +14,7 @@ resetClickCode <-
 
 #' @export
 ui <- function() {
+  addResourcePath("www", pkg_file("shiny/www"))
   navbarPage(
     fluid = T,
     inverse = TRUE,
