@@ -52,6 +52,7 @@ DIR <- ifelse(is_in_package(), "R/data", "data")
 MAX_SAMPLES <- 250
 
 print(DIR)
+print(getwd())
 
 STUDIES <- list.files(pkg_file(file.path(DIR, 'studies'))) %>%
   str_split_fixed("\\.", n = 2) %>% .[,1]
