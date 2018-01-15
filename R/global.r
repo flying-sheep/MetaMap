@@ -33,6 +33,7 @@ pkg_file <- function(path = "."){
     file.path("../inst", path)
 }
 
+print(pkg_file("shiny/www"))
 addResourcePath("www", pkg_file("shiny/www"))
 
 DIR <- pkg_file("data")
