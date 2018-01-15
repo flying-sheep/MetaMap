@@ -42,7 +42,7 @@ if(!is_in_package()){
 }
 
 pkg_file <- function(path = '.') {
-  if (is_in_package()) system.file(path, package = 'metatranscriptome1', mustWork = T)
+  if (is_in_package()) system.file(path, package = 'metatranscriptome', mustWork = T)
   else {
     path
   }
@@ -55,6 +55,7 @@ print(DIR)
 print(getwd())
 print(list.files("R"))
 print(list.files("R/data"))
+print(environment(is_in_package))
 print(pkg_file(file.path(DIR, 'studies')))
 STUDIES <- list.files(pkg_file(file.path(DIR, 'studies'))) %>%
   str_split_fixed("\\.", n = 2) %>% .[,1]
