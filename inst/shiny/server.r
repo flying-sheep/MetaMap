@@ -133,7 +133,7 @@ output$overviewText <- renderUI(
     values$study <- study
     # load phylo from .RData file
     cls <-
-      class(try(loadPhylo(study, environment()))
+      class(try(loadPhylo(DIR, study, environment()))
       )
     if (cls == "try-error")
     {

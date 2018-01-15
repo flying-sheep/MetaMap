@@ -43,7 +43,7 @@ STUDIES <- list.files(file.path(DIR, 'studies')) %>%
 
 load(file.path(DIR, 'study_info.RData'))
 
-# only show studies that exist in the data/studie directory
+# only show studies that exist in the data/studies directory
 study_info <- subset(study_info, study %in% STUDIES)
 
 # add links redirecting to the sra website for each study

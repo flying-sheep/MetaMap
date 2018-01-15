@@ -215,13 +215,14 @@ getAttributes <- function(phylo) {
 #'
 #' Load phyloseq object into memory. Run first phyloseq_generator.r.
 #'
+#' @param dir directory of the data.
 #' @param study study ID
 #' @param envir enviroment to load phyloseq object
 #'
 #'
 #' @export
-loadPhylo <- function(study, envir = environment(loadPhylo)) {
-  try(load(file.path(DIR, "studies", paste0(study, ".RData")), envir))
+loadPhylo <- function(dir, study, envir = environment(loadPhylo)) {
+  try(load(file.path(dir, "studies", paste0(study, ".RData")), envir))
 }
 
 #' Generate Lineage
