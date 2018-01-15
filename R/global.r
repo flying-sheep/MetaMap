@@ -56,6 +56,7 @@ print(getwd())
 print(list.files("R"))
 print(list.files("R/data"))
 print(environment(is_in_package))
+print(pkg_file)
 print(pkg_file(file.path(DIR, 'studies')))
 STUDIES <- list.files(pkg_file(file.path(DIR, 'studies'))) %>%
   str_split_fixed("\\.", n = 2) %>% .[,1]
