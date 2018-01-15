@@ -51,13 +51,15 @@ pkg_file <- function(path = '.') {
 DIR <- ifelse(is_in_package(), "R/data", "data")
 MAX_SAMPLES <- 250
 
-studies <- list.files(pkg_file(file.path(DIR, 'studies'))) %>%
+print(DIR)
+
+STUDIES <- list.files(pkg_file(file.path(DIR, 'studies'))) %>%
   str_split_fixed("\\.", n = 2) %>% .[,1]
 
 load(pkg_file(file.path(DIR, 'study_info.RData')))
 
 # only show studies that exist in the data/studie directory
-study_info <- subset(study_info, study %in% studies)
+study_info <- subset(study_info, study %in% STUDIES)
 
 # add links redirecting to the sra website for each study
 study_info$link <-
