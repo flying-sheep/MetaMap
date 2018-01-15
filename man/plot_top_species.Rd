@@ -2,7 +2,9 @@
 % Please edit documentation in R/plots.r
 \name{plot_top_species}
 \alias{plot_top_species}
-\title{Top relative abundance}
+\title{Top relative abundance
+
+Plot the relative abundance of the \code{top_n} most abundant species.}
 \usage{
 plot_top_species(phylo, top_n = 10L, attribute)
 }
@@ -15,7 +17,4 @@ plot_top_species(phylo, top_n = 10L, attribute)
 }
 \value{
 A bar plot grouped by \code{attribute}.
-}
-\description{
-Plot the relative abundance of the \code{top_n} most abundant species.
 }

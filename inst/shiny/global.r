@@ -9,21 +9,6 @@
 
 is_in_package <- function() !identical(environment(is_in_package), .GlobalEnv)
 
-#' @import data.table
-#' @import rlang
-#' @import purrr
-#' @import tidyr
-#' @import plyr
-#' @import dplyr
-#' @import stringr
-#' @import phyloseq
-#' @import ggplot2
-#' @import shiny
-#' @import htmltools
-#' @import plotly
-#' @import utils
-#' @import shinyjs
-
 if(!is_in_package()){
   library(data.table)
   library(rlang)
@@ -39,9 +24,20 @@ if(!is_in_package()){
   library(plotly)
   library(utils)
   library(shinyjs)
+
+  R_DIR <- "../../R"
 }
 
-DIR <- ifelse(is_in_package(), "R/data", "data")
+pkg_file <- function(path = "."){
+  if(is_in_package())
+    system.file(path, package = "metatranscriptome", mustWork = T)
+  else
+    path
+}
+
+print(environment())
+
+DIR <- ifelse(is_in_package(), pkg_file("data"), "../data")
 MAX_SAMPLES <- 250
 
 STUDIES <- list.files(file.path(DIR, 'studies')) %>%

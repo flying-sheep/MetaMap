@@ -1,4 +1,3 @@
-  #
 # This is a Shiny web application. You can run the application by clicking
 # the 'Run App' button above.
 #
@@ -7,13 +6,9 @@
 #    http://shiny.rstudio.com/
 #
 
-#' @include global.r
-#' @include methods.r
-#' @include plots.r
-
 if(!is_in_package()){
-  source("methods.r")
-  source("plots.r")
+  source(file.path(R_DIR, "methods.r"))
+  source(file.path(R_DIR, "plots.r"))
 }
 
 empty <- "none"
@@ -138,7 +133,7 @@ output$overviewText <- renderUI(
     values$study <- study
     # load phylo from .RData file
     cls <-
-      class(try(loadPhylo(study))
+      class(try(loadPhylo(study, environment()))
       )
     if (cls == "try-error")
     {

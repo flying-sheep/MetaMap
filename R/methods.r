@@ -1,6 +1,16 @@
-#' @include global.r
+#' @import rlang
+#' @import purrr
+#' @import tidyr
+#' @import plyr
+#' @import dplyr
+#' @import stringr
+#' @import phyloseq
+#' @import ggplot2
+#' @import shiny
+#' @import plotly
+#' @import utils
 
-#' TaxID to Species
+#' @title TaxID to Species
 #'
 #' Transforms taxID to the corresponding Species name.
 #'
@@ -211,7 +221,7 @@ getAttributes <- function(phylo) {
 #'
 #' @export
 loadPhylo <- function(study, envir = environment(loadPhylo)) {
-  try(load(pkg_file(file.path(DIR, "studies", paste0(study, ".RData"))), envir))
+  try(load(file.path(DIR, "studies", paste0(study, ".RData")), envir))
 }
 
 #' Generate Lineage
@@ -290,6 +300,9 @@ makeSankey_links <-
     links
   }
 
-getMetafeautures <- function(study_info, studies_dir){
-
+mfPerStudy <- function(study_info, studies, studies_dir){
+  # use rbind.fill from plyr
+  # lapply(studies, function(x) {
+  #   loadPhylo()
+  # })
 }

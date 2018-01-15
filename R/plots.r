@@ -1,10 +1,6 @@
-#' @include global.r
 #' @include methods.r
 
-if (!is_in_package()) {
-  source("methods.r")
-}
-#' Top relative abundance
+#' @title Top relative abundance
 #'
 #' Plot the relative abundance of the \code{top_n} most abundant species.
 #'
