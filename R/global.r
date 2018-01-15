@@ -42,7 +42,7 @@ if(!is_in_package()){
 }
 
 pkg_file <- function(path = '.') {
-  if (is_in_package()) "."
+  if (is_in_package()) path
     # system.file(path, package = 'metatranscriptome', mustWork = T)
   else {
     path
