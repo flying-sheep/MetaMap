@@ -7,35 +7,35 @@
 #    http://shiny.rstudio.com/
 #
 
-library(data.table)
-library(rlang)
-library(purrr)
-library(tidyr)
-library(plyr)
-library(dplyr)
-library(stringr)
-library(phyloseq)
-library(ggplot2)
-library(shiny)
-library(htmltools)
-library(plotly)
-library(utils)
-library(shinyjs)
-
 is_in_package <- function() !identical(environment(is_in_package), .GlobalEnv)
 
 if(!is_in_package()){
-  R_DIR <- "../../R"
+  library(data.table)
+  library(rlang)
+  library(purrr)
+  library(tidyr)
+  library(plyr)
+  library(dplyr)
+  library(stringr)
+  library(phyloseq)
+  library(ggplot2)
+  library(shiny)
+  library(htmltools)
+  library(plotly)
+  library(utils)
+  library(shinyjs)
 }
 
 pkg_file <- function(path = "."){
   if(is_in_package())
     system.file(path, package = "metatranscriptome", mustWork = T)
   else
-    path
+    file.path("../inst", path)
 }
 
-DIR <- ifelse(is_in_package(), pkg_file("data"), "../data")
+addResourcePath("www", pkg_file("shiny/www"))
+
+DIR <- pkg_file("data")
 MAX_SAMPLES <- 250
 
 STUDIES <- list.files(file.path(DIR, 'studies')) %>%

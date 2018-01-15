@@ -9,6 +9,8 @@
 #' @import shiny
 #' @import plotly
 #' @import utils
+#' @import data.table
+#' @import shinyjs
 
 #' @title TaxID to Species
 #'
@@ -301,6 +303,15 @@ makeSankey_links <-
     links
   }
 
+#' Metafeature mean relative abundance table
+#'
+#' Create a table of the mean relative abundance of each metafeature per study.
+#'
+#' @param study_info The table study_info
+#' @param studies A vector of study IDs
+#' @param dir The data directory
+#'
+#' @export
 mfMeans <- function(study_info, studies, dir){
   # use rbind.fill from plyr
   tbl <- lapply(studies, function(x) {

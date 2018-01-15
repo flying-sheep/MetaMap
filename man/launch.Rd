@@ -4,7 +4,7 @@
 \alias{launch}
 \title{Launch App}
 \usage{
-launch()
+launch(...)
 }
 \description{
 Launch App

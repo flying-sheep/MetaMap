@@ -1,8 +1,7 @@
 #' Launch App
 #' @importFrom shiny runApp
 #' @export
-launch <- function() {
-	runApp(system.file("shiny", package = "metatranscriptome"),
-	       display.mode = "normal",
-	       launch.browser = TRUE)
+#'
+launch <- function(...) {
+	runApp(list(ui = ui, server = server), ...)
 }
