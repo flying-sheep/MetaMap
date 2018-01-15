@@ -301,9 +301,14 @@ makeSankey_links <-
     links
   }
 
-mfPerStudy <- function(study_info, studies, studies_dir){
+mfMeans <- function(study_info, studies, dir){
   # use rbind.fill from plyr
-  # lapply(studies, function(x) {
-  #   loadPhylo()
-  # })
+  tbl <- lapply(studies, function(x) {
+    loadPhylo(dir, x, environment(mfMeans))
+    means <- apply(phylo@otu_table, 2, function(x) x/sum(x)*100) %>% apply(1, mean)
+    names(means) <- taxids2names(phylo, names(means))
+    as.data.frame(t(means))
+  }) %>% rbind.fill %>% t
+  colnames(tbl) <- studies
+  tbl
 }
