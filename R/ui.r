@@ -22,7 +22,7 @@ ui <- function() {
     tabPanel(
       "Overview",
       htmlOutput("overviewText"),
-      img(src='www/PipelineImage.png', align = "center")
+      img(src='/www/PipelineImage.png', align = "center")
     ),
     tabPanel(
       "Query studies",
