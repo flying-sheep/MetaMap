@@ -33,7 +33,9 @@ pkg_file <- function(path = "."){
     file.path("../inst", path)
 }
 
-addResourcePath("www", pkg_file("shiny/www"))
+resourcesPath <- pkg_file("shiny/www")
+print(resourcesPath)
+addResourcePath("www", resourcesPath)
 
 DIR <- pkg_file("data")
 MAX_SAMPLES <- 250
