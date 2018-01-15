@@ -41,30 +41,13 @@ if(!is_in_package()){
   library(shinyjs)
 }
 
-pkg_file <- function(path = '.') {
-  if (is_in_package()) path
-    # system.file(path, package = 'metatranscriptome', mustWork = T)
-  else {
-    path
-  }
-}
-
 DIR <- ifelse(is_in_package(), "R/data", "data")
 MAX_SAMPLES <- 250
 
-print(DIR)
-print(getwd())
-print(list.files("R"))
-print(list.files("R/data"))
-print(environment(is_in_package))
-print(pkg_file("R"))
-print(list.files(pkg_file("R")))
-print(list.files(pkg_file("R/data")))
-print(pkg_file(file.path(DIR, 'studies')))
-STUDIES <- list.files(pkg_file(file.path(DIR, 'studies'))) %>%
+STUDIES <- list.files(file.path(DIR, 'studies')) %>%
   str_split_fixed("\\.", n = 2) %>% .[,1]
 
-load(pkg_file(file.path(DIR, 'study_info.RData')))
+load(file.path(DIR, 'study_info.RData'))
 
 # only show studies that exist in the data/studie directory
 study_info <- subset(study_info, study %in% STUDIES)
