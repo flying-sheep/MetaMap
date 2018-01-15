@@ -7,24 +7,24 @@
 #    http://shiny.rstudio.com/
 #
 
+library(data.table)
+library(rlang)
+library(purrr)
+library(tidyr)
+library(plyr)
+library(dplyr)
+library(stringr)
+library(phyloseq)
+library(ggplot2)
+library(shiny)
+library(htmltools)
+library(plotly)
+library(utils)
+library(shinyjs)
+
 is_in_package <- function() !identical(environment(is_in_package), .GlobalEnv)
 
 if(!is_in_package()){
-  library(data.table)
-  library(rlang)
-  library(purrr)
-  library(tidyr)
-  library(plyr)
-  library(dplyr)
-  library(stringr)
-  library(phyloseq)
-  library(ggplot2)
-  library(shiny)
-  library(htmltools)
-  library(plotly)
-  library(utils)
-  library(shinyjs)
-
   R_DIR <- "../../R"
 }
 
@@ -34,8 +34,6 @@ pkg_file <- function(path = "."){
   else
     path
 }
-
-print(environment())
 
 DIR <- ifelse(is_in_package(), pkg_file("data"), "../data")
 MAX_SAMPLES <- 250
