@@ -6,7 +6,7 @@
 #    http://shiny.rstudio.com/
 #
 
-if(!is_in_package()){
+if (!is_in_package()) {
   source("methods.r")
   source("plots.r")
 }
@@ -17,11 +17,13 @@ empty <- "none"
 #' @export
 server <- function(input, output, session) {
   output$overviewText <- renderUI(
-   HTML('<h1 style="color: #5e9ca0;"><span style="color: #000000;">MetaMap - exploring the unexplored</span></h1>
-         <p><span style="color: #000000;">This interactive webtools enables the exploration of viral and microbial traits extracted from human RNA-seq data of over 500 studies relevant to human disease. The data was generated using a two-step alignment pipeline outlined below:</span></p>
-         <h2 style="color: #2e6c80;">&nbsp;</h2>
-         <p>&nbsp;</p>')
-        )
+    HTML(
+      '<h1 style="color: #5e9ca0;"><span style="color: #000000;">MetaMap - exploring the unexplored</span></h1>
+      <p><span style="color: #000000;">This interactive webtools enables the exploration of viral and microbial traits extracted from human RNA-seq data of over 500 studies relevant to human disease. The data was generated using a two-step alignment pipeline outlined below:</span></p>
+      <h2 style="color: #2e6c80;">&nbsp;</h2>
+      <p>&nbsp;</p>'
+    )
+    )
   output$queryHelp <-
     renderUI(
       HTML(
@@ -87,7 +89,9 @@ server <- function(input, output, session) {
       phylo = NULL,
       selection = NULL,
       de_table = NULL,
-      attributes = NULL
+      attributes = NULL,
+      mf_tbl = NULL,
+      mf_selected = NULL
     )
 
   sankey <-
@@ -135,8 +139,7 @@ server <- function(input, output, session) {
     values$study <- study
     # load phylo from .RData file
     cls <-
-      class(try(loadPhylo(DIR, study, environment()))
-      )
+      class(try(loadPhylo(DIR, study, environment())))
     if (cls == "try-error")
     {
       values$phylo <- NULL
@@ -330,7 +333,7 @@ server <- function(input, output, session) {
     if (is.null(values$phylo))
       return(NULL)
     sam_data <-
-      values$phylo@sam_data[,-which(values$phylo@sam_data %>% colnames == "All")]
+      values$phylo@sam_data[, -which(values$phylo@sam_data %>% colnames == "All")]
     DT::datatable(
       data.frame(sam_data),
       options = list(pageLength = 10, scrollX = TRUE),
@@ -511,7 +514,9 @@ server <- function(input, output, session) {
 
   output$dimred <- renderPlotly({
     phylo <- isolate(values$phylo)
-    if (any(is.null(phylo), is.null(input$attribute_dr), input$attribute_dr == ""))
+    if (any(is.null(phylo),
+            is.null(input$attribute_dr),
+            input$attribute_dr == ""))
       return(NULL)
 
     if (study_info[isolate(study_info$study) == isolate(values$study), "sample_size"] > MAX_SAMPLES) {
@@ -534,7 +539,9 @@ server <- function(input, output, session) {
 
   output$diversity <- renderPlotly({
     phylo <- isolate(values$phylo)
-    if (any(is.null(phylo), is.null(input$attribute_da), input$attribute_da == ""))
+    if (any(is.null(phylo),
+            is.null(input$attribute_da),
+            input$attribute_da == ""))
       return(NULL)
     attribute <- input$attribute_da
     if (input$attribute_da == empty)
@@ -664,7 +671,7 @@ server <- function(input, output, session) {
       input$select_species_diff == ""
     ))
       return(NULL)
-    de_table_subset <- values$de_table[input$select_species_diff, ]
+    de_table_subset <- values$de_table[input$select_species_diff,]
     DT::datatable(
       de_table_subset %>% as.data.frame,
       options = list(pageLength = 10, scrollX = TRUE),
@@ -697,7 +704,9 @@ server <- function(input, output, session) {
   output$top_species_plot <- renderPlot({
     phylo <- isolate(values$phylo)
     attribute <- input$attribute_ma
-    if (any(is.null(attribute), is.null(phylo), input$attribute_ma == ""))
+    if (any(is.null(attribute),
+            is.null(phylo),
+            input$attribute_ma == ""))
       return(NULL)
     withProgress(session = session, value = 0.5, {
       attribute <-
@@ -713,10 +722,12 @@ server <- function(input, output, session) {
     withProgress(session = session, value = 0.5, {
       setProgress(message = "Calculation in progress")
       # isolate(print(sankey$args_history))
-      if(isolate(!sankey$undo) && isolate(length(sankey$args)) != 0 && !isolate(identical(sankey$args, sankey$newArgs))){
+      if (isolate(!sankey$undo) &&
+          isolate(length(sankey$args)) != 0 &&
+          !isolate(identical(sankey$args, sankey$newArgs))) {
         isolate(sankey$args_history[[length(sankey$args_history) + 1]] <-
-          sankey$args)
-      }else{
+                  sankey$args)
+      } else{
         # print("test")
         sankey$undo <- F
       }
@@ -728,7 +739,7 @@ server <- function(input, output, session) {
       # filter phylo
       attribute <- isolate(sankey$attribute)
       cond <- isolate(sankey$cond)
-      if(cond != empty && !is.null(cond)){
+      if (cond != empty && !is.null(cond)) {
         environment(subset_samples) <- environment()
         phylo <-
           subset_samples(phylo, unlist(phylo@sam_data[, attribute]) %in% cond)
@@ -801,6 +812,88 @@ server <- function(input, output, session) {
       T
     })
     outputOptions(output, "cond1", suspendWhenHidden = FALSE)
+  })
+
+  output$mfInput <- renderUI({
+    if (is.null(values$mf_tbl)) {
+      withProgress(session = session, value = 0.5, {
+        setProgress(message = 'Calculation in progress')
+        values$mf_tbl <- mfMeans(study_info, STUDIES, DIR)
+      })
+    }
+    selectInput('mfInput',
+                'Metafeature',
+                c("", rownames(values$mf_tbl)))
+  })
+
+  output$mfPlot <- renderPlotly({
+    mf_tbl <- isolate(values$mf_tbl)
+    selected <- input$mfInput
+    if(any(is.null(mf_tbl), is.null(selected)))
+      return(NULL)
+    withProgress(session = session, value = 0.5, {
+      setProgress(message = 'Plotting')
+      p <- mfPlot(mf_tbl)
+      isolate(values$mf_selected <- rep(F, nrow(values$mf_tbl)))
+      isolate(names(values$mf_selected) <- rownames(values$mf_tbl))
+      if (selected != "") {
+        p$data$Selected <- F
+        p$data[selected, "Selected"] <- T
+        p <- p + aes(color = Selected) +
+          scale_color_manual(values=c("black", "red"))
+        isolate(values$mf_selected[selected] <- T)
+      }
+      ggplotly(
+        p,
+        tooltip = c(
+          "Metafeature",
+          "mfCoverage",
+          "maxRelAbundance",
+          "maxStudy"
+        ),
+        source = "mf"
+      )
+    })
+  })
+
+  output$mfTable <- DT::renderDataTable({
+    event <- event_data("plotly_click", source = "mf")
+    if(is.null(event)){
+      return(NULL)
+    }
+    isolate(mf_tbl <- as.data.frame(values$mf_tbl))
+    selected <- event$curveNumber == 1
+    isolate(mf_tbl <- mf_tbl[which(values$mf_selected == selected),])
+
+    row <- event$pointNumber + 1
+    metafeature <- rownames(mf_tbl)[row]
+    abundances <- mf_tbl[row, ]
+    abundances <- abundances[which(!is.na(abundances))]
+    inds <- which(study_info$study %in% names(abundances))
+    df <- study_info[inds, showColumns]
+    df$`Relative Abundance` <- as.numeric(abundances)
+    df <- df[order(df$`Relative Abundance`, decreasing = T),]
+
+    output$mfName <-
+      renderUI(HTML(
+        paste0(
+          '<p style="text-align: center"><strong>',
+          metafeature,
+          "</strong></p>"
+        )
+      ))
+
+    DT::datatable(
+      df,
+      options = list(
+        autoWidth = TRUE,
+        pageLength = 5,
+        scrollX = TRUE
+      ),
+      selection = 'none',
+      escape = F,
+      rownames = F
+    )
   })
 
   output$cond <- reactive({

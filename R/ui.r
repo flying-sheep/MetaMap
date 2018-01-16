@@ -25,6 +25,14 @@ ui <- function() {
       htmlOutput("overviewText"),
       img(src='/www/PipelineImage.png', align = "center")
     ),
+    tabPanel("Query metafeature",
+             uiOutput("mfInput"),
+             plotlyOutput("mfPlot"),
+             HTML(
+               '<hr style="height:1px;border:none;color:#333;background-color:#333;"/>'
+             ),
+             htmlOutput("mfName"),
+             DT::dataTableOutput("mfTable")),
     tabPanel(
       "Query studies",
       htmlOutput("queryHelp") ,

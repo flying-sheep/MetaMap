@@ -357,3 +357,22 @@ plot_de_heatmap <-
     p$data$Abundance <- p$data$Abundance + 1
     ggplotly(p) %>% layout(margin = list(b = 120))
   }
+
+#' Metafeature plot
+#'
+#' Plots the maximum abundance of each metafeature against the percentage of studies covering it.
+#'
+#'
+#' @export
+mfPlot <- function(mf_tbl){
+  mfMax <- apply(mf_tbl, 1, function(x) {
+    study_nr <- which.max(x)
+    c(study_nr, x[study_nr])
+    }) %>% t %>% as.data.frame
+  colnames(mfMax) <- c("maxStudy", "maxRelAbundance")
+  mfMax$maxStudy <- colnames(mf_tbl)[mfMax$maxStudy]
+  mfCoverage <- apply(mf_tbl, 1, function(x) length(which(!is.na(x))) / length(x) * 100)
+  df <- cbind(mfMax, as.data.frame(mfCoverage))
+  df$Metafeature <- rownames(df)
+  ggplot(df, aes(x = mfCoverage, y = maxRelAbundance, label1 = Metafeature, label2 = maxStudy)) + geom_point() + labs(x = "% Covered", y = "Maximum relative abundance")
+}
