@@ -16,7 +16,32 @@ empty <- "none"
 
 #' @export
 server <- function(input, output, session) {
-  initData()
+  # Initialize data
+  DIR <- pkg_file("data")
+  MAX_SAMPLES <- 250
+
+  STUDIES <- list.files(file.path(DIR, 'studies')) %>%
+    str_split_fixed("\\.", n = 2) %>% .[, 1]
+
+  load(file.path(DIR, 'study_info.RData'))
+
+  # only show studies that exist in the data/studies directory
+  study_info <- subset(study_info, study %in% STUDIES)
+  # View(study_info)
+
+  # add links redirecting to the sra website for each study
+  study_info$link <-
+    with(
+      study_info,
+      paste0(
+        "<a href='https://trace.ncbi.nlm.nih.gov/Traces/sra/?study=",
+        study,
+        "'>",
+        study,
+        "</a>"
+      )
+    )
+
   output$overviewText <- renderUI(
     HTML(
       '<h1 style="color: #5e9ca0;"><span style="color: #000000;">MetaMap - exploring the unexplored</span></h1>
