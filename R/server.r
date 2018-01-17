@@ -130,6 +130,7 @@ server <- function(input, output, session) {
     values$selection <- NULL
     values$de_table <- NULL
     values$attributes <- NULL
+    values$species_diff = NULL
     output$taxa_plot <- renderPlot({
       NULL
     })
