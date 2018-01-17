@@ -16,6 +16,7 @@ empty <- "none"
 
 #' @export
 server <- function(input, output, session) {
+  initData()
   output$overviewText <- renderUI(
     HTML(
       '<h1 style="color: #5e9ca0;"><span style="color: #000000;">MetaMap - exploring the unexplored</span></h1>
