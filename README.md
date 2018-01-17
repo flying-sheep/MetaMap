@@ -12,4 +12,4 @@ Package
 
 This app can also be built as a package.
 
-Call `shiny.metatranscriptome::launch()`.
+Call `MetaMap::launch()`.

@@ -1,1 +1,1 @@
-metatranscriptome::server
+MetaMap::server

@@ -1,1 +1,1 @@
-metatranscriptome::ui
+MetaMap::ui

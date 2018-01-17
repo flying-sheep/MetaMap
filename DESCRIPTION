@@ -1,4 +1,4 @@
-Package: metatranscriptome
+Package: MetaMap
 Type: Shiny app
 Title: Visualization tool for the metatranscriptome project
 Version: 0.1
