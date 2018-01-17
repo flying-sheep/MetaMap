@@ -85,7 +85,7 @@ plot_volcano <- function(tax_table, de_table) {
            )) + geom_point() +
     labs(x = "Fold change (log2)", y = "-log10 p-value")
   # + scale_color_manual(values = cols)
-  ggplotly(p, tooltip = c("Species", "x", "y"))
+  p
 }
 
 #' Sankey plot

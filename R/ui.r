@@ -25,7 +25,7 @@ ui <- function() {
       htmlOutput("overviewText"),
       img(src='/www/PipelineImage.png', align = "center")
     ),
-    tabPanel("Query metafeature",
+    tabPanel("Query metafeatures",
              uiOutput("mfInput"),
              plotlyOutput("mfPlot"),
              HTML(
@@ -37,6 +37,10 @@ ui <- function() {
       "Query studies",
       htmlOutput("queryHelp") ,
       DT::dataTableOutput("mystudies")
+    ),
+    tabPanel(
+      "Study Info",
+     tableOutput("studyinfo")
     ),
     tabPanel(
       'Sample Selection',
@@ -100,11 +104,11 @@ ui <- function() {
             id = "de_panel",
             tabPanel(
               "Global",
-              DT::dataTableOutput("deseq_table"),
-              plotlyOutput("de_plot", height = "600px")
+              DT::dataTableOutput("deseq_table")
             ),
             tabPanel("Local", DT::dataTableOutput("deseq_table_subset"))
-          )
+          ),
+          plotlyOutput("de_plot", height = "600px")
         )
       )
     ),

@@ -86,8 +86,14 @@ deseq2_table <- function(phylo,
   tmp <- subset_samples(tmp, !is.na(tmp@sam_data[, attribute]))
   tmp <- prune_taxa(taxa_sums(tmp) > 0, tmp)
   # make valid condition names
-  tmp@sam_data$ad.type <-
-    paste0("cond", as.integer(factor(tmp@sam_data$ad.type)))
+  conds <- if (all(!is.null(cond1), !is.null(cond2))) {
+    tmp1 <- setNames(list(1, 2), c(cond1, cond2))
+    tmp1[unlist(tmp@sam_data[, attribute])]
+  }  else{
+    as.integer(factor(tmp@sam_data[, attribute]))
+  }
+  tmp@sam_data[, attribute] <-
+    paste0("cond", conds)
   deseq <-
     phyloseq_to_deseq2(tmp, as.formula(paste("~", attribute)))
   size.factors <-
