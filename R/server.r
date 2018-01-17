@@ -15,11 +15,8 @@ empty <- "none"
 
 
 #' @export
-server <- function(input, output, session) {
+server <- function(input, output, session, DIR = pkg_file("data"), MAX_SAMPLES = 250) {
   # Initialize data
-  DIR <- pkg_file("data")
-  MAX_SAMPLES <- 250
-
   STUDIES <- list.files(file.path(DIR, 'studies')) %>%
     str_split_fixed("\\.", n = 2) %>% .[, 1]
 
