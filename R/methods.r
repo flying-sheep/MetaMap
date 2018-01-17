@@ -327,6 +327,5 @@ mfMeans <- function(study_info, studies, dir){
     as.data.frame(t(means))
   }) %>% rbind.fill %>% t
   colnames(tbl) <- studies
-  View(tbl)
   tbl
 }
