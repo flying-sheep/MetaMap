@@ -39,6 +39,11 @@ MAX_SAMPLES <- 250
 STUDIES <- list.files(file.path(DIR, 'studies')) %>%
   str_split_fixed("\\.", n = 2) %>% .[,1]
 
+print(file.path(DIR, 'studies'))
+print(list.files(file.path(DIR, 'studies')) %>%
+        str_split_fixed("\\.", n = 2) %>% .[,1])
+print(STUDIES)
+
 load(file.path(DIR, 'study_info.RData'))
 
 # only show studies that exist in the data/studies directory
