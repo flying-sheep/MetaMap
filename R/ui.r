@@ -23,25 +23,25 @@ ui <- function() {
     tabPanel(
       "Overview",
       htmlOutput("overviewText"),
-      img(src='/www/PipelineImage.png', align = "center")
+      img(src = '/www/PipelineImage.png', align = "center")
     ),
-    tabPanel("Query metafeatures",
-             uiOutput("mfInput"),
-             plotlyOutput("mfPlot"),
-             HTML(
-               '<hr style="height:1px;border:none;color:#333;background-color:#333;"/>'
-             ),
-             htmlOutput("mfName"),
-             DT::dataTableOutput("mfTable")),
+    tabPanel(
+      "Query metafeatures",
+      uiOutput("mfInput"),
+      plotlyOutput("mfPlot"),
+      HTML(
+        '<hr style="height:1px;border:none;color:#333;background-color:#333;"/>'
+      ),
+      htmlOutput("mfName"),
+      DT::dataTableOutput("mfTable")
+    ),
     tabPanel(
       "Query studies",
       htmlOutput("queryHelp") ,
       DT::dataTableOutput("mystudies")
     ),
-    tabPanel(
-      "Study Info",
-     tableOutput("studyinfo")
-    ),
+    tabPanel("Study Info",
+             tableOutput("studyinfo")),
     tabPanel(
       'Sample Selection',
       htmlOutput("sampleHelp"),
@@ -67,97 +67,102 @@ ui <- function() {
         mainPanel(DT::dataTableOutput("mysamples"), width = 10)
       )
     ),
-    tabPanel(
-      "Dimension reduction",
-      htmlOutput("dmHelp"),
-      uiOutput("attribute_dr"),
-      tags$div(style = "margin-bottom:100px;",
-               plotlyOutput("dimred"))
-    ),
-    tabPanel(
-      "Diversity analysis",
-      htmlOutput("daHelp"),
-      uiOutput("attribute_da"),
-      tags$div(
-        style = "margin-bottom:100px;",
-        uiOutput('diversity_stats'),
-        plotlyOutput("diversity")
-      )
-    ),
-    tabPanel(
-      "Differential expression",
-      htmlOutput("deHelp"),
-      fluidRow(column(4, uiOutput(
-        'select_species_diff'
-      )), column(4, uiOutput("attribute_de"))),
-      plotlyOutput("de_boxplot"),
-      fluidRow(
-        column(4, uiOutput('select_cond1')),
-        column(4, uiOutput('select_cond2')),
-        column(4, offset = 3, uiOutput('de_button'))
+    navbarMenu(
+      "Analysis",
+      tabPanel(
+        "Dimension reduction",
+        htmlOutput("dmHelp"),
+        uiOutput("attribute_dr"),
+        tags$div(style = "margin-bottom:100px;",
+                 plotlyOutput("dimred"))
       ),
-      tags$div(
-        style = "margin-bottom:100px;",
-        conditionalPanel(
-          condition = "output.cond" ,
-          tabsetPanel(
-            id = "de_panel",
-            tabPanel(
-              "Global",
-              DT::dataTableOutput("deseq_table")
-            ),
-            tabPanel("Local", DT::dataTableOutput("deseq_table_subset"))
-          ),
-          plotlyOutput("de_plot", height = "600px")
+      tabPanel(
+        "Diversity analysis",
+        htmlOutput("daHelp"),
+        uiOutput("attribute_da"),
+        tags$div(
+          style = "margin-bottom:100px;",
+          uiOutput('diversity_stats'),
+          plotlyOutput("diversity")
         )
-      )
-    ),
-    tabPanel(
-      "Metafeature Abundance",
-      htmlOutput("maHelp"),
-      uiOutput("attribute_ma"),
-      plotOutput("top_species_plot")
-      # ,uiOutput('select_species_abundance'),
-      # plotOutput("abundances_plot")
-    ),
-    #attribute, level, relative = T
-    tabPanel(
-      "Taxonomy Bar Chart",
-      htmlOutput("tbcHelp"),
-      fluidRow(
-        column(4, uiOutput("attribute_tbc")),
-        column(4, uiOutput("level_tbc")),
-        column(4, offset = 3, uiOutput('tbc_button'))
       ),
-      conditionalPanel(
-        condition = "output.cond1",
-        tabsetPanel(
-          id = "tbc_panel",
-          # ntaxa_plot is normalized
-          tabPanel("Relative proportion", plotOutput("ntaxa_plot")),
-	  tabPanel("Absolute counts", plotOutput("taxa_plot"))
-        )
-      )
-    ),
-    tabPanel("Sankey Diagram", sidebarLayout(
-      sidebarPanel(
-        selectInput('sankey_source', 'Source', c()),
-        selectInput('sankey_target', 'Target', c()),
+      tabPanel(
+        "Differential expression",
+        htmlOutput("deHelp"),
         fluidRow(column(4, uiOutput(
-          'attribute_sankey'
-        )),
-        column(4, uiOutput('sankey_condition'))),
+          'select_species_diff'
+        )), column(4, uiOutput("attribute_de"))),
+        plotlyOutput("de_boxplot"),
         fluidRow(
-          column(4, actionButton("sankey_apply_button", label = "Apply")),
-          column(4,  actionButton("sankey_reset_button", label = "Reset")),
-          column(
-            4,
-            conditionalPanel(condition = "output.sankey_cond", actionButton("sankey_undo_button", "Undo"))
+          column(4, uiOutput('select_cond1')),
+          column(4, uiOutput('select_cond2')),
+          column(4, offset = 3, uiOutput('de_button'))
+        ),
+        tags$div(
+          style = "margin-bottom:100px;",
+          conditionalPanel(
+            condition = "output.cond" ,
+            tabsetPanel(
+              id = "de_panel",
+              tabPanel("Global",
+                       DT::dataTableOutput("deseq_table")),
+              tabPanel("Local", DT::dataTableOutput("deseq_table_subset"))
+            ),
+            plotlyOutput("de_plot", height = "600px")
           )
         )
       ),
-      mainPanel(plotlyOutput("sankey_plot"))
-    )),
+      tabPanel(
+        "Metafeature Abundance",
+        htmlOutput("maHelp"),
+        uiOutput("attribute_ma"),
+        plotOutput("top_species_plot")
+        # ,uiOutput('select_species_abundance'),
+        # plotOutput("abundances_plot")
+      ),
+      #attribute, level, relative = T
+      tabPanel(
+        "Taxonomy Bar Chart",
+        htmlOutput("tbcHelp"),
+        fluidRow(
+          column(4, uiOutput("attribute_tbc")),
+          column(4, uiOutput("level_tbc")),
+          column(4, offset = 3, uiOutput('tbc_button'))
+        ),
+        conditionalPanel(
+          condition = "output.cond1",
+          tabsetPanel(
+            id = "tbc_panel",
+            # ntaxa_plot is normalized
+            tabPanel("Relative proportion", plotOutput("ntaxa_plot")),
+            tabPanel("Absolute counts", plotOutput("taxa_plot"))
+          )
+        )
+      ),
+      tabPanel("Sankey Diagram",
+        plotlyOutput("sankey_plot"),
+        HTML(
+          '<hr style="height:1px;border:none;color:#333;background-color:#333;"/>'
+        ),
+        fluidRow(
+          column(4, selectInput('sankey_source', 'Source', c()), offset = 2),
+          column(4, selectInput('sankey_target', 'Target', c()))),
+          fluidRow(column(4, uiOutput(
+            'attribute_sankey'
+          ), offset = 2),
+          column(4, uiOutput(
+            'sankey_condition'
+          ))),
+          fluidRow(
+            column(4, actionButton("sankey_apply_button", label = "Apply"), offset = 2),
+            column(1,  actionButton("sankey_reset_button", label = "Reset")),
+            column(
+              2,
+              conditionalPanel(condition = "output.sankey_cond", actionButton("sankey_undo_button", HTML("<b>Undo</b>")))
+            )
+          )
+      )
+    ),
     # as long as there are still some bugs
     tags$style(
       type = "text/css",

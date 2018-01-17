@@ -67,13 +67,26 @@ server <- function(input, output, session) {
       )
     )
 
+  observeEvent(input$dataset, {
+    if (all(!(
+      input$dataset %in% c("Overview", "Query metafeatures", "Query studies")
+    ), is.null(values$study))){
+      showModal(
+        modalDialog(
+          title = "Important message",
+          'Please choose a study in the "Query studies" tab!',
+          easyClose = TRUE
+        )
+      )    }
+  })
+
   showColumns <- c('link', 'study_abstract', "sample_size")
 
   mystudiesProxy <-  DT::dataTableProxy("mystudies")
 
   output$mystudies <- DT::renderDataTable({
     selected <- 1
-    if(!is.null(isolate(values$study)))
+    if (!is.null(isolate(values$study)))
       selected <- which(study_info$study == isolate(values$study))
     DT::datatable(
       study_info[, showColumns],
@@ -146,15 +159,23 @@ server <- function(input, output, session) {
     study <- values$study
 
     output$studyinfo <- renderTable({
-      df <- study_info[which(study_info$study == study), c(showColumns, "study_type", "study_alias")] %>% t
-      rownames(df) <- c("Study:", "Study abstract:", "Sample size:", "Study type:", "Study alias:")
-      rownames(df) <- paste0("<b>", rownames(df),"</b>")
+      df <-
+        study_info[which(study_info$study == study), c(showColumns, "study_type", "study_alias")] %>% t
+      rownames(df) <-
+        c("Study:",
+          "Study abstract:",
+          "Sample size:",
+          "Study type:",
+          "Study alias:")
+      rownames(df) <- paste0("<b>", rownames(df), "</b>")
       df
-    }, rownames = T, colnames = F, sanitize.text.function = function(x) x)
+    }, rownames = T, colnames = F, sanitize.text.function = function(x)
+      x)
 
     # load phylo from .RData file
     cls <-
-      class(try(loadPhylo(DIR, study, environment())))
+      class(try(loadPhylo(DIR, study, environment()))
+      )
     if (cls == "try-error")
     {
       values$phylo <- NULL
@@ -352,7 +373,7 @@ server <- function(input, output, session) {
     if (is.null(values$phylo))
       return(NULL)
     sam_data <-
-      values$phylo@sam_data[, -which(values$phylo@sam_data %>% colnames == "All")]
+      values$phylo@sam_data[,-which(values$phylo@sam_data %>% colnames == "All")]
     DT::datatable(
       data.frame(sam_data),
       options = list(pageLength = 10, scrollX = TRUE),
@@ -465,6 +486,7 @@ server <- function(input, output, session) {
       )
       return()
     }
+    sankey$newArgs <- NULL
     sankey$newArgs <-
       list(
         source = input$sankey_source,
@@ -477,6 +499,7 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$sankey_reset_button, {
+    sankey$newArgs <- NULL
     sankey$newArgs <-
       list(
         source = "Kingdom",
@@ -672,13 +695,17 @@ server <- function(input, output, session) {
           )
         } else{
           p$data$selected <- rep(F, nrow(p$data))
-          if(all(!is.null(values$species_diff), values$species_diff != "")){
+          if (all(!is.null(values$species_diff),
+                  values$species_diff != "")) {
             # print(taxids2names(values$phylo, values$species_diff))
-            p$data[which(p$data$Species %in% taxids2names(values$phylo, values$species_diff)), "selected"] <- T
+            p$data[which(p$data$Species %in% taxids2names(values$phylo, values$species_diff)), "selected"] <-
+              T
             p <-  p + aes(color = selected) +
               scale_color_manual(values = c("black", "red"))
           }
-          ggplotly(p, tooltip = c("Species", "x", "y"), source = "de_plot")
+          ggplotly(p,
+                   tooltip = c("Species", "x", "y"),
+                   source = "de_plot")
         }
       })
     })
@@ -693,20 +720,24 @@ server <- function(input, output, session) {
   observeEvent(event_data("plotly_click", source = "de_plot"), {
     event <- event_data("plotly_click", source = "de_plot")
     de_table <- values$de_table
-    selected_rows <- which(rownames(de_table) %in% values$species_diff)
+    selected_rows <-
+      which(rownames(de_table) %in% values$species_diff)
     if (length(selected_rows) != 0) {
       de_table <-
         if (event$curveNumber == 0)
-          de_table[-selected_rows,]
+          de_table[-selected_rows, ]
       else
-        de_table[selected_rows,]
+        de_table[selected_rows, ]
     }
-    species <- de_table[event$pointNumber + 1,]
-    values$species_diff <- unique(c(values$species_diff, rownames(species)))
-    updateSelectInput(session,
+    species <- de_table[event$pointNumber + 1, ]
+    values$species_diff <-
+      unique(c(values$species_diff, rownames(species)))
+    updateSelectInput(
+      session,
       'select_species_diff',
       label = '',
-      choices = c(Species = '', setNames(taxa_names(phylo), phylo@tax_table[, "Species"])), selected = values$species_diff
+      choices = c(Species = '', setNames(taxa_names(phylo), phylo@tax_table[, "Species"])),
+      selected = values$species_diff
     )
     # print(event$pointNumber + 1)
     # print(species)
@@ -724,7 +755,7 @@ server <- function(input, output, session) {
     ))
       return(NULL)
     # print(values$species_diff)
-    de_table_subset <- values$de_table[values$species_diff,]
+    de_table_subset <- values$de_table[values$species_diff, ]
     DT::datatable(
       de_table_subset %>% as.data.frame,
       options = list(pageLength = 10, scrollX = TRUE),
@@ -902,12 +933,12 @@ server <- function(input, output, session) {
         metafeature <- selected
 
         mf_tbl <- as.data.frame(mf_tbl)
-        abundances <- mf_tbl[metafeature, ]
+        abundances <- mf_tbl[metafeature,]
         abundances <- abundances[which(!is.na(abundances))]
         inds <- which(study_info$study %in% names(abundances))
         df <- study_info[inds, showColumns]
         df$`Relative Abundance` <- as.numeric(abundances)
-        df <- df[order(df$`Relative Abundance`, decreasing = T),]
+        df <- df[order(df$`Relative Abundance`, decreasing = T), ]
 
         output$mfName <-
           renderUI(HTML(
@@ -959,7 +990,7 @@ server <- function(input, output, session) {
     isolate(mf_tbl <- as.data.frame(values$mf_tbl))
     selected <- event$curveNumber == 1
     isolate(mf_tbl <-
-              mf_tbl[which(values$mf_selected == selected), ])
+              mf_tbl[which(values$mf_selected == selected),])
 
     row <- event$pointNumber + 1
     metafeature <- rownames(mf_tbl)[row]
