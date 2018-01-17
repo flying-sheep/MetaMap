@@ -28,7 +28,7 @@ if(!is_in_package()){
 
 pkg_file <- function(path = "."){
   if(is_in_package())
-    system.file(path, package = "metatranscriptome", mustWork = T)
+    system.file(path, package = "MetaMap", mustWork = T)
   else
     file.path("../inst", path)
 }
