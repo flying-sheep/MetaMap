@@ -741,6 +741,7 @@ server <- function(input, output, session, DIR = pkg_file("data"), MAX_SAMPLES =
   })
 
   observeEvent(event_data("plotly_click", source = "de_plot"), {
+    phylo <- values$phylo
     event <- event_data("plotly_click", source = "de_plot")
     de_table <- values$de_table
     selected_rows <-
