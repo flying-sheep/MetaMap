@@ -929,6 +929,7 @@ server <- function(input, output, session, DIR = pkg_file("data"), MAX_SAMPLES =
       if (file.exists(file.path(DIR, 'metafeatures_table.RData'))) {
         load(file.path(DIR, 'metafeatures_table.RData'))
         mf_tbl <- mf_tbl[, STUDIES]
+        mf_tbl <- mf_tbl[which(apply(mf_tbl, 1, function(x) !all(is.na(x)))),]
         values$mf_tbl <- mf_tbl
       } else
         withProgress(session = session, value = 0.5, {
