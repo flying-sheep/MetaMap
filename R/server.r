@@ -926,10 +926,15 @@ server <- function(input, output, session, DIR = pkg_file("data"), MAX_SAMPLES =
 
   output$mfInput <- renderUI({
     if (is.null(values$mf_tbl)) {
-      withProgress(session = session, value = 0.5, {
-        setProgress(message = 'Calculation in progress')
-        values$mf_tbl <- mfMeans(study_info, STUDIES, DIR)
-      })
+      if (file.exists(file.path(DIR, 'metafeatures_table.RData'))) {
+        load(file.path(DIR, 'metafeatures_table.RData'))
+        mf_tbl <- mf_tbl[, STUDIES]
+        values$mf_tbl <- mf_tbl
+      } else
+        withProgress(session = session, value = 0.5, {
+          setProgress(message = 'Calculation in progress')
+          values$mf_tbl <- mfMeans(study_info, STUDIES, DIR)
+        })
     }
     selectInput('mfInput',
                 'Metafeature',
