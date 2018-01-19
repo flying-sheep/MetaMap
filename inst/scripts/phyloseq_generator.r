@@ -1,26 +1,32 @@
-DIR <- "C:/Users/Giorgos/OneDrive/Documents/Bachelor Bioinformatik/7. Semester/Bachelorarbeit/Data/v2data/"
-OUTPUT_DIR <- "data"
-LOG <- T
+#' @include methods.r
 
-dir.create(OUTPUT_DIR, showWarnings=F)
+#' Save Data
+#'
+#' This function generates a phyloseq Object for each study found in the input tables.
+#'
+#' @param tables A list that contains the following files: study_info, sample_info, feature_info, counts
+#' @param output_dir The directory where the transformed data will be saved. The default is inside the package.
+#' @param log A logical value indicating whether a log file should be generated with info about the process. The default is \code{FALSE}
+#'
+#' @export
+transformData <- function(tables, output_dir, log = F){
+  # read the data
+  load(tables$study_info)
+  load(tables$sample_info)
+  load(tables$counts)
+  load(tables$feature_info)
 
-library(phyloseq)
-library(data.table)
-library(plyr)
-library(dplyr)
-library(stringr)
+  dir.create(output_dir, showWarnings=F)
 
-source("methods.r")
+  lineage <- generateLineage(feature_info)
 
-load(paste0(DIR, 'study_info.RData'))
-load(paste0(DIR,'sample_info.RData'))
-load(paste0(DIR, 'counts.RData'))
-load(paste0(DIR, 'feature_info.RData'))
 
-lineage <- generateLineage(feature_info)
+
+}
+
 
 # generate phyloseq objects
-run <- function(){
+run <- function(study_info, sample_info, counts, lineage, otuput){
   env <- environment()
   error <- data.frame()
   lapply(study_info$study, function(study){

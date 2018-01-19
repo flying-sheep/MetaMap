@@ -14,7 +14,7 @@ resetClickCode <-
 
 #' @export
 ui <- function() {
-  addResourcePath("www", pkg_file("shiny/www"))
+  # addResourcePath("www", pkg_file("shiny/www"))
   navbarPage(
     fluid = T,
     inverse = TRUE,
@@ -23,7 +23,7 @@ ui <- function() {
     tabPanel(
       "Overview",
       htmlOutput("overviewText"),
-      img(src = '/www/PipelineImage.png', align = "center")
+      img(src = 'PipelineImage.png', align = "center")
     ),
     tabPanel(
       "Query metafeatures",
