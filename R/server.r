@@ -24,7 +24,19 @@ server <- function(input, output, session, DIR = pkg_file("data"), MAX_SAMPLES =
 
   # only show studies that exist in the data/studies directory
   study_info <- subset(study_info, study %in% STUDIES)
-  # View(study_info)
+
+  #Fix encoding
+  study_info$study_abstract <-
+    as_native_character(study_info$study_abstract) %>%
+    {
+      Encoding(.) <- "UTF-8"
+      .
+    } %>%
+  as_native_character %>%
+  {
+    Encoding(.) <- "UTF-8"
+    .
+  }
 
   # add links redirecting to the sra website for each study
   study_info$link <-
