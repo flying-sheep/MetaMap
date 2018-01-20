@@ -15,14 +15,14 @@ globalDE <- function(input_dir = pkg_file("data"), max_samples = 1000,
   output_dir <- file.path("de_results")
   dir.create(output_dir, showWarnings=F)
 
-  r <- run(input_dir, output_dir, max_samples, log)
+  r <- runGDE(input_dir, output_dir, max_samples, log)
 
   if(log){
     write.csv(r, file.path(output_dir, "de_log.csv"), row.names = F)
   }
 }
 
-run <- function(input_dir, output_dir, max_samples, log) {
+runGDE <- function(input_dir, output_dir, max_samples, log) {
   env <- environment()
   error <- data.frame()
   studies <- sapply(strsplit(list.files(file.path(input_dir, "studies")), split = "\\."), `[`, 1)

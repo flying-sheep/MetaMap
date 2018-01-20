@@ -32,7 +32,7 @@ transformData <-
 
     lineage <- generateLineage(feature_info)
 
-    r <- run(study_info,
+    r <- runDG(study_info,
              sample_info,
              counts,
              lineage,
@@ -58,7 +58,7 @@ transformData <-
 
 
 # generate phyloseq objects
-run <-
+runDG <-
   function(study_info,
            sample_info,
            counts,

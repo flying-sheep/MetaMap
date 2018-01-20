@@ -15,7 +15,7 @@ globalDA <- function(input_dir = pkg_file("data"), max_samples = 1000,
   output_dir <- file.path("da_results")
   dir.create(output_dir, showWarnings=F)
 
-  r <- run(input_dir, max_samples, log)
+  r <- runGDA(input_dir, max_samples, log)
 
   r$Result %>%
     .[order(.$Pvalue),] %>%
@@ -26,7 +26,7 @@ globalDA <- function(input_dir = pkg_file("data"), max_samples = 1000,
   }
 }
 
-run <- function(input_dir, max_samples, log) {
+runGDA <- function(input_dir, max_samples, log) {
   env <- environment()
   error <- data.frame()
   studies <- sapply(strsplit(list.files(file.path(input_dir, "studies")), split = "\\."), `[`, 1)
