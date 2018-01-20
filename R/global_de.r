@@ -50,6 +50,7 @@ runGDE <- function(input_dir, output_dir, max_samples, log) {
       }
     })
   })
-  colnames(error) <- c("Study", "Phenotype", "Messsage")
+  if(log)
+    colnames(error) <- c("Study", "Phenotype", "Messsage")
   error
 }
