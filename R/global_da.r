@@ -31,7 +31,7 @@ runGDA <- function(input_dir, max_samples, log) {
   error <- data.frame()
   studies <- sapply(strsplit(list.files(file.path(input_dir, "studies")), split = "\\."), `[`, 1)
   res <- do.call(rbind, lapply(studies, function(study){
-    cls <- class(try(loadPhylo(dir = input_dir, study, envir = environment())))
+    cls <- class(try(loadPhylo(study, dir = input_dir, envir = environment())))
     if(cls == "try-error" || length(sample_names(phylo)) > max_samples) {
       error <- rbind(error, c(study, NA, geterrmessage()), stringsAsFactors = F)
       if(log) assign("error", error, env)

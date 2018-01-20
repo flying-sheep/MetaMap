@@ -197,7 +197,7 @@ server <- function(input, output, session, DIR = pkg_file("data"), MAX_SAMPLES =
 
     # load phylo from .RData file
     cls <-
-      class(try(loadPhylo(DIR, study, environment()))
+      class(try(loadPhylo(study, DIR, environment()))
       )
     if (cls == "try-error")
     {

@@ -42,7 +42,6 @@ transformData <-
     if (log) {
       write.table(r, file.path(output_dir, "errors.txt"), row.names = F)
     }
-
     #add column sample_size to study_info
     study_info$sample_size <-
       sapply(study_info$study, function(x)
@@ -50,9 +49,11 @@ transformData <-
 
     save(study_info, file = file.path(output_dir, "study_info.RData"))
 
+
     studies <- list.files(file.path(output_dir, 'studies')) %>%
       str_split_fixed("\\.", n = 2) %>% .[, 1]
     mf_tbl <- mfMeans(study_info, studies, output_dir)
+
     save(mf_tbl, file =  file.path(output_dir, "metafeatures_table.RData"))
   }
 
