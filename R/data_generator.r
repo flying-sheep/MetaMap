@@ -1,8 +1,8 @@
 #' @include methods.r
 
-#' Save Data
+#' @title Transform Data
 #'
-#' This function generates a phyloseq Object for each study found in the input tables.
+#' Convert tables to input compatible with the webtool.
 #'
 #' @param tables A directory containing the tables or or list that contains the following files: study_info, sample_info, feature_info, counts
 #' @param output_dir The directory where the transformed data will be saved. The default is inside the package.

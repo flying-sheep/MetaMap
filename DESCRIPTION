@@ -28,6 +28,8 @@ Collate:
     'methods.r'
     'data_generator.r'
     'global.r'
+    'global_da.r'
+    'global_de.r'
     'launch.r'
     'plots.r'
     'server.r'

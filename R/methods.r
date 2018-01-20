@@ -90,7 +90,7 @@ deseq2_table <- function(phylo,
     tmp1 <- setNames(list(1, 2), c(cond1, cond2))
     tmp1[unlist(tmp@sam_data[, attribute])]
   }  else{
-    as.integer(factor(tmp@sam_data[, attribute]))
+    as.integer(factor(tmp@sam_data %>% data.frame %>% .[[attribute]]))
   }
   tmp@sam_data[, attribute] <-
     paste0("cond", conds)
@@ -148,6 +148,9 @@ de_glm_df <- function(phylo, taxids, attribute, cond1, cond2) {
 diversity_test <- function(phylo, attribute) {
   if (is.null(phylo))
     return(NULL)
+  if(length(unique(phylo@sam_data[[attribute]])) < 2){
+    stop("There is only 1 condition!")
+  }
   alpha.diversity <- estimate_richness(phylo, measures = "Shannon")
   data <- cbind(sample_data(phylo), alpha.diversity)
   anova <- aov(as.formula(paste("Shannon ~", attribute)), data)
@@ -229,7 +232,7 @@ getAttributes <- function(phylo) {
 #'
 #'
 #' @export
-loadPhylo <- function(dir, study, envir = environment(loadPhylo)) {
+loadPhylo <- function(study, dir = pkg_file("data"), envir = environment(loadPhylo)) {
   try(load(file.path(dir, "studies", paste0(study, ".RData")), envir))
 }
 

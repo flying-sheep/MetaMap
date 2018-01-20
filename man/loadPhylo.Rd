@@ -4,12 +4,12 @@
 \alias{loadPhylo}
 \title{Load phyloseq}
 \usage{
-loadPhylo(dir, study, envir = environment(loadPhylo))
+loadPhylo(study, dir = pkg_file("data"), envir = environment(loadPhylo))
 }
 \arguments{
-\item{dir}{directory of the data.}
-
 \item{study}{study ID}
+
+\item{dir}{directory of the data.}
 
 \item{envir}{enviroment to load phyloseq object}
 }
