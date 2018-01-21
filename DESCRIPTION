@@ -33,4 +33,5 @@ Collate:
     'launch.r'
     'plots.r'
     'server.r'
+    'shiny.r'
     'ui.r'
