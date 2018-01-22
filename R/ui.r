@@ -159,7 +159,7 @@ ui <- function() {
             column(
               2,
               conditionalPanel(condition = "output.sankey_cond", actionButton("sankey_undo_button", HTML("<b>Undo</b>")))
-            )
+            ), style = "margin-bottom:100px;"
           )
       )
     ),
