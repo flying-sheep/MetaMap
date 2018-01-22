@@ -15,6 +15,12 @@ resetClickCode <-
 #' @export
 ui <- function() {
   # addResourcePath("www", pkg_file("shiny/www"))
+  # as long as there are still some bugs
+  tags$style(
+    type = "text/css",
+    ".shiny-output-error { visibility: hidden; }",
+    ".shiny-output-error:before { visibility: hidden; }"
+  )
   navbarPage(
     fluid = T,
     inverse = TRUE,
@@ -139,37 +145,42 @@ ui <- function() {
           )
         )
       ),
-      tabPanel("Sankey Diagram",
+      tabPanel(
+        "Sankey Diagram",
         plotlyOutput("sankey_plot"),
         HTML(
           '<hr style="height:1px;border:none;color:#333;background-color:#333;"/>'
         ),
+        fluidRow(column(
+          4, selectInput('sankey_source', 'Source', c()), offset = 2
+        ),
+        column(
+          4, selectInput('sankey_target', 'Target', c())
+        )),
+        fluidRow(column(
+          4, uiOutput('attribute_sankey'), offset = 2
+        ),
+        column(4, uiOutput(
+          'sankey_condition'
+        ))),
         fluidRow(
-          column(4, selectInput('sankey_source', 'Source', c()), offset = 2),
-          column(4, selectInput('sankey_target', 'Target', c()))),
-          fluidRow(column(4, uiOutput(
-            'attribute_sankey'
-          ), offset = 2),
-          column(4, uiOutput(
-            'sankey_condition'
-          ))),
-          fluidRow(
-            column(4, actionButton("sankey_apply_button", label = "Apply"), offset = 2),
-            column(1,  actionButton("sankey_reset_button", label = "Reset")),
-            column(
-              2,
-              conditionalPanel(condition = "output.sankey_cond", actionButton("sankey_undo_button", HTML("<b>Undo</b>")))
-            ), style = "margin-bottom:100px;"
-          )
+          column(
+            4,
+            actionButton("sankey_apply_button", label = "Apply"),
+            offset = 2
+          ),
+          column(1,  actionButton("sankey_reset_button", label = "Reset")),
+          column(
+            2,
+            conditionalPanel(condition = "output.sankey_cond", actionButton(
+              "sankey_undo_button", HTML("<b>Undo</b>")
+            ))
+          ),
+          style = "margin-bottom:100px;"
+        ),
+        useShinyjs(),
+        extendShinyjs(text = resetClickCode)
       )
-    ),
-    # as long as there are still some bugs
-    tags$style(
-      type = "text/css",
-      ".shiny-output-error { visibility: hidden; }",
-      ".shiny-output-error:before { visibility: hidden; }"
-    ),
-    useShinyjs(),
-    extendShinyjs(text = resetClickCode)
+    )
   )
 }

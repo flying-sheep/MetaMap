@@ -172,7 +172,9 @@ server <-
       values$selection <- NULL
       values$de_table <- NULL
       values$attributes <- NULL
-      values$species_diff = NULL
+      values$species_diff <- NULL
+      sankey$attribute <- empty
+      sankey$cond <- empty
       output$taxa_plot <- renderPlot({
         NULL
       })
