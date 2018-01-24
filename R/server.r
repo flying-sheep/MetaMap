@@ -175,10 +175,10 @@ server <-
       values$species_diff <- NULL
       sankey$attribute <- empty
       sankey$cond <- empty
-      output$taxa_plot <- renderPlot({
+      output$taxa_plot <- renderPlotly({
         NULL
       })
-      output$ntaxa_plot <- renderPlot({
+      output$ntaxa_plot <- renderPlotly({
         NULL
       })
       # output$top_species_plot <- renderPlot({NULL})
@@ -830,7 +830,7 @@ server <-
     #   plot_abundance(values$phylo, input$select_species_abundance, attribute)
     # })
 
-    output$top_species_plot <- renderPlot({
+    output$top_species_plot <- renderPlotly({
       phylo <- isolate(values$phylo)
       attribute <- input$attribute_ma
       if (any(is.null(attribute),
@@ -924,14 +924,14 @@ server <-
         return(NULL)
       }
 
-      output$taxa_plot <- renderPlot({
+      output$taxa_plot <- renderPlotly({
         withProgress(session = session, value = 0.5, {
           setProgress(message = 'Calculation in progress')
           plot_taxa(phylo, attribute, level, relative = F)
         })
       })
 
-      output$ntaxa_plot <- renderPlot({
+      output$ntaxa_plot <- renderPlotly({
         withProgress(session = session, value = 0.5, {
           setProgress(message = 'Calculation in progress')
           plot_taxa(phylo, attribute, level, relative = T)

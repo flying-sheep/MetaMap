@@ -122,7 +122,7 @@ ui <- function() {
         "Metafeature Abundance",
         htmlOutput("maHelp"),
         uiOutput("attribute_ma"),
-        plotOutput("top_species_plot")
+        plotlyOutput("top_species_plot")
         # ,uiOutput('select_species_abundance'),
         # plotOutput("abundances_plot")
       ),
@@ -140,8 +140,8 @@ ui <- function() {
           tabsetPanel(
             id = "tbc_panel",
             # ntaxa_plot is normalized
-            tabPanel("Relative proportion", plotOutput("ntaxa_plot")),
-            tabPanel("Absolute counts", plotOutput("taxa_plot"))
+            tabPanel("Relative proportion", plotlyOutput("ntaxa_plot")),
+            tabPanel("Absolute counts", plotlyOutput("taxa_plot"))
           )
         )
       ),
