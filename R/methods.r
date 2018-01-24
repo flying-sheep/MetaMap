@@ -83,10 +83,10 @@ deseq2_table <- function(phylo,
     subset_samples(tmp, unlist(tmp@sam_data[, attribute]) %in% c(cond1, cond2))
 
   # Remove samples with NA
-  tmp <- subset_samples(tmp, !is.na(tmp@sam_data[, attribute]))
+  tmp <- subset_samples(tmp,!is.na(tmp@sam_data[, attribute]))
   tmp <- prune_taxa(taxa_sums(tmp) > 0, tmp)
   # make valid condition names
-  conds <- if (all(!is.null(cond1), !is.null(cond2))) {
+  conds <- if (all(!is.null(cond1),!is.null(cond2))) {
     tmp1 <- setNames(list(1, 2), c(cond1, cond2))
     tmp1[unlist(tmp@sam_data[, attribute])]
   }  else{
@@ -102,7 +102,7 @@ deseq2_table <- function(phylo,
   de_table <-
     DESeq2::DESeq(deseq, test = "Wald", fitType = "local") %>%
     DESeq2::results(cooksCutoff = FALSE) %>%
-    .[sort.list(.$padj),] %>%
+    .[sort.list(.$padj), ] %>%
     as.data.frame
   # %>% mutate(pvalue = -log10(pvalue), padj = -log10(padj))
   de_table
@@ -118,7 +118,7 @@ de_glm_df <- function(phylo, taxids, attribute, cond1, cond2) {
 
   lapply(taxids, function(x) {
     species_name <- taxids2names(phylo, x)
-    phylo@otu_table[x,] %>%
+    phylo@otu_table[x, ] %>%
       t %>%
       cbind(phylo@sam_data[, c(attribute, "Total.Reads")]) %>%
       set_colnames(c("Transcript", attribute, "Total.Reads")) %>%
@@ -148,7 +148,7 @@ de_glm_df <- function(phylo, taxids, attribute, cond1, cond2) {
 diversity_test <- function(phylo, attribute) {
   if (is.null(phylo))
     return(NULL)
-  if(length(unique(phylo@sam_data[[attribute]])) < 2){
+  if (length(unique(phylo@sam_data[[attribute]])) < 2) {
     stop("There is only 1 condition!")
   }
   alpha.diversity <- estimate_richness(phylo, measures = "Shannon")
@@ -175,7 +175,7 @@ generatePhylo <- function(study, counts, sample_info, lineage) {
   otu <-
     otu_table(round(as.data.table(counts)[, ok, with = F]), taxa_are_rows =
                 TRUE)
-  sam <- sample_data(sample_info[ok,])
+  sam <- sample_data(sample_info[ok, ])
   rownames(sam) <- colnames(otu)
   tax <- tax_table(lineage)
   rownames(tax) <- rownames(otu)
@@ -187,8 +187,8 @@ generatePhylo <- function(study, counts, sample_info, lineage) {
                        str_split(x, ": ", n = 2) %>%
                          data.frame(stringsAsFactors = F) %>%
                          {
-                           colnames(.) <- .[1,]
-                           as.data.table(.)[2,]
+                           colnames(.) <- .[1, ]
+                           as.data.table(.)[2, ]
                          })))
   bla <-
     if (class(bla) == "try-error")
@@ -232,9 +232,12 @@ getAttributes <- function(phylo) {
 #'
 #'
 #' @export
-loadPhylo <- function(study, dir = pkg_file("data"), envir = environment(loadPhylo)) {
-  try(load(file.path(dir, "studies", paste0(study, ".RData")), envir))
-}
+loadPhylo <-
+  function(study,
+           dir = pkg_file("data"),
+           envir = environment(loadPhylo)) {
+    try(load(file.path(dir, "studies", paste0(study, ".RData")), envir))
+  }
 
 #' Generate Lineage
 #'
@@ -307,7 +310,7 @@ makeSankey_links <-
         Source_level = rep(source, nrow(.)),
         Target_level = rep(target, nrow(.))
       ) %>%
-      .[order(.$Value, decreasing = T), ] %>% .[which(.$Value > 0.5), ]
+      .[order(.$Value, decreasing = T),] %>% .[which(.$Value > 0.5),]
 
     links
   }
@@ -321,14 +324,31 @@ makeSankey_links <-
 #' @param dir The data directory
 #'
 #' @export
-mfMeans <- function(study_info, studies, dir){
+mfMeans <- function(study_info, studies, dir) {
   # use rbind.fill from plyr
   tbl <- lapply(studies, function(x) {
     loadPhylo(x, dir, environment())
-    means <- apply(phylo@otu_table, 2, function(x) x/sum(x)*100) %>% apply(1, mean)
+    means <-
+      apply(phylo@otu_table, 2, function(x)
+        x / sum(x) * 100) %>% apply(1, mean)
     names(means) <- taxids2names(phylo, names(means))
     as.data.frame(t(means))
   }) %>% rbind.fill %>% t
   colnames(tbl) <- studies
   tbl
+}
+
+#' Relative Counts
+#'
+#' Divides the counts of each samples by the total number of reads (including non-microbial reads) in each sample.
+#'
+#' @param phylo \link[phyloseq]{phyloseq} object
+#'
+#' @return A data frame of relative counts
+#' @export
+relativeCounts <- function(phylo) {
+  otu_table <- data.frame(phylo@otu_table)
+  readsPerSample <-
+    phylo@sam_data[colnames(otu_table), "Total.Reads"] %>% t
+  otu_table / readsPerSample[col(otu_table)] * 100
 }

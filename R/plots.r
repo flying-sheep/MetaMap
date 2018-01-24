@@ -14,33 +14,35 @@
 plot_top_species <- function(phylo, top_n = 10L, attribute) {
   if (is.null(phylo))
     return(NULL)
-  phylo@otu_table %>%
-    apply(2, function(x) x/sum(x)*100) %>%
+  apply(phylo@otu_table, 2, function(x)
+    x / sum(x) * 100) %>%
     t %>%
     as.data.frame %>%
     mutate(Selection = unlist(phylo@sam_data[, attribute])) %>%
     group_by(Selection) %>%
     summarise_all(funs(mean, sd)) %>%
     gather(key, Value,-Selection) %>%
-    with(.,
-         data.frame(
-           Mean = Value[grep("_mean", key)],
-           SD = Value[grep("_sd", key)],
-           Selection = Selection[grep("_mean", key)],
-           TaxID = str_sub(key[grep("_mean", key)], 1,-6),
-           stringsAsFactors = F
-         )) %>%
+    with(
+      .,
+      data.frame(
+        Mean = Value[grep("_mean", key)],
+        SD = Value[grep("_sd", key)],
+        Selection = Selection[grep("_mean", key)],
+        TaxID = str_sub(key[grep("_mean", key)], 1,-6),
+        stringsAsFactors = F
+      )
+    ) %>%
     arrange(desc(Mean)) %>%
     group_by(Selection) %>%
     mutate(
       SpeciesUnordered = taxids2names(phylo, TaxID),
       Species = factor(SpeciesUnordered, SpeciesUnordered[order(Mean)])
     ) %>%
-     plotly::slice(seq_len(min(top_n, n()))) %>%
+    plotly::slice(seq_len(min(top_n, n()))) %>%
     #{View(.); .} %>%
     ggplot(aes(Species, Mean, fill = Selection)) +
     geom_col(position = 'dodge') +
-    geom_errorbar(aes(ymin = ifelse((Mean - SD)<0, 0, (Mean - SD)), ymax = Mean + SD), width = 0.2) +
+    geom_errorbar(aes(ymin = ifelse((Mean - SD) < 0, 0, (Mean - SD)), ymax = Mean + SD), width = 0.2) +
     scale_x_discrete(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) +
     coord_flip() + labs(x = 'Species / Metafeature', y = 'Mean relative abundance')
 }
@@ -78,11 +80,10 @@ plot_volcano <- function(tax_table, de_table) {
     ))
   p <-
     ggplot(data = tmp,
-           aes(
-             label = Species,
-             log2FoldChange,-log10(padj)
-             # , colour = threshold
-           )) + geom_point() +
+           aes(label = Species,
+               log2FoldChange, -log10(padj))) +
+    # , colour = threshold)) +
+    geom_point() +
     labs(x = "Fold change (log2)", y = "-log10 p-value")
   # + scale_color_manual(values = cols)
   p
@@ -364,15 +365,23 @@ plot_de_heatmap <-
 #'
 #'
 #' @export
-mfPlot <- function(mf_tbl){
+mfPlot <- function(mf_tbl) {
   mfMax <- apply(mf_tbl, 1, function(x) {
     study_nr <- which.max(x)
     c(study_nr, x[study_nr])
-    }) %>% t %>% as.data.frame
+  }) %>% t %>% as.data.frame
   colnames(mfMax) <- c("maxStudy", "maxRelAbundance")
   mfMax$maxStudy <- colnames(mf_tbl)[mfMax$maxStudy]
-  mfCoverage <- apply(mf_tbl, 1, function(x) length(which(!is.na(x))) / length(x) * 100)
+  mfCoverage <-
+    apply(mf_tbl, 1, function(x)
+      length(which(!is.na(x))) / length(x) * 100)
   df <- cbind(mfMax, as.data.frame(mfCoverage))
   df$Metafeature <- rownames(df)
-  ggplot(df, aes(x = mfCoverage, y = maxRelAbundance, label1 = Metafeature, label2 = maxStudy)) + geom_point() + labs(x = "% Covered", y = "Maximum relative abundance")
+  ggplot(df,
+         aes(
+           x = mfCoverage,
+           y = maxRelAbundance,
+           label1 = Metafeature,
+           label2 = maxStudy
+         )) + geom_point() + labs(x = "% Covered", y = "Maximum relative abundance")
 }
