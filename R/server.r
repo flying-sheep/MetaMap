@@ -1019,7 +1019,6 @@ server <-
         } else {
           values$mf_studies <- NULL
           output$mfName <- renderUI(NULL)
-          output$mfTable <- DT::renderDataTable(NULL)
         }
         output$mfPlot <- renderPlotly({
           ggplotly(
