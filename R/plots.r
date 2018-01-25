@@ -14,8 +14,7 @@
 plot_top_species <- function(phylo, top_n = 10L, attribute) {
   if (is.null(phylo))
     return(NULL)
-  apply(phylo@otu_table, 2, function(x)
-    x / sum(x) * 100) %>%
+  relativeCounts(phylo)%>%
     t %>%
     as.data.frame %>%
     mutate(Selection = unlist(phylo@sam_data[, attribute])) %>%
@@ -44,7 +43,7 @@ plot_top_species <- function(phylo, top_n = 10L, attribute) {
     geom_col(position = 'dodge') +
     geom_errorbar(aes(ymin = ifelse((Mean - SD) < 0, 0, (Mean - SD)), ymax = Mean + SD), width = 0.2) +
     scale_x_discrete(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) +
-    coord_flip() + labs(x = 'Species / Metafeature', y = 'Mean relative abundance')
+    coord_flip() + labs(x = 'Species / Metafeature', y = 'Mean relative abundance (RPM)')
 }
 
 #' Volcano plot
@@ -121,11 +120,13 @@ plot_sankey <-
       lapply(1:(length(levls) - 1), function(x)
         list(Source = levls[x], Target = levls[x + 1]))
 
+    phylo@tax_table <- tax_table(tax_table)
+
     links <-
       do.call(rbind, lapply(pairs, function(x)
         makeSankey_links(
           tax_table,
-          phylo@otu_table,
+          relativeCounts(phylo),
           x$Source,
           x$Target,
           source_filter,
@@ -184,6 +185,17 @@ plot_sankey <-
 plot_taxa <- function(phylo, attribute, level, relative = T) {
   if (is.null(phylo))
     return(NULL)
+  phylo@tax_table <- tax_table(as.matrix(clean_tax_table(phylo@tax_table)))
+  if(relative){
+    phylo@otu_table <- otu_table(relativeCounts(phylo), taxa_are_rows = T)
+  }
+  # trim to 10 most abundant taxa
+  taxa_sums <- taxa_sums(phylo)
+  taxa <- data.frame(Abundance = taxa_sums, Level = as.character(phylo@tax_table[names(taxa_sums),level]), stringsAsFactors=F) %>%
+    group_by(Level) %>%
+    summarize(Abundance= sum(Abundance)) %>% arrange(desc(Abundance)) %>% .[1:min(nrow(.), 10), "Level"] %>% unlist
+  environment(subset_taxa) <- environment()
+  phylo <- subset_taxa(phylo, phylo@tax_table[,level] %in% taxa)
   p <- plot_bar(phylo, x = attribute, fill = level) +
     aes(label = Species, y = Abundance) +
     geom_bar(stat = "identity") + coord_flip() +
@@ -199,6 +211,7 @@ plot_taxa <- function(phylo, attribute, level, relative = T) {
     p$data$Abundance <-
       p$data$Abundance / groups[p$data[, attribute]] * 100
   }
+  p$data <- subset(p$data, Abundance != 0)
   p
 }
 
@@ -259,7 +272,7 @@ plot_abundance <- function(phylo, taxids, attribute) {
 #' @return A ggplot2 object showing the boxplots.
 #' @export
 plot_diff <- function(phylo, taxids, attribute) {
-  phylo@otu_table[taxids, ] %>%
+  relativeCounts(phylo)[taxids, ] %>%
     t %>%
     as.data.frame %>%
     mutate(Selection = unlist(phylo@sam_data[, attribute])) %>%
@@ -284,6 +297,7 @@ plot_diff <- function(phylo, taxids, attribute) {
 plot_mds <- function(phylo, color) {
   if (is.null(phylo))
     return(NULL)
+  phylo@otu_table <- otu_table(relativeCounts(phylo), taxa_are_rows = T)
   sam_dt_names <- names(phylo@sam_data)
   attrs <-
     c("Axis.1",
@@ -383,5 +397,5 @@ mfPlot <- function(mf_tbl) {
            y = maxRelAbundance,
            label1 = Metafeature,
            label2 = maxStudy
-         )) + geom_point() + labs(x = "% Covered", y = "Maximum relative abundance")
+         )) + geom_point() + labs(x = "% Covered", y = "Maximum relative abundance (RPM)")
 }

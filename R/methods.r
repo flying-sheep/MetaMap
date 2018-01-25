@@ -328,9 +328,7 @@ mfMeans <- function(study_info, studies, dir) {
   # use rbind.fill from plyr
   tbl <- lapply(studies, function(x) {
     loadPhylo(x, dir, environment())
-    means <-
-      apply(phylo@otu_table, 2, function(x)
-        x / sum(x) * 100) %>% apply(1, mean)
+    means <- relativeCounts(phylo) %>% apply(1, mean)
     names(means) <- taxids2names(phylo, names(means))
     as.data.frame(t(means))
   }) %>% rbind.fill %>% t
@@ -350,5 +348,5 @@ relativeCounts <- function(phylo) {
   otu_table <- data.frame(phylo@otu_table)
   readsPerSample <-
     phylo@sam_data[colnames(otu_table), "Total.Reads"] %>% t
-  otu_table / readsPerSample[col(otu_table)] * 100
+  otu_table / readsPerSample[col(otu_table)] * 1e6
 }
