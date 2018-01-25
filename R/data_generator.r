@@ -29,6 +29,7 @@ transformData <-
     load(tables$feature_info)
 
     dir.create(output_dir, showWarnings = F)
+    dir.create(file.path(output_dir, "studies"), showWarnings = F)
 
     lineage <- generateLineage(feature_info)
 
