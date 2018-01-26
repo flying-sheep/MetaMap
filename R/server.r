@@ -425,10 +425,13 @@ server <-
         paste0(values$study, "_data.zip")
       },
       content = function(file) {
+        phylo <- values$phylo
+        if(is.null(phylo)){
+          return()
+        }
         owd <- setwd(tempdir())
         on.exit(setwd(owd))
         files <- NULL
-
 
         checkList <- input$check_file
         files <- c()
