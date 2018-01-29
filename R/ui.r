@@ -15,12 +15,6 @@ resetClickCode <-
 #' @export
 ui <- function() {
   # addResourcePath("www", pkg_file("shiny/www"))
-  # as long as there are still some bugs
-  tags$style(
-    type = "text/css",
-    ".shiny-output-error { visibility: hidden; }",
-    ".shiny-output-error:before { visibility: hidden; }"
-  )
   navbarPage(
     fluid = T,
     inverse = TRUE,
@@ -180,6 +174,11 @@ ui <- function() {
         ),
         useShinyjs(),
         extendShinyjs(text = resetClickCode)
+      ), # as long as there are still some bugs
+      tags$style(
+        type = "text/css",
+        ".shiny-output-error { visibility: hidden; }",
+        ".shiny-output-error:before { visibility: hidden; }"
       )
     )
   )
