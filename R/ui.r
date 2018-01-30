@@ -27,6 +27,7 @@ ui <- function() {
     ),
     tabPanel(
       "Query metafeatures",
+	htmlOutput("mfHelp"),
       uiOutput("mfInput"),
       plotlyOutput("mfPlot"),
       HTML(

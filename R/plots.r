@@ -394,8 +394,8 @@ mfPlot <- function(mf_tbl) {
   ggplot(df,
          aes(
            x = mfCoverage,
-           y = maxRelAbundance,
+           y = log10(maxRelAbundance),
            label1 = Metafeature,
            label2 = maxStudy
-         )) + geom_point() + labs(x = "% Covered", y = "Maximum relative abundance (RPM)")
+         )) + geom_point() + labs(x = "Frequency of detection", y = "Log 10 maximum abundance (RPM)")
 }
