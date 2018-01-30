@@ -46,7 +46,7 @@ server <-
     output$overviewText <- renderUI(
       HTML(
         '<h1 style="color: #5e9ca0;"><span style="color: #000000;">MetaMap - exploring the unexplored</span></h1>
-        <p><span style="color: #000000;">This interactive webtools enables the exploration of viral and microbial traits extracted from human RNA-seq data of over 500 studies relevant to human disease. The data was generated using a two-step alignment pipeline outlined below:</span></p>
+        <p><span style="color: #000000;">This interactive webtools facilitates exploration of the MetaMap resource (manuscript in preparation). In this large scale analysis raw human RNA-seq data from over 400 studies relevant to human disease was screened for microbial and viral reads. The data was generated using a two-step alignment pipeline outlined below:</span></p>
         <h2 style="color: #2e6c80;">&nbsp;</h2>
         <p>&nbsp;</p>'
       )
@@ -99,7 +99,7 @@ server <-
 			)		
     observeEvent(input$dataset, {
       if (all(!(
-        input$dataset %in% c("Overview", "Query metafeatures", "Query studies")
+        input$dataset %in% c("Overview", "Query by metafeature", "Query by study")
       ), is.null(values$study))) {
         showModal(
           modalDialog(

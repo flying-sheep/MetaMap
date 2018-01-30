@@ -26,7 +26,7 @@ ui <- function() {
       img(src = 'PipelineImage.png', align = "center")
     ),
     tabPanel(
-      "Query metafeatures",
+      "Query by metafeature",
 	htmlOutput("mfHelp"),
       uiOutput("mfInput"),
       plotlyOutput("mfPlot"),
@@ -37,7 +37,7 @@ ui <- function() {
       DT::dataTableOutput("mfTable")
     ),
     tabPanel(
-      "Query studies",
+      "Query by study",
       htmlOutput("queryHelp") ,
       DT::dataTableOutput("mystudies")
     ),
@@ -106,8 +106,7 @@ ui <- function() {
             tabsetPanel(
               id = "de_panel",
               tabPanel("Global",
-                       DT::dataTableOutput("deseq_table")),
-              tabPanel("Local", DT::dataTableOutput("deseq_table_subset"))
+                       DT::dataTableOutput("deseq_table"))
             ),
             plotlyOutput("de_plot", height = "600px")
           )
