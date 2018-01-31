@@ -96,7 +96,7 @@ server <-
 	output$mfHelp <-
 		renderUI(
 			HTML('<p style="text-align: center"><strong>The scatter plot shows frequency of detection and maximal metafeature abundance across all studies on X and Y axes, respectively. The user can select a metafeature by 1) searching for the species name in the text field or 2) clicking on a data point in the plot. After selection of metafeature studies detecting the selected metafeature are listed below the plot. By clicking on the row in the list study is selected for further analysis.</strong></p>')
-			)		
+			)
     observeEvent(input$dataset, {
       if (all(!(
         input$dataset %in% c("Overview", "Query by metafeature", "Query by study")
@@ -996,7 +996,7 @@ server <-
           abundances <- abundances[which(!is.na(abundances))]
           inds <- which(study_info$study %in% names(abundances))
           df <- study_info[inds, showColumns]
-          df$`Relative Abundance` <- as.numeric(abundances)
+          df$`Relative Abundance` <- as.numeric(abundances[study_info$study[inds]])
           df <- df[order(df$`Relative Abundance`, decreasing = T),]
 
           output$mfName <-
