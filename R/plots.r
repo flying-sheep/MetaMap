@@ -308,7 +308,6 @@ plot_mds <- function(phylo, color) {
   p <-
     plot_ordination(phylo, ordinate(phylo, 'MDS', phyloseq::distance(phylo, 'jsd')), color = color) +
     do.call(aes_string, attrs)
-  ggplotly(p, tooltip = c(names(attrs)))
 }
 
 #' Alpha diversity plot
