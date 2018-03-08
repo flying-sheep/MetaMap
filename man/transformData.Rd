@@ -4,7 +4,7 @@
 \alias{transformData}
 \title{Transform Data
 
-Convert tables to input compatible with the webtool.}
+Convert tables into input compatible with the webtool.}
 \usage{
 transformData(tables, output_dir = pkg_file("data"), log = F)
 }

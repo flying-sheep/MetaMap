@@ -92,6 +92,8 @@ deseq2_table <- function(phylo,
   }  else{
     as.integer(factor(tmp@sam_data %>% data.frame %>% .[[attribute]]))
   }
+  if(length(unique(conds))>5)
+    stop("Too many conditions")
   tmp@sam_data[, attribute] <-
     paste0("cond", conds)
   deseq <-
@@ -100,7 +102,7 @@ deseq2_table <- function(phylo,
     log10(tmp@sam_data$Total.Reads) / median(log10(tmp@sam_data$Total.Reads))
   DESeq2::sizeFactors(deseq) <- size.factors
   de_table <-
-    DESeq2::DESeq(deseq, test = "Wald", fitType = "local") %>%
+    DESeq2::DESeq(deseq, test = "Wald", fitType = "local", parallel = T) %>%
     DESeq2::results(cooksCutoff = FALSE) %>%
     .[sort.list(.$padj), ] %>%
     as.data.frame
@@ -253,6 +255,7 @@ generateLineage <- function(feature_info) {
     do.call(rbind, lapply(as.character(feature_info[, 'Lineage']), function(x)
       strsplit(x, ";", fixed = T)[[1]]))
   lineage <- cbind(lineage, as.character(feature_info[, 'Name']))
+  lineage <- cbind(lineage, as.character(feature_info[, 'TaxID']))
   lineage[which(lineage[, 1] == ''), 1] <- "Viruses"
   lineage[which(lineage == '')] <- NA
   colnames(lineage) <-
@@ -262,7 +265,9 @@ generateLineage <- function(feature_info) {
       "Order",
       "Family",
       "Genus",
-      'Species')
+      'Species',
+      "TaxID"
+      )
   lineage
 }
 

@@ -2,7 +2,7 @@
 
 #' @title Transform Data
 #'
-#' Convert tables to input compatible with the webtool.
+#' Convert tables into input compatible with the webtool.
 #'
 #' @param tables A directory containing the tables or or list that contains the following files: study_info, sample_info, feature_info, counts
 #' @param output_dir The directory where the transformed data will be saved. The default is inside the package.

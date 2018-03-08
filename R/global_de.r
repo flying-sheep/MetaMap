@@ -47,6 +47,7 @@ runGDE <- function(input_dir, output_dir, max_samples, log) {
       } else {
           rownames(de_table) <- taxids2names(phylo, rownames(de_table))
           write.csv(de_table, file_path)
+          print("written")
       }
     })
   })
