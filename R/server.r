@@ -151,6 +151,10 @@ server <-
         species_diff = NULL
       )
 
+    plots <- reactiveValues(
+      dimred = NULL
+    )
+
     sankey <-
       reactiveValues(
         sankey_links = NULL,
@@ -173,6 +177,7 @@ server <-
     })
 
     observeEvent(values$study, {
+      plots$dimred <- NULL
       updateSelectInput(session, 'attribute_dr', 'Color by', "")
       updateSelectInput(session, 'attribute_da', 'Color by', "")
       updateSelectInput(session, 'attribute_ma', 'Color by', "")
@@ -189,11 +194,10 @@ server <-
       output$ntaxa_plot <- renderPlotly({
         NULL
       })
-      # output$top_species_plot <- renderPlot({NULL})
-      # output$sankey_plot <- renderSankeyNetwork({NULL})
       output$cond1 <- reactive({
         F
       })
+      updateRadioButtons(session, "groups_button", "Groups", choices = c("Group_0"))
 
       study <- values$study
 
@@ -408,8 +412,9 @@ server <-
     })
 
     output$mysamples <- DT::renderDataTable({
-      if (is.null(values$phylo))
-        return(NULL)
+      if (is.null(values$phylo)){
+        return(DT::datatable(data.frame(Samples = "Empty"), selection = "none"))
+      }
       sam_data <-
         values$phylo@sam_data[, -which(values$phylo@sam_data %>% colnames == "All")]
       DT::datatable(
@@ -620,7 +625,12 @@ server <-
       }
       withProgress(session = session, value = 0.5, {
         setProgress(message = "Calculation in progress")
-        plot_mds(phylo, input$attribute_dr)
+        if(is.null(isolate(plots$dimred))){
+          p <- plot_mds(phylo, input$attribute_dr)
+          isolate(plots$dimred <- p)
+          p
+        }else{
+          isolate(plots$dimred) + aes_string(colour = input$attribute_dr)}
       })
     })
 
@@ -820,18 +830,17 @@ server <-
 
 
     output$de_boxplot <- renderPlotly({
+      species_diff <- values$species_diff
       phylo <- isolate(values$phylo)
-      if (is.null(phylo) ||
-          is.null(values$species_diff) ||
-          values$species_diff == "")
-        # is.null(input$select_species_diff) ||
-        #   input$select_species_diff == "")
+      if (any(is.null(phylo),
+          is.null(species_diff),
+          species_diff == ""))
         return(NULL)
       attribute <-
         ifelse(input$attribute_de == empty, "All", input$attribute_de)
       withProgress(session = session, value = 0.5, {
         setProgress(message = "Calculation in progress")
-        plot_diff(phylo, values$species_diff, attribute)
+        plot_diff(phylo, species_diff, attribute)
       })
     })
 

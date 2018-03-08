@@ -193,7 +193,7 @@ plot_taxa <- function(phylo, attribute, level, relative = T) {
   taxa_sums <- taxa_sums(phylo)
   taxa <- data.frame(Abundance = taxa_sums, Level = as.character(phylo@tax_table[names(taxa_sums),level]), stringsAsFactors=F) %>%
     group_by(Level) %>%
-    summarize(Abundance= sum(Abundance)) %>% arrange(desc(Abundance)) %>% .[1:min(nrow(.), 10), "Level"] %>% unlist
+    summarise(Abundance= sum(Abundance)) %>% arrange(desc(Abundance)) %>% .[1:min(nrow(.), 10), "Level"] %>% unlist
   environment(subset_taxa) <- environment()
   phylo <- subset_taxa(phylo, phylo@tax_table[,level] %in% taxa)
   p <- plot_bar(phylo, x = attribute, fill = level) +
@@ -308,7 +308,6 @@ plot_mds <- function(phylo, color) {
   p <-
     plot_ordination(phylo, ordinate(phylo, 'MDS', phyloseq::distance(phylo, 'jsd')), color = color) +
     do.call(aes_string, attrs)
-  ggplotly(p, tooltip = c(names(attrs)))
 }
 
 #' Alpha diversity plot
