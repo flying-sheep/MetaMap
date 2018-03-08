@@ -46,7 +46,7 @@ server <-
     output$overviewText <- renderUI(
       HTML(
         '<h1 style="color: #5e9ca0;"><span style="color: #000000;">MetaMap - exploring the unexplored</span></h1>
-        <p><span style="color: #000000;">This interactive webtools facilitates exploration of the MetaMap resource (manuscript in preparation). In this large scale analysis raw human RNA-seq data from over 400 studies relevant to human disease was screened for microbial and viral reads. The data was generated using a two-step alignment pipeline outlined below:</span></p>
+        <p><span style="color: #000000;">This interactive web tool facilitates exploration of the MetaMap resource (<a href="https://www.biorxiv.org/content/early/2018/02/22/269092">Simon et al. bioRxiv</a>). In this large scale analysis raw human RNA-seq data from over 400 studies relevant to human disease were screened for microbial and viral reads. The data were generated using a two-step alignment pipeline outlined below:</span></p>
         <h2 style="color: #2e6c80;">&nbsp;</h2>
         <p>&nbsp;</p>'
       )
@@ -66,7 +66,7 @@ server <-
     output$dmHelp <-
       renderUI(
         HTML(
-          '<p style="text-align: center"><strong>To change the coloring select sample attribute from <em>Color by</em> drop-down menu.</strong></p>'
+          '<p style="text-align: center"><strong>Multi-dimensional scaling plot visualized metafeatures counts of samples in reduced dimensions. To change the coloring select sample attribute from <em>Color by</em> drop-down menu.</strong></p>'
         )
       )
     output$daHelp <-
@@ -84,7 +84,7 @@ server <-
     output$maHelp <-
       renderUI(
         HTML(
-          '<p style="text-align: center"><strong>To change the coloring select sample attribute from <em>Color by</em> drop-down menu.</strong></p>'
+          '<p style="text-align: center"><strong>The barplot shows the mean abundance levels of the top 5 metafeatures. To change the grouping select sample attribute from <em>Color by</em> drop-down menu.</strong></p>'
         )
       )
     output$tbcHelp <-
@@ -97,6 +97,11 @@ server <-
 		renderUI(
 			HTML('<p style="text-align: center"><strong>The scatter plot shows frequency of detection and maximal metafeature abundance across all studies on X and Y axes, respectively. The user can select a metafeature by 1) searching for the species name in the text field or 2) clicking on a data point in the plot. After selection of metafeature studies detecting the selected metafeature are listed below the plot. By clicking on the row in the list study is selected for further analysis.</strong></p>')
 			)
+	output$sankeyHelp <-
+                renderUI(
+                        HTML('<p style="text-align: center"><strong>Sankey diagram shows the average metafeature abundance across samples or selected grouping. The user can "walk" through the Sankey tree by 1) clicking on the graph or 2) selecting <em>Source</em> and <em>Target</em> phylogenetic levels and clicking on <em>Apply</em>.</strong></p>')
+                        )
+
     observeEvent(input$dataset, {
       if (all(!(
         input$dataset %in% c("Overview", "Query by metafeature", "Query by study")
@@ -410,7 +415,7 @@ server <-
       DT::datatable(
         data.frame(sam_data),
         options = list(
-          pageLength = 10,
+          pageLength = 50,
           scrollX = TRUE,
           searchHighlight = T
         ),

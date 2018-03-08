@@ -41,10 +41,10 @@ ui <- function() {
       htmlOutput("queryHelp") ,
       DT::dataTableOutput("mystudies")
     ),
-    tabPanel("Study Info",
+    tabPanel("Selected study information",
              tableOutput("studyinfo")),
     tabPanel(
-      'Sample Selection',
+      'Define sample grouping',
       htmlOutput("sampleHelp"),
       sidebarLayout(
         sidebarPanel(
@@ -141,6 +141,7 @@ ui <- function() {
       ),
       tabPanel(
         "Sankey Diagram",
+	htmlOutput("sankeyHelp"),
         plotlyOutput("sankey_plot"),
         HTML(
           '<hr style="height:1px;border:none;color:#333;background-color:#333;"/>'
