@@ -4,7 +4,7 @@
 \alias{deseq2_table}
 \title{DESeq2 table}
 \usage{
-deseq2_table(phylo, attribute, cond1 = NULL, cond2 = NULL)
+deseq2_table(phylo, attribute, cond1 = NULL, cond2 = NULL, parallel = F)
 }
 \arguments{
 \item{phylo}{\link[phyloseq]{phyloseq} object}

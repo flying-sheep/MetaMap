@@ -73,7 +73,7 @@ clean_tax_table <- function(tax_table) {
 deseq2_table <- function(phylo,
                          attribute,
                          cond1 = NULL,
-                         cond2 = NULL) {
+                         cond2 = NULL, parallel=F) {
   if (is.null(phylo))
     return(NULL)
   environment(subset_samples) <- environment()
@@ -102,7 +102,7 @@ deseq2_table <- function(phylo,
     log10(tmp@sam_data$Total.Reads) / median(log10(tmp@sam_data$Total.Reads))
   DESeq2::sizeFactors(deseq) <- size.factors
   de_table <-
-    DESeq2::DESeq(deseq, test = "Wald", fitType = "local", parallel = T) %>%
+    DESeq2::DESeq(deseq, test = "Wald", fitType = "local", parallel = parallel) %>%
     DESeq2::results(cooksCutoff = FALSE) %>%
     .[sort.list(.$padj), ] %>%
     as.data.frame
@@ -198,11 +198,14 @@ generatePhylo <- function(study, counts, sample_info, lineage) {
   else
     data.frame(bla)
   rownames(bla) <- colnames(otu_table(tmp))
+  bla$metaSRA.Disease.Status <- sam$metaSRA.disease.status
+  bla$metaSRA.Infection.Status <- sam$infection.status
+  bla$Sample.Name <- sam$sample_name
+  bla$sraID <- colnames(otu)
   bla$`Total.Reads` <- sam$spots
   bla$Selection <- rep("Group_0", nrow(bla))
   # Add column to samples table, that refers to all the samples
   bla$All <- rep("All", nrow(bla))
-  bla$sraID <- colnames(otu)
   sample_data(tmp) <- bla
   prune_taxa(taxa_sums(tmp) > 0, tmp)
 }
@@ -315,7 +318,9 @@ makeSankey_links <-
         Source_level = rep(source, nrow(.)),
         Target_level = rep(target, nrow(.))
       ) %>%
-      .[order(.$Value, decreasing = T),] %>% .[which(.$Value > 0.5),]
+      .[order(.$Value, decreasing = T),] %>% .[which(.$Value > 0.5),] %>%
+      .[1:min(4, nrow(.)),]
+
 
     links
   }
@@ -355,4 +360,44 @@ relativeCounts <- function(phylo) {
   readsPerSample <-
     phylo@sam_data[colnames(otu_table), "Total.Reads"] %>% t
   otu_table / readsPerSample[col(otu_table)] * 1e6
+}
+
+# Get samples using MetaSRA. It contains the ontology ids and labels for each sample.
+metaSRATable <- function(sample_info, metaSRA.file="data/metasra.v1-4.json"){
+  # Load metaSRA annotation
+  file <- metaSRA.file
+  # url <- "http://metasra.biostat.wisc.edu/static/metasra_versions/v1.4/metasra.v1-4.json"
+  metaSRA <- jsonlite::fromJSON(file, flatten = FALSE)
+  metaSRA <- metaSRA[sample_info$sample]
+  sample_info_dt <- as.data.table(sample_info)
+  sample_info_dt[, sample_type := lapply(metaSRA, function(sample)
+    ifelse(is.null(sample$`sample type`), NA, sample$`sample type`)) %>% unlist]
+  sample_info_dt <- sample_info_dt[, ontology_terms :=  lapply(metaSRA, function(sample) {
+    oterms <- sample$`mapped ontology terms`
+    if (any(is.null(sample), length(oterms) == 0)) {
+      oterms <- NA
+    }
+    oterms
+  })] %>% unnest(ontology_terms) %>% setnames("ontology_terms", "ontology_term")
+  sample_info_dt
+}
+
+# get info about ontology id using the metasra api. The alternative would be to use the OLS API.
+getOntologyInfo <- function(ids){
+  if(all(is.na(ids))) return(NA)
+  ids <- ids[!is.na(ids)]
+  ids <- unique(ids)
+  nids <- length(ids)
+  res <- do.call(rbind, lapply(seq(1, nids, by = 50), function(i) {
+    tmp <- ids[i:min(i + 49, nids)]
+    url <-
+      paste0("http://metasra.biostat.wisc.edu/api/v01/terms?id=",
+             paste0(tmp, collapse = ","))
+    jsonlite::fromJSON(url, flatten = FALSE)$terms
+  })) %>%  as.data.table %>% unnest(ids)
+  res <- unique(res)
+  setkey(res, ids)
+  res <- res[ids]
+  res[,ontology := tstrsplit(ids, ":", keep=1)]
+  res
 }

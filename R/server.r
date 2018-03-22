@@ -20,7 +20,9 @@ server <-
            output,
            session,
            DIR = pkg_file("data"),
-           MAX_SAMPLES = 250) {
+           MAX_SAMPLES = 1000,
+           DESEQ_PARALLEL= F
+           ) {
     # Initialize data
     STUDIES <- list.files(file.path(DIR, 'studies')) %>%
       str_split_fixed("\\.", n = 2) %>% .[, 1]
@@ -121,7 +123,7 @@ server <-
     mystudiesProxy <-  DT::dataTableProxy("mystudies")
 
     output$mystudies <- DT::renderDataTable({
-      selected <- 1
+      selected <- NULL
       if (!is.null(isolate(values$study)))
         selected <- which(study_info$study == isolate(values$study))
       DT::datatable(
@@ -230,6 +232,9 @@ server <-
           )
         )
         return()
+      }else{
+        # Remove NA's from metaSRA annotation
+        phylo@sam_data[is.na(phylo@sam_data$metaSRA.Disease.Status), "metaSRA.Disease.Status"] <- "healthy"
       }
       values$phylo <- phylo
       values$attributes <-  sapply(1:length(sample_data(phylo)),
@@ -710,7 +715,7 @@ server <-
         de_table <- try(deseq2_table(values$phylo,
                                      input$attribute_de,
                                      input$select_cond1,
-                                     input$select_cond2))
+                                     input$select_cond2, parallel=DESEQ_PARALLEL))
         if (class(de_table) == "try-error") {
           showModal(
             modalDialog(
@@ -1123,6 +1128,14 @@ server <-
           level_filter = level_filter,
           source_filter = source_filter
         )
+    })
+
+    observe({
+      if (!is.null(values$phylo)) {
+        show(selector = "#dataset li a[data-value='Selected study information']", anim=T)
+        show(selector = "#dataset li a[data-value='Define sample grouping']", anim=T)
+        show(selector = "#dataset li a[data-value='Analysis']", anim=T)
+      }
     })
 
   }

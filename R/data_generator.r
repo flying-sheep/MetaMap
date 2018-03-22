@@ -1,4 +1,5 @@
 #' @include methods.r
+#' @include metaSRA_data.r
 
 #' @title Transform Data
 #'
@@ -13,7 +14,11 @@ transformData <-
   function(tables,
            output_dir = pkg_file("data"),
            log = F) {
+    metaSRA.file <- ""
+    doid.file <- ""
     if (class(tables) == "character") {
+      metaSRA.file <- file.path(tables, "metasra.json")
+      doid.file <- file.path(tables, "doid.json")
       tmp <- c("study_info", "sample_info", "counts", "feature_info")
       tables <- as.list(file.path(tables, paste0(tmp, ".RData")))
       names(tables) <- tmp
@@ -29,6 +34,25 @@ transformData <-
     load(tables$feature_info)
 
     dir.create(output_dir, showWarnings = F)
+
+    # Use metaSRA annotation
+    if(file.exists(metaSRA.file)){
+      metaSRA.tables <- getMetaSRA(sample_info, metaSRA.file)
+      metaSRA.dt <- metaSRA.tables[[1]]
+      ontologyInfo.dt <- metaSRA.tables[[2]]
+      save(metaSRA.dt, ontologyInfo.dt, file = file.path(output_dir, "metaSRA_annot.RData"))
+
+      if(file.exists(doid.file)){
+        disease.tables <- annotateDisease(metaSRA.dt, doid.file)
+        diseaseRun.dt <- disease.tables[[1]]
+        diseaseTerms.dt <- disease.tables[[2]]
+        save(diseaseRun.dt, diseaseTerms.dt, file = file.path(output_dir, "disease_annot.RData"))
+        setkey(diseaseRun.dt, run)
+        sample_info$metaSRA.disease.status <- diseaseRun.dt[sample_info$run, disease.status]
+        sample_info$infection.status <- diseaseRun.dt[sample_info$run, infected]
+      }
+    }
+
     dir.create(file.path(output_dir, "studies"), showWarnings = F)
 
     lineage <- generateLineage(feature_info)
@@ -47,6 +71,18 @@ transformData <-
     study_info$sample_size <-
       sapply(study_info$study, function(x)
         sum(x == sample_info$study))
+
+    study_info$study_abstract <-
+      as_native_character(study_info$study_abstract) %>%
+      {
+        Encoding(.) <- "UTF-8"
+        .
+      } %>%
+      as_native_character %>%
+      {
+        Encoding(.) <- "UTF-8"
+        .
+      }
 
     save(study_info, file = file.path(output_dir, "study_info.RData"))
 
@@ -84,7 +120,7 @@ runDG <-
       } else{
         save(phylo, file = path)
       }
-      print(phylo)
+      # print(phylo)
     })
     try(colnames(error) <- c("Study", "Message"), silent = T)
     error

@@ -26,6 +26,7 @@ LazyData: true
 RoxygenNote: 6.0.1
 Collate: 
     'methods.r'
+    'metaSRA_data.r'
     'data_generator.r'
     'global.r'
     'global_da.r'

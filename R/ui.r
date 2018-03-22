@@ -11,11 +11,14 @@
 
 resetClickCode <-
   "shinyjs.resetClick = function() { Shiny.onInputChange('.clientValue-plotly_click-sankey', 'null'); }"
-
+hideTabsCode <- "
+$(dataset[data-value='Selected study information']).hide();
+}"
 #' @export
 ui <- function() {
   # addResourcePath("www", pkg_file("shiny/www"))
   navbarPage(
+    position = "fixed-top",
     fluid = T,
     inverse = TRUE,
     title = 'MetaMap',
@@ -25,21 +28,24 @@ ui <- function() {
       htmlOutput("overviewText"),
       img(src = 'PipelineImage.png', align = "center")
     ),
-    tabPanel(
-      "Query by metafeature",
-	htmlOutput("mfHelp"),
-      uiOutput("mfInput"),
-      plotlyOutput("mfPlot"),
-      HTML(
-        '<hr style="height:1px;border:none;color:#333;background-color:#333;"/>'
+    navbarMenu(
+      "Query",
+      tabPanel(
+        "Query by metafeature",
+        htmlOutput("mfHelp"),
+        uiOutput("mfInput"),
+        plotlyOutput("mfPlot"),
+        HTML(
+          '<hr style="height:1px;border:none;color:#333;background-color:#333;"/>'
+        ),
+        htmlOutput("mfName"),
+        DT::dataTableOutput("mfTable")
       ),
-      htmlOutput("mfName"),
-      DT::dataTableOutput("mfTable")
-    ),
-    tabPanel(
-      "Query by study",
-      htmlOutput("queryHelp") ,
-      DT::dataTableOutput("mystudies")
+      tabPanel(
+        "Query by study",
+        htmlOutput("queryHelp") ,
+        DT::dataTableOutput("mystudies")
+      )
     ),
     tabPanel("Selected study information",
              tableOutput("studyinfo")),
@@ -103,11 +109,11 @@ ui <- function() {
           style = "margin-bottom:100px;",
           conditionalPanel(
             condition = "output.cond" ,
-            tabsetPanel(
-              id = "de_panel",
-              tabPanel("Global",
-                       DT::dataTableOutput("deseq_table"))
-            ),
+            tabsetPanel(id = "de_panel",
+                        tabPanel(
+                          "Global",
+                          DT::dataTableOutput("deseq_table")
+                        )),
             plotlyOutput("de_plot", height = "600px")
           )
         )
@@ -141,7 +147,7 @@ ui <- function() {
       ),
       tabPanel(
         "Sankey Diagram",
-	htmlOutput("sankeyHelp"),
+        htmlOutput("sankeyHelp"),
         plotlyOutput("sankey_plot"),
         HTML(
           '<hr style="height:1px;border:none;color:#333;background-color:#333;"/>'
@@ -175,12 +181,18 @@ ui <- function() {
         ),
         useShinyjs(),
         extendShinyjs(text = resetClickCode)
-      ), # as long as there are still some bugs
+      ),
+      # as long as there are still some bugs
       tags$style(
         type = "text/css",
         ".shiny-output-error { visibility: hidden; }",
         ".shiny-output-error:before { visibility: hidden; }"
-      )
+      ),
+      tags$style(type = "text/css", "body {padding-top: 70px;}"),
+      tags$style(type = "text/css", "#dataset li a[data-value='Define sample grouping']{color: #ff4d4d;}"),
+      tags$style(type = "text/css", "#dataset li a[data-value='Selected study information']{color: #ff4d4d;}"),
+      tags$style(type = "text/css", "#dataset li a[data-value='Analysis']{color: #ff4d4d;}"),
+      extendShinyjs(script = "www/hideTabs.js")
     )
   )
 }
