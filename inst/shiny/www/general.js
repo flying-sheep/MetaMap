@@ -18,6 +18,7 @@ shinyjs.init = function(){
 	$("#mfPlot").addClass("download")
 	$("#dimred").addClass("download")
 	$("#diversity").addClass("download")
+	$("#top_species_plot").addClass("download")
 	$("#de_plot").addClass("download")
 	$("#de_boxplot").addClass("download")
 	$("#taxa_plot").addClass("download")

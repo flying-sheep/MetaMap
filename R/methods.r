@@ -12,6 +12,8 @@
 #' @import data.table
 #' @import shinyjs
 #' @import shinythemes
+#' @import DT
+#' @import V8
 
 #' @title TaxID to Species
 #'

@@ -20,6 +20,7 @@ if (!is_in_package()) {
   library(dplyr)
   library(stringr)
   library(phyloseq)
+  # devtools::install_github('tidyverse/ggplot2@2b5b88dcc8ef73ec37459cd2b107b60693154884')
   library(ggplot2)
   library(shiny)
   library(htmltools)
@@ -27,6 +28,8 @@ if (!is_in_package()) {
   library(utils)
   library(shinyjs)
   library(shinythemes)
+  library(DT)
+  library(V8)
 }
 
 pkg_file <- function(path = ".") {
