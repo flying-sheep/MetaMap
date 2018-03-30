@@ -24,8 +24,14 @@ shinyjs.init = function(){
 	$("#taxa_plot").addClass("download")
 	$("#ntaxa_plot").addClass("download")
 	
-	$( "#navbar-end" ).addClass("pull-right");
-}
+	// 5)
+	//setTimeout(function(){
+	//	var lnk = document.querySelector("#downloadHelper").getAttribute("href");
+	//	console.log("test")
+	//	console.log(lnk)
+	//	Shiny.onInputChange("helper_link", lnk);
+	//}, 400)
+} 
 
 // function to reset the click value of sankey plot
 shinyjs.resetClick = function() { 

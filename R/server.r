@@ -1218,22 +1218,19 @@ server <-
     observeEvent(input$right_click, {
       click <- input$right_click
       plot.name <- click$plot
-      plot.action <- click$action
-      link <- click$lnk
+      # plot.action <- click$action
+      print(click)
+      print("test")
 
       p <- plots[[plot.name]]
 
-      print(click)
-      print(p)
-      click(id = "downloadproject")
-      output$downloadHelper <- downloadHandler(paste0(ifelse(plot.name != "mfPlot",values$study,"global"),"_",plot.name, "_ggplot.rds"), function(file){
-        saveRDS(p, file = file)
+      output$ggplot_link <- downloadHandler(paste0(ifelse(plot.name != "mfPlot",values$study,"global"),"_",plot.name, "_ggplot.rds"), function(file){
+         saveRDS(p, file = file)
       })
-      js$openLink(link)
     })
 
-    output$downloadHelper <- downloadHandler("", function(file){
-      NULL
+    output$ggplot_link <- downloadHandler("", function(file){
+
     })
 
     output$study_title <- renderText({values$study})

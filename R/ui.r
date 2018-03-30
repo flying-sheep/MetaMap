@@ -210,18 +210,16 @@ ui <- function() {
     page,
     includeCSS("www/style.css"),
     # add contextmenu on plots
-    HTML(
-      '<nav class="context-menu">
-      <ul class="context-menu__items">
-      <li class="context-menu__item">
-      <a href="#" class="context-menu__link" plot-action="download ggplot">
-      <i class="fa fa-download"></i> Download ggplot
-      </a>
-      </li>
-      </ul>
-      </nav>'
-    ),
-    downloadLink("downloadHelper", ""),
+    tags$nav(tags$ul(
+      tags$li(
+        downloadLink("ggplot_link",
+                     label=HTML(as.character(tags$i(class="fa fa-download")),"Download ggplot"),
+                     class="context-menu__link", `plot-action`="download ggplot"),
+        class = "context-menu__item"),
+      class = "context-menu__items"),
+    class = "context-menu"),
+
+    #downloadLink("downloadHelper", ""),
     useShinyjs(),
     extendShinyjs(script = "www/contextmenu.js"),
     extendShinyjs(script = "www/general.js")

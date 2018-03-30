@@ -102,6 +102,8 @@ shinyjs.contextmenu = function(){
 				ev.preventDefault();
 				toggleMenuOn();
 				positionMenu(ev);
+				var message = {plot: taskItemInContext.getAttribute("id"), nonce: Math.random()};
+				Shiny.onInputChange("right_click", message);
 			} else {
 				taskItemInContext = null;
 				toggleMenuOff();
@@ -113,29 +115,29 @@ shinyjs.contextmenu = function(){
 	function clickListener() {
 		document.addEventListener( "click", function(e) {
 			var clickeElIsLink = clickInsideElement( e, contextMenuLinkClassName );
-			
+
 			if(clickeElIsLink){
-				e.preventDefault();
-				menuItemListener( clickeElIsLink );
+				//e.preventDefault();
+				//menuItemListener( clickeElIsLink );
 				toggleMenuOff();
 			} else {
 				var button = e.which || e.button;
 				if ( button === 1 ) {
 					toggleMenuOff();
 				}	
-			}			
+			}	
+						
 		});
 	}
 	
-	function menuItemListener( link ) {
-		var lnk = document.querySelector("#downloadHelper").getAttribute("href")
-		var message = {plot: taskItemInContext.getAttribute("id"), action: link.getAttribute("plot-action"), lnk: lnk, nonce: Math.random()};
-		Shiny.onInputChange("right_click", message);	
-		console.log( "Task ID - " + 
-                taskItemInContext.getAttribute("id") + 
-                ", Task action - " + link.getAttribute("plot-action"));
-	}
-	
+	//function menuItemListener( link ) {
+	//	var message = {plot: taskItemInContext.getAttribute("id"), action: link.getAttribute("plot-action"), nonce: Math.random()};
+	//	//Shiny.onInputChange("right_click", message);	
+	//	console.log( "Task ID - " + 
+    //            taskItemInContext.getAttribute("id") + 
+    //            ", Task action - " + link.getAttribute("plot-action"));
+	//}
+
 	
 	init();
 }

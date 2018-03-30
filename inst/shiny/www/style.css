@@ -41,16 +41,18 @@ word-wrap: break-word;
 .context-menu {
   display: none;
   position: absolute;
-  z-index: 10;
-  padding: 5px 0;
-  width: 170px;
-  background-color: #fff;
-  border: solid 1px #dfdfdf;
-  box-shadow: 1px 1px 2px #cfcfcf;
+  z-index: -1;
 }
 
 .context-menu--active {
   display: block;
+  opacity: 1;
+  z-index: 10;
+  padding: 5px 0;
+  width: 170px;	
+  background-color: #fff;
+  border: solid 1px #dfdfdf;
+  box-shadow: 1px 1px 2px #cfcfcf;
 }
 
 .context-menu__items {
