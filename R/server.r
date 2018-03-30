@@ -1219,9 +1219,6 @@ server <-
     observeEvent(input$right_click, {
       click <- input$right_click
       plot.name <- click$plot
-      # plot.action <- click$action
-      print(plot.name)
-      print("test")
 
       p <- plots[[plot.name]]
 

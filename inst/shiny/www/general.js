@@ -23,22 +23,9 @@ shinyjs.init = function(){
 	$("#de_boxplot").addClass("download")
 	$("#taxa_plot").addClass("download")
 	$("#ntaxa_plot").addClass("download")
-	
-	// 5)
-	//setTimeout(function(){
-	//	var lnk = document.querySelector("#downloadHelper").getAttribute("href");
-	//	console.log("test")
-	//	console.log(lnk)
-	//	Shiny.onInputChange("helper_link", lnk);
-	//}, 400)
 } 
 
 // function to reset the click value of sankey plot
 shinyjs.resetClick = function() { 
 	Shiny.onInputChange('.clientValue-plotly_click-sankey', 'null'); 
-}
-
-shinyjs.openLink = function(lnk){
-	win=window.open(lnk, '_blank');
-	win.focus();
 }

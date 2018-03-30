@@ -45,7 +45,7 @@ word-wrap: break-word;
 }
 
 .context-menu--active {
-  display: block;
+  display: block;	
   opacity: 1;
   z-index: 10;
   padding: 5px 0;
