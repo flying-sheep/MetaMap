@@ -41,6 +41,8 @@ runGDA <- function(input_dir, max_samples, log) {
       subset(!. %in% c("sraID", "Total.Reads", "Selection", "All"))
     sapply(attributes, function(attribute){
       print(paste0(study, "_", attribute))
+      # replace NA with unknown
+      phylo@sam_data[is.na(phylo@sam_data)] <- "unknown"
       PVal <- try(diversity_test(phylo, attribute), silent = T)
       if(class(PVal) == "try-error"){
         error <- rbind(error, c(study, attribute, geterrmessage()), stringsAsFactors = F)

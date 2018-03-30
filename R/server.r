@@ -21,8 +21,7 @@ server <-
            session,
            DIR = pkg_file("data"),
            MAX_SAMPLES = 1000,
-           DESEQ_PARALLEL= F
-           ) {
+           DESEQ_PARALLEL = F) {
     # Initialize data
     STUDIES <- list.files(file.path(DIR, 'studies')) %>%
       str_split_fixed("\\.", n = 2) %>% .[, 1]
@@ -95,14 +94,18 @@ server <-
           '<p style="text-align: center"><strong>To plot the Taxonomy Bar Chart click on <em>Generate</em>. To group samples together select sample attribute from <em>Select Grouping</em> drop-down menu. To change the coloring select a classification level from <em>Select Classification Level</em> drop-down menu. You can toggle between displaying absolute sequence abundances (by clicking the <em>Value</em> button) or normalized/proportional abundances (by clicking the <em>%</em> button).</strong></p>'
         )
       )
-	output$mfHelp <-
-		renderUI(
-			HTML('<p style="text-align: center"><strong>The scatter plot shows frequency of detection and maximal metafeature abundance across all studies on X and Y axes, respectively. The user can select a metafeature by 1) searching for the species name in the text field or 2) clicking on a data point in the plot. After selection of metafeature studies detecting the selected metafeature are listed below the plot. By clicking on the row in the list study is selected for further analysis.</strong></p>')
-			)
-	output$sankeyHelp <-
-                renderUI(
-                        HTML('<p style="text-align: center"><strong>Sankey diagram shows the average metafeature abundance across samples or selected grouping. The user can "walk" through the Sankey tree by 1) clicking on the graph or 2) selecting <em>Source</em> and <em>Target</em> phylogenetic levels and clicking on <em>Apply</em>.</strong></p>')
-                        )
+    output$mfHelp <-
+      renderUI(
+        HTML(
+          '<p style="text-align: center"><strong>The scatter plot shows frequency of detection and maximal metafeature abundance across all studies on X and Y axes, respectively. The user can select a metafeature by 1) searching for the species name in the text field or 2) clicking on a data point in the plot. After selection of metafeature studies detecting the selected metafeature are listed below the plot. By clicking on the row in the list study is selected for further analysis.</strong></p>'
+        )
+      )
+    output$sankeyHelp <-
+      renderUI(
+        HTML(
+          '<p style="text-align: center"><strong>Sankey diagram shows the average metafeature abundance across samples or selected grouping. The user can "walk" through the Sankey tree by 1) clicking on the graph or 2) selecting <em>Source</em> and <em>Target</em> phylogenetic levels and clicking on <em>Apply</em>.</strong></p>'
+        )
+      )
 
     observeEvent(input$dataset, {
       if (all(!(
@@ -140,6 +143,9 @@ server <-
       )
     })
 
+    tabs <- reactiveValues(last = NULL,
+                           current = NULL)
+
     values <-
       reactiveValues(
         study = NULL,
@@ -154,7 +160,14 @@ server <-
       )
 
     plots <- reactiveValues(
-      dimred = NULL
+      mfPlot = NULL,
+      dimred = NULL,
+      diversity = NULL,
+      de_boxplot = NULL,
+      de_plot = NULL,
+      top_species_plot = NULL,
+      taxa_plot = NULL,
+      ntaxa_plot = NULL
     )
 
     sankey <-
@@ -179,7 +192,14 @@ server <-
     })
 
     observeEvent(values$study, {
+      plots$mfPlot <- NULL
       plots$dimred <- NULL
+      plots$diversity <- NULL
+      plots$de_plot <- NULL
+      plots$de_boxplot <- NULL
+      plots$taxa_plot <- NULL
+      plots$ntaxa_plot <- NULL
+      plots$top_species_plot <- NULL
       updateSelectInput(session, 'attribute_dr', 'Color by', "")
       updateSelectInput(session, 'attribute_da', 'Color by', "")
       updateSelectInput(session, 'attribute_ma', 'Color by', "")
@@ -232,9 +252,9 @@ server <-
           )
         )
         return()
-      }else{
+      } else{
         # Remove NA's from metaSRA annotation
-        phylo@sam_data[is.na(phylo@sam_data$metaSRA.Disease.Status), "metaSRA.Disease.Status"] <- "healthy"
+        phylo@sam_data[is.na(phylo@sam_data)] <- "Unknown"
       }
       values$phylo <- phylo
       values$attributes <-  sapply(1:length(sample_data(phylo)),
@@ -349,7 +369,7 @@ server <-
     output$de_button <- renderUI({
       if (is.null(values$phylo))
         return(NULL)
-      actionButton('de_button', "Analyze")
+      actionButton('de_button', "Analyze", class = "btn-primary")
     })
 
     output$attribute_ma <- renderUI({
@@ -387,7 +407,7 @@ server <-
     output$tbc_button <- renderUI({
       if (is.null(values$phylo))
         return(NULL)
-      actionButton('tbc_button', "Generate")
+      actionButton('tbc_button', "Generate", class = "btn-primary")
     })
 
     output$attribute_sankey <- renderUI({
@@ -417,7 +437,7 @@ server <-
     })
 
     output$mysamples <- DT::renderDataTable({
-      if (is.null(values$phylo)){
+      if (is.null(values$phylo)) {
         return(DT::datatable(data.frame(Samples = "Empty"), selection = "none"))
       }
       sam_data <-
@@ -425,8 +445,9 @@ server <-
       DT::datatable(
         data.frame(sam_data),
         options = list(
-          pageLength = 50,
+          pageLength = 25,
           scrollX = TRUE,
+          scrollY = "500px",
           searchHighlight = T
         ),
         rownames = FALSE,
@@ -444,7 +465,7 @@ server <-
       },
       content = function(file) {
         phylo <- values$phylo
-        if(is.null(phylo)){
+        if (is.null(phylo)) {
           return()
         }
         owd <- setwd(tempdir())
@@ -485,7 +506,6 @@ server <-
                     col.names = T)
           files <- c(files, taxa_fileName)
         }
-
         zip(file, files)
       }
     )
@@ -630,12 +650,17 @@ server <-
       }
       withProgress(session = session, value = 0.5, {
         setProgress(message = "Calculation in progress")
-        if(is.null(isolate(plots$dimred))){
+        if (is.null(isolate(plots$dimred))) {
           p <- plot_mds(phylo, input$attribute_dr)
           isolate(plots$dimred <- p)
-          p
-        }else{
-          isolate(plots$dimred) + aes_string(colour = input$attribute_dr)}
+        } else{
+          isolate(plots$dimred$data$Selection <-
+                    values$phylo@sam_data$Selection)
+          p <-
+            isolate(plots$dimred + aes_string(colour = input$attribute_dr))
+          isolate(plots$dimred <- p)
+        }
+        p
       })
     })
 
@@ -650,7 +675,17 @@ server <-
         attribute <- NULL
       withProgress(session = session, value = 0.5, {
         setProgress(message = "Calculation in progress")
-        plot_alpha(phylo, attribute)
+        if (is.null(isolate(plots$diversity))) {
+          p <- plot_alpha(phylo, attribute)
+          isolate(plots$diversity <- p)
+        } else{
+          isolate(plots$diversity$data$Selection <-
+                    values$phylo@sam_data$Selection)
+          p <-
+            isolate(plots$diversity + aes_string(colour = attribute))
+          isolate(plots$diversity <- p)
+        }
+        p
       })
     })
 
@@ -662,7 +697,9 @@ server <-
       attribute <- input$attribute_da
       if (input$attribute_da == empty)
         return("")
-      pval <- diversity_test(phylo, attribute)
+      pval <- try(diversity_test(phylo, attribute), silent = T)
+      if (class(pval) == "try-error")
+        return()
       HTML(paste0("<center><b>P value: ", round(pval, 5), "</b></center>"))
     })
 
@@ -712,10 +749,13 @@ server <-
 
       withProgress(session = session , value = 0.2, {
         setProgress(message = "Performing Differential Expression Analysis", detail = 'This may take a while...')
-        de_table <- try(deseq2_table(values$phylo,
-                                     input$attribute_de,
-                                     input$select_cond1,
-                                     input$select_cond2, parallel=DESEQ_PARALLEL))
+        de_table <- try(deseq2_table(
+          values$phylo,
+          input$attribute_de,
+          input$select_cond1,
+          input$select_cond2,
+          parallel = DESEQ_PARALLEL
+        ))
         if (class(de_table) == "try-error") {
           showModal(
             modalDialog(
@@ -735,8 +775,9 @@ server <-
           DT::datatable(
             values$de_table %>% as.data.frame,
             options = list(
-              pageLength = 10,
+              pageLength = 50,
               scrollX = TRUE,
+              scrollY = "500px",
               searchHighlight = T
             ),
             selection = 'none',
@@ -767,6 +808,7 @@ server <-
               p <-  p + aes(color = selected) +
                 scale_color_manual(values = c("black", "red"))
             }
+            isolate(plots$de_plot <- p)
             ggplotly(p,
                      tooltip = c("Species", "x", "y"),
                      source = "de_plot")
@@ -824,8 +866,9 @@ server <-
       DT::datatable(
         de_table_subset %>% as.data.frame,
         options = list(
-          pageLength = 10,
+          pageLength = 50,
           scrollX = TRUE,
+          scrollY = "500px",
           searchHighlight = T
         ),
         selection = 'none',
@@ -838,14 +881,16 @@ server <-
       species_diff <- values$species_diff
       phylo <- isolate(values$phylo)
       if (any(is.null(phylo),
-          is.null(species_diff),
-          species_diff == ""))
+              is.null(species_diff),
+              species_diff == ""))
         return(NULL)
       attribute <-
         ifelse(input$attribute_de == empty, "All", input$attribute_de)
       withProgress(session = session, value = 0.5, {
         setProgress(message = "Calculation in progress")
-        plot_diff(phylo, species_diff, attribute)
+        p <- plot_diff(phylo, species_diff, attribute)
+        isolate(plots$de_boxplot <- p)
+        p
       })
     })
 
@@ -866,7 +911,9 @@ server <-
         attribute <-
           ifelse(attribute == empty, "All", attribute)
         setProgress(message = "Calculation in progress")
-        plot_top_species(phylo, attribute = attribute)
+        p <- plot_top_species(phylo, attribute = attribute)
+        isolate(plots$top_species_plot <- p)
+        p
       })
     })
 
@@ -952,14 +999,18 @@ server <-
       output$taxa_plot <- renderPlotly({
         withProgress(session = session, value = 0.5, {
           setProgress(message = 'Calculation in progress')
-          plot_taxa(phylo, attribute, level, relative = F)
+          p <- plot_taxa(phylo, attribute, level, relative = F)
+          isolate(plots$taxa_plot <- p)
+          p
         })
       })
 
       output$ntaxa_plot <- renderPlotly({
         withProgress(session = session, value = 0.5, {
           setProgress(message = 'Calculation in progress')
-          plot_taxa(phylo, attribute, level, relative = T)
+          p <- plot_taxa(phylo, attribute, level, relative = T)
+          isolate(plots$ntaxa_plot <- p)
+          p
         })
       })
       output$cond1 <- reactive({
@@ -998,6 +1049,7 @@ server <-
       withProgress(session = session, value = 0.5, {
         setProgress(message = 'Plotting')
         p <- mfPlot(mf_tbl)
+        isolate(plots$mfPlot <- p)
         isolate(values$mf_selected <- rep(F, nrow(mf_tbl)))
         isolate(names(values$mf_selected) <-
                   rownames(mf_tbl))
@@ -1015,7 +1067,8 @@ server <-
           abundances <- abundances[which(!is.na(abundances))]
           inds <- which(study_info$study %in% names(abundances))
           df <- study_info[inds, showColumns]
-          df$`Relative Abundance` <- as.numeric(abundances[study_info$study[inds]])
+          df$`Relative Abundance` <-
+            as.numeric(abundances[study_info$study[inds]])
           df <- df[order(df$`Relative Abundance`, decreasing = T),]
 
           output$mfName <-
@@ -1132,10 +1185,56 @@ server <-
 
     observe({
       if (!is.null(values$phylo)) {
-        show(selector = "#dataset li a[data-value='Selected study information']", anim=T)
-        show(selector = "#dataset li a[data-value='Define sample grouping']", anim=T)
-        show(selector = "#dataset li a[data-value='Analysis']", anim=T)
+        show(selector = "#study_title", anim =
+               F)
+        show(selector = "#dataset li a[data-value='Define sample grouping']", anim =
+               T)
+        show(selector = "#dataset li a[data-value='Analysis']", anim = T)
       }
     })
 
+    observeEvent(input$dataset, {
+      tabs$last <- tabs$current
+      tabs$current <- input$dataset
+      if (!is.null(tabs$last))
+        enable(selector = "#back_button")
+    })
+
+    observeEvent(input$back_button, {
+      last <- tabs$last
+      if (is.null(last))
+        return()
+      updateNavbarPage(session, "dataset", selected = last)
+    })
+
+    observeEvent(input$check_file, {
+      if (length(input$check_file) == 0) {
+        disable("download_samples")
+      } else{
+        enable("download_samples")
+      }
+    }, ignoreNULL = F)
+
+    observeEvent(input$right_click, {
+      click <- input$right_click
+      plot.name <- click$plot
+      plot.action <- click$action
+      link <- click$lnk
+
+      p <- plots[[plot.name]]
+
+      print(click)
+      print(p)
+      click(id = "downloadproject")
+      output$downloadHelper <- downloadHandler(paste0(ifelse(plot.name != "mfPlot",values$study,"global"),"_",plot.name, "_ggplot.rds"), function(file){
+        saveRDS(p, file = file)
+      })
+      js$openLink(link)
+    })
+
+    output$downloadHelper <- downloadHandler("", function(file){
+      NULL
+    })
+
+    output$study_title <- renderText({values$study})
   }

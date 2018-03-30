@@ -11,6 +11,7 @@
 #' @import utils
 #' @import data.table
 #' @import shinyjs
+#' @import shinythemes
 
 #' @title TaxID to Species
 #'
@@ -87,7 +88,7 @@ deseq2_table <- function(phylo,
   tmp <- prune_taxa(taxa_sums(tmp) > 0, tmp)
   # make valid condition names
   conds <- if (all(!is.null(cond1),!is.null(cond2))) {
-    tmp1 <- setNames(list(1, 2), c(cond1, cond2))
+    tmp1 <- setNames(list(1, 2), c(cond2, cond1))
     tmp1[unlist(tmp@sam_data[, attribute])]
   }  else{
     as.integer(factor(tmp@sam_data %>% data.frame %>% .[[attribute]]))
@@ -155,7 +156,7 @@ diversity_test <- function(phylo, attribute) {
   }
   alpha.diversity <- estimate_richness(phylo, measures = "Shannon")
   data <- cbind(sample_data(phylo), alpha.diversity)
-  anova <- aov(as.formula(paste("Shannon ~", attribute)), data)
+  anova <- aov(as.formula(paste("Shannon ~", attribute, "+ Total.Reads")), data)
   summary(anova)
   summary(anova)[[1]][, "Pr(>F)"][1]
 }
@@ -319,7 +320,7 @@ makeSankey_links <-
         Target_level = rep(target, nrow(.))
       ) %>%
       .[order(.$Value, decreasing = T),] %>% .[which(.$Value > 0.5),] %>%
-      .[1:min(4, nrow(.)),]
+      .[1:min(10, nrow(.)),]
 
 
     links

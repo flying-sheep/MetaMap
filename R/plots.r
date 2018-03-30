@@ -306,8 +306,9 @@ plot_mds <- function(phylo, color) {
         .
       ) - 2)))) %>% as.list
   p <-
-    plot_ordination(phylo, ordinate(phylo, 'MDS', phyloseq::distance(phylo, 'jsd')), color = color) +
+    phyloseq::plot_ordination(phylo, ordinate(phylo, 'MDS', phyloseq::distance(phylo, 'jsd')), color = color) +
     do.call(aes_string, attrs)
+  p
 }
 
 #' Alpha diversity plot
@@ -337,7 +338,7 @@ plot_alpha <- function(phylo, color) {
   }
   p <- p + do.call(aes_string, attrs) +
     labs(x = p$labels$x, y = p$labels$y) + theme(axis.text.x = element_blank(), axis.ticks = element_blank())
-  ggplotly(p, tooltip = c(names(attrs)))
+  p
 }
 
 # Function to plot DE heatmap

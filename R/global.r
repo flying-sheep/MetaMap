@@ -26,6 +26,7 @@ if (!is_in_package()) {
   library(plotly)
   library(utils)
   library(shinyjs)
+  library(shinythemes)
 }
 
 pkg_file <- function(path = ".") {

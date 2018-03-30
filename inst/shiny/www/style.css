@@ -1,0 +1,72 @@
+body {
+color: black;
+}
+
+<!-- as long as there are still some bugs -->
+.shiny-output-error:before { visibility: hidden; }
+
+body {padding-top: 70px;}
+
+#study_title{
+	color: #ff4d4d;
+	font-weight: bold;
+}
+
+#dataset li a[data-value='Define sample grouping']{color: #ff4d4d;}
+
+#dataset li a[data-value='Analysis']{color: #ff4d4d;}
+
+#back_button {
+display:inline-block;	
+height: 50px;
+width: 50px;
+border-radius: 50%;
+border: 0px;
+color: white;
+outline: none;
+background-color: transparent;
+background-image: none;
+box-shadow: none;
+}
+
+.navbar-nav li a {
+line-height: 45px;
+}
+
+.btn {
+white-space: normal;
+word-wrap: break-word;
+}					
+
+.context-menu {
+  display: none;
+  position: absolute;
+  z-index: 10;
+  padding: 5px 0;
+  width: 170px;
+  background-color: #fff;
+  border: solid 1px #dfdfdf;
+  box-shadow: 1px 1px 2px #cfcfcf;
+}
+
+.context-menu--active {
+  display: block;
+}
+
+.context-menu__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.context-menu__link {
+  display: block;
+  padding: 4px 12px;
+  color: #0066aa;
+  text-decoration: none!important;
+}
+
+.context-menu__link:hover {
+  color: #fff;
+  background-color: #0066aa;
+}

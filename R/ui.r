@@ -9,19 +9,16 @@
 
 # include global.r
 
-resetClickCode <-
-  "shinyjs.resetClick = function() { Shiny.onInputChange('.clientValue-plotly_click-sankey', 'null'); }"
-hideTabsCode <- "
-$(dataset[data-value='Selected study information']).hide();
-}"
-#' @export
-ui <- function() {
-  # addResourcePath("www", pkg_file("shiny/www"))
+page <- fluidPage(
+  titlePanel(title = "", windowTitle = "MetaMap"),
   navbarPage(
+    theme = shinytheme("flatly"),
     position = "fixed-top",
     fluid = T,
-    inverse = TRUE,
-    title = 'MetaMap',
+    # inverse = TRUE,
+    title = div(actionButton(
+      "back_button", "", icon = icon("arrow-left", "fa-2x")
+    ), "MetaMap"),
     id = 'dataset',
     tabPanel(
       "Overview",
@@ -47,19 +44,36 @@ ui <- function() {
         DT::dataTableOutput("mystudies")
       )
     ),
-    tabPanel("Selected study information",
+    tabPanel(uiOutput("study_title"),
              tableOutput("studyinfo")),
     tabPanel(
       'Define sample grouping',
       htmlOutput("sampleHelp"),
       sidebarLayout(
         sidebarPanel(
-          # div(style = "height:200px;", h2("Groups")),
+          # style = "position:fixed;width:inherit;",
           radioButtons("groups_button", "Groups", choices = c("Group_0")),
-          textInput("group_name", "Group Name"),
-          actionButton("groupName_button", "Change Name"),
-          actionButton("sel_button", "Select samples"),
-          actionButton("addGroup_button", "Add Group"),
+          textInput("group_name", "Group Name", width = "100%"),
+          actionButton(
+            "groupName_button",
+            "Change Name",
+            width = "100%",
+            class = "btn-primary"
+          ),
+          HTML('<hr style="height:0px;border:none;"/>'),
+          actionButton(
+            "sel_button",
+            "Select samples",
+            width = "100%",
+            class = "btn-primary"
+          ),
+          HTML('<hr style="height:0px;border:none;"/>'),
+          actionButton(
+            "addGroup_button",
+            "Add Group",
+            width = "100%",
+            class = "btn-primary"
+          ),
           HTML(
             '<hr style="height:1px;border:none;color:#333;background-color:#333;"/>'
           ),
@@ -68,12 +82,17 @@ ui <- function() {
             label = "Select files",
             choices = c("OTU Counts", "Sample info", "Feature info")
           ),
-          downloadButton("download_samples", "Download"),
+          downloadButton("download_samples", "Download", class = "btn-primary"),
+          tags$style(HTML("
+                          #download_samples {
+                          width: 100%;
+                          }
+                          ")),
           width = 2
-        ),
-        mainPanel(DT::dataTableOutput("mysamples"), width = 10)
-      )
-    ),
+          ),
+        mainPanel(DT::dataTableOutput("mysamples", width = "100%"), width = 10)
+          )
+          ),
     navbarMenu(
       "Analysis",
       tabPanel(
@@ -135,15 +154,13 @@ ui <- function() {
           column(4, uiOutput("level_tbc")),
           column(4, offset = 3, uiOutput('tbc_button'))
         ),
-        conditionalPanel(
-          condition = "output.cond1",
-          tabsetPanel(
-            id = "tbc_panel",
-            # ntaxa_plot is normalized
-            tabPanel("Relative proportion", plotlyOutput("ntaxa_plot")),
-            tabPanel("Absolute counts", plotlyOutput("taxa_plot"))
-          )
-        )
+        conditionalPanel(condition = "output.cond1",
+                         tabsetPanel(
+                           id = "tbc_panel",
+                           # ntaxa_plot is normalized
+                           tabPanel("Relative proportion", plotlyOutput("ntaxa_plot")),
+                           tabPanel("Absolute counts", plotlyOutput("taxa_plot"))
+                         ))
       ),
       tabPanel(
         "Sankey Diagram",
@@ -158,41 +175,55 @@ ui <- function() {
         column(
           4, selectInput('sankey_target', 'Target', c())
         )),
-        fluidRow(column(
-          4, uiOutput('attribute_sankey'), offset = 2
-        ),
-        column(4, uiOutput(
-          'sankey_condition'
-        ))),
+        fluidRow(column(4, uiOutput('attribute_sankey'), offset = 2),
+                 column(4, uiOutput('sankey_condition'))),
         fluidRow(
           column(
             4,
-            actionButton("sankey_apply_button", label = "Apply"),
+            actionButton("sankey_apply_button", label = "Apply", class =
+                           "btn-primary"),
             offset = 2
           ),
-          column(1,  actionButton("sankey_reset_button", label = "Reset")),
+          column(
+            1,
+            actionButton("sankey_reset_button", label = "Reset", class = "btn-primary")
+          ),
           column(
             2,
-            conditionalPanel(condition = "output.sankey_cond", actionButton(
-              "sankey_undo_button", HTML("<b>Undo</b>")
-            ))
+            conditionalPanel(
+              condition = "output.sankey_cond",
+              actionButton("sankey_undo_button", HTML("<b>Undo</b>")
+                           , class = "btn-primary")
+            )
           ),
           style = "margin-bottom:100px;"
-        ),
-        useShinyjs(),
-        extendShinyjs(text = resetClickCode)
-      ),
-      # as long as there are still some bugs
-      tags$style(
-        type = "text/css",
-        ".shiny-output-error { visibility: hidden; }",
-        ".shiny-output-error:before { visibility: hidden; }"
-      ),
-      tags$style(type = "text/css", "body {padding-top: 70px;}"),
-      tags$style(type = "text/css", "#dataset li a[data-value='Define sample grouping']{color: #ff4d4d;}"),
-      tags$style(type = "text/css", "#dataset li a[data-value='Selected study information']{color: #ff4d4d;}"),
-      tags$style(type = "text/css", "#dataset li a[data-value='Analysis']{color: #ff4d4d;}"),
-      extendShinyjs(script = "www/hideTabs.js")
+        )
+      )
     )
-  )
+    )
+    )
+
+#' @export
+ui <- function() {
+  # addResourcePath("www", pkg_file("shiny/www"))
+  tagList(
+    page,
+    includeCSS("www/style.css"),
+    # add contextmenu on plots
+    HTML(
+      '<nav class="context-menu">
+      <ul class="context-menu__items">
+      <li class="context-menu__item">
+      <a href="#" class="context-menu__link" plot-action="download ggplot">
+      <i class="fa fa-download"></i> Download ggplot
+      </a>
+      </li>
+      </ul>
+      </nav>'
+    ),
+    downloadLink("downloadHelper", ""),
+    useShinyjs(),
+    extendShinyjs(script = "www/contextmenu.js"),
+    extendShinyjs(script = "www/general.js")
+    )
 }
