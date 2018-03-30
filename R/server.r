@@ -167,7 +167,8 @@ server <-
       de_plot = NULL,
       top_species_plot = NULL,
       taxa_plot = NULL,
-      ntaxa_plot = NULL
+      ntaxa_plot = NULL,
+      download = NULL
     )
 
     sankey <-
@@ -1219,18 +1220,16 @@ server <-
       click <- input$right_click
       plot.name <- click$plot
       # plot.action <- click$action
-      print(click)
+      print(plot.name)
       print("test")
 
       p <- plots[[plot.name]]
 
-      output$ggplot_link <- downloadHandler(paste0(ifelse(plot.name != "mfPlot",values$study,"global"),"_",plot.name, "_ggplot.rds"), function(file){
-         saveRDS(p, file = file)
-      })
+      plots$download <- p
     })
 
-    output$ggplot_link <- downloadHandler("", function(file){
-
+    output$ggplot_link <- downloadHandler("ggplot.rds", function(file){
+      saveRDS(plots$download, file = file)
     })
 
     output$study_title <- renderText({values$study})
