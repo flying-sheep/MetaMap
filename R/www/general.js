@@ -33,5 +33,6 @@ shinyjs.resetClick = function() {
 }
 
 shinyjs.openLink = function(lnk){
-	window.open(lnk, '_self');
+	win=window.open(lnk, '_blank');
+	win.focus();
 }
