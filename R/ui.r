@@ -198,8 +198,15 @@ page <- fluidPage(
           ),
           style = "margin-bottom:100px;"
         )
+      ),
+        tabPanel(
+        "Krona plot",
+	htmlOutput("kronaHelp"),
+	fluidRow(column(2, uiOutput('attribute_krona')), column(2, actionButton("krona_apply_button", label="Plot", class="btn-primary"))),
+	fluidRow(column(12,
+	uiOutput("krona_iframe", style="margin-bottom:1500px")
+       )))
       )
-    )
     )
     )
 

@@ -29,3 +29,12 @@ shinyjs.init = function(){
 shinyjs.resetClick = function() { 
 	Shiny.onInputChange('.clientValue-plotly_click-sankey', 'null'); 
 }
+
+// write krona file
+shinyjs.writeKrona = function(input){
+	var doc = document.getElementById('krona-file').contentWindow.document; 
+	console.log("works");
+	doc.open(); 
+	doc.write(input); 
+	doc.close();
+}
