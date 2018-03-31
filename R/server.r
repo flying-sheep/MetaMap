@@ -1247,23 +1247,17 @@ server <-
     output$krona_iframe <- renderUI(tags$iframe(src="about:blank", id = "krona-file", width="100%", frameborder="0", height="100%", scrolling="yes", class = "outer"))
 
     observeEvent(input$krona_apply_button, {
-      withProgress(session = session, value = 0.5, {         
+      withProgress(session = session, value = 0.5, {
         setProgress(message = "Calculation in progress")
         attribute <- isolate(input$attribute_krona)
         attribute <- ifelse(attribute=="none", "sraID", attribute)
-        print("test")
         phylo <- values$phylo
-        print(phylo@sam_data %>% dim)
         tax_table(phylo) <- tax_table(phylo)[,-8]
-        print(phylo@sam_data %>% dim)
         file <- tempfile()
-        print(file)
-        print(attribute)
-        plot_krona(phylo, file, attribute, trim=T)
+        try(plot_krona(phylo, file, attribute, trim=T))
 
 	if(file.exists(paste0(file, ".html"))){
           input <- sourcetools::read(paste0(file,".html"))
-	  print("whaat")
 	} else {
   	  input <- ""
 	  showModal(
@@ -1271,7 +1265,7 @@ server <-
               title = "Important message", "Krona could not be plotted for the selected attribute!", easyClose = TRUE)
 	  )
 	}
-        js$writeKrona(input) 
+        js$writeKrona(input)
       })
-    })  
+    })
   }

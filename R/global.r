@@ -30,7 +30,7 @@ if (!is_in_package()) {
   library(shinythemes)
   library(DT)
   library(V8)
-  library(psadd)
+  require(psadd)
 }
 
 pkg_file <- function(path = ".") {
