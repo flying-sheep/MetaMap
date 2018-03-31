@@ -14,6 +14,7 @@
 #' @import shinythemes
 #' @import DT
 #' @import V8
+#' @import psadd
 
 #' @title TaxID to Species
 #'
