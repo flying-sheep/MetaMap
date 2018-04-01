@@ -32,8 +32,11 @@ shinyjs.resetClick = function() {
 
 // write krona file
 shinyjs.writeKrona = function(input){
-	var doc = document.getElementById('krona-file').contentWindow.document; 
-	console.log("works");
+	krona = document.getElementById('krona-file');
+	if(krona == null){
+		return null;
+	}
+	var doc = krona.contentWindow.document;
 	doc.open(); 
 	doc.write(input); 
 	doc.close();
