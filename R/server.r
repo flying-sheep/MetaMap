@@ -241,7 +241,8 @@ server <-
 
       # load phylo from .RData file
       cls <-
-        class(try(loadPhylo(study, DIR, environment())))
+        class(try(loadPhylo(study, DIR, environment()))
+        )
       if (cls == "try-error")
       {
         values$phylo <- NULL
@@ -256,7 +257,8 @@ server <-
         return()
       } else{
         # Remove NA's from metaSRA annotation
-        phylo@sam_data$metaSRA.Sample.Type <- as.character(phylo@sam_data$metaSRA.Sample.Type)
+        phylo@sam_data$metaSRA.Sample.Type <-
+          as.character(phylo@sam_data$metaSRA.Sample.Type)
         phylo@sam_data[is.na(phylo@sam_data)] <- "Unknown"
         phylo@sam_data$metaSRA.Infection.Status <- NULL
       }
@@ -457,7 +459,7 @@ server <-
         return(DT::datatable(data.frame(Samples = "Empty"), selection = "none"))
       }
       sam_data <-
-        values$phylo@sam_data[, -which(values$phylo@sam_data %>% colnames == "All")]
+        values$phylo@sam_data[,-which(values$phylo@sam_data %>% colnames == "All")]
       DT::datatable(
         data.frame(sam_data),
         options = list(
@@ -848,11 +850,11 @@ server <-
       if (length(selected_rows) != 0) {
         de_table <-
           if (event$curveNumber == 0)
-            de_table[-selected_rows,]
+            de_table[-selected_rows, ]
         else
-          de_table[selected_rows,]
+          de_table[selected_rows, ]
       }
-      species <- de_table[event$pointNumber + 1,]
+      species <- de_table[event$pointNumber + 1, ]
       values$species_diff <-
         unique(c(values$species_diff, rownames(species)))
       updateSelectInput(
@@ -878,7 +880,7 @@ server <-
       ))
         return(NULL)
       # print(values$species_diff)
-      de_table_subset <- values$de_table[values$species_diff,]
+      de_table_subset <- values$de_table[values$species_diff, ]
       DT::datatable(
         de_table_subset %>% as.data.frame,
         options = list(
@@ -1042,7 +1044,7 @@ server <-
           mf_tbl <- mf_tbl[, STUDIES]
           mf_tbl <-
             mf_tbl[which(apply(mf_tbl, 1, function(x)
-              ! all(is.na(x)))), ]
+              ! all(is.na(x)))),]
           values$mf_tbl <- mf_tbl
         } else
           withProgress(session = session, value = 0.5, {
@@ -1079,13 +1081,13 @@ server <-
           metafeature <- selected
 
           mf_tbl <- as.data.frame(mf_tbl)
-          abundances <- mf_tbl[metafeature, ]
+          abundances <- mf_tbl[metafeature,]
           abundances <- abundances[which(!is.na(abundances))]
           inds <- which(study_info$study %in% names(abundances))
           df <- study_info[inds, showColumns]
           df$`Relative Abundance` <-
             as.numeric(abundances[study_info$study[inds]])
-          df <- df[order(df$`Relative Abundance`, decreasing = T),]
+          df <- df[order(df$`Relative Abundance`, decreasing = T), ]
 
           output$mfName <-
             renderUI(HTML(
@@ -1137,7 +1139,7 @@ server <-
       isolate(mf_tbl <- as.data.frame(values$mf_tbl))
       selected <- event$curveNumber == 1
       isolate(mf_tbl <-
-                mf_tbl[which(values$mf_selected == selected), ])
+                mf_tbl[which(values$mf_selected == selected),])
 
       row <- event$pointNumber + 1
       metafeature <- rownames(mf_tbl)[row]
@@ -1202,9 +1204,9 @@ server <-
     observe({
       if (!is.null(values$phylo)) {
         shinyjs::show(selector = "#study_title", anim =
-               F)
+                        F)
         shinyjs::show(selector = "#dataset li a[data-value='Define sample grouping']", anim =
-               T)
+                        T)
         shinyjs::show(selector = "#dataset li a[data-value='Analysis']", anim = T)
       }
     })
@@ -1240,33 +1242,50 @@ server <-
       plots$download <- p
     })
 
-    output$ggplot_link <- downloadHandler("ggplot.rds", function(file){
-      saveRDS(plots$download, file = file)
+    output$ggplot_link <-
+      downloadHandler("ggplot.rds", function(file) {
+        saveRDS(plots$download, file = file)
+      })
+
+    output$study_title <- renderText({
+      values$study
     })
 
-    output$study_title <- renderText({values$study})
-
-    output$krona_iframe <- renderUI(tags$iframe(src="about:blank", id = "krona-file", width="100%", frameborder="0", height="100%", scrolling="yes", class = "outer"))
+    output$krona_iframe <-
+      renderUI(
+        tags$iframe(
+          src = "about:blank",
+          id = "krona-file",
+          width = "100%",
+          frameborder = "0",
+          height = "100%",
+          scrolling = "yes",
+          class = "outer"
+        )
+      )
 
     observeEvent(input$krona_apply_button, {
       withProgress(session = session, value = 0.5, {
         setProgress(message = "Calculation in progress")
         attribute <- isolate(input$attribute_krona)
-        attribute <- ifelse(attribute=="none", "sraID", attribute)
+        attribute <- ifelse(attribute == "none", "sraID", attribute)
         phylo <- values$phylo
-        tax_table(phylo) <- tax_table(phylo)[,-8]
+        tax_table(phylo) <- tax_table(phylo)[, -8]
         file <- tempfile()
-        try(plot_krona(phylo, file, attribute, trim=T))
+        try(plot_krona(phylo, file, attribute, trim = T))
 
-	if(file.exists(paste0(file, ".html"))){
-          input <- sourcetools::read(paste0(file,".html"))
-	} else {
-  	  input <- ""
-	  showModal(
-             modalDialog(
-              title = "Important message", "Krona could not be plotted for the selected attribute!", easyClose = TRUE)
-	  )
-	}
+        if (file.exists(paste0(file, ".html"))) {
+          input <- sourcetools::read(paste0(file, ".html"))
+        } else {
+          input <- ""
+          showModal(
+            modalDialog(
+              title = "Important message",
+              "Krona could not be plotted for the selected attribute!",
+              easyClose = TRUE
+            )
+          )
+        }
         js$writeKrona(input)
       })
     })
