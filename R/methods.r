@@ -204,6 +204,7 @@ generatePhylo <- function(study, counts, sample_info, lineage) {
   rownames(bla) <- colnames(otu_table(tmp))
   bla$metaSRA.Disease.Status <- sam$metaSRA.disease.status
   bla$metaSRA.Infection.Status <- sam$infection.status
+  bla$metaSRA.Sample.Type <- sam$metaSRA.sample.type
   bla$Sample.Name <- sam$sample_name
   bla$sraID <- colnames(otu)
   bla$`Total.Reads` <- sam$spots

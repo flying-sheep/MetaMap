@@ -256,7 +256,9 @@ server <-
         return()
       } else{
         # Remove NA's from metaSRA annotation
+        phylo@sam_data$metaSRA.Sample.Type <- as.character(phylo@sam_data$metaSRA.Sample.Type)
         phylo@sam_data[is.na(phylo@sam_data)] <- "Unknown"
+        phylo@sam_data$metaSRA.Infection.Status <- NULL
       }
       values$phylo <- phylo
       values$attributes <-  sapply(1:length(sample_data(phylo)),
@@ -1199,11 +1201,11 @@ server <-
 
     observe({
       if (!is.null(values$phylo)) {
-        show(selector = "#study_title", anim =
+        shinyjs::show(selector = "#study_title", anim =
                F)
-        show(selector = "#dataset li a[data-value='Define sample grouping']", anim =
+        shinyjs::show(selector = "#dataset li a[data-value='Define sample grouping']", anim =
                T)
-        show(selector = "#dataset li a[data-value='Analysis']", anim = T)
+        shinyjs::show(selector = "#dataset li a[data-value='Analysis']", anim = T)
       }
     })
 

@@ -50,6 +50,7 @@ transformData <-
         setkey(diseaseRun.dt, run)
         sample_info$metaSRA.disease.status <- diseaseRun.dt[sample_info$run, disease.status]
         sample_info$infection.status <- diseaseRun.dt[sample_info$run, infected]
+        sample_info$metaSRA.sample.type <- diseaseRun.dt[sample_info$run, sample_type]
       }
     }
 
