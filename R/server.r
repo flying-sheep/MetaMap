@@ -1276,8 +1276,8 @@ server <-
         phylo <- values$phylo
         tax_table(phylo) <- tax_table(phylo)[,-8]
         file <- tempfile()
+	phylo@sam_data[,attribute] <- make.names( unlist( phylo@sam_data[,attribute] ) )
         try(plot_krona(phylo, file, attribute, trim = T))
-
         if (file.exists(paste0(file, ".html"))) {
           input <- sourcetools::read(paste0(file, ".html"))
         } else {
