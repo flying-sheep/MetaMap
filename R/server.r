@@ -693,8 +693,8 @@ server <-
         attribute <- NULL
       withProgress(session = session, value = 0.5, {
         setProgress(message = "Calculation in progress")
-          p <- plot_alpha(phylo, attribute)
-          isolate(plots$diversity <- p)
+        p <- plot_alpha(phylo, attribute)
+        isolate(plots$diversity <- p)
         p
       })
     })
