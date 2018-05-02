@@ -1,6 +1,6 @@
 shinyjs.init = function(){
 	// 1) hide analysis tabs
-	$("#study_title").hide();
+	$("#dataset li a[data-value='<div id=\"study_title\" class=\"shiny-html-output\"></div>").hide();
 	$("#dataset li a[data-value='Define sample grouping']").hide();
 	$("#dataset li a[data-value='Analysis']").hide();
 	$(".hidden_tab").hide();

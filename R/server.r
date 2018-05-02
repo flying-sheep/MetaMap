@@ -269,7 +269,7 @@ server <-
                                        return(colnames(phylo@sam_data)[x])
                                    }) %>% unlist
       values$attributes <-
-        values$attributes[!values$attributes %in% c("Total.Reads", "sraID")]
+        values$attributes[!values$attributes %in% c("Total.Reads")]
       # for debug
       # assign("phylo", phylo, globalenv())
     })
@@ -935,6 +935,16 @@ server <-
       })
     })
 
+    # Dynamically change the heigth of the sankey plot
+    output$sankey.ui <- renderUI({
+      links <- sankey$sankey_links
+      height <- 500
+      if(!is.null(links)){
+        height <- height + (10*nrow(links))
+      }
+      plotlyOutput("sankey_plot", height=paste0(height,"px"), width="1500px")
+    })
+
     output$sankey_plot <- renderPlotly({
       if (is.null(values$phylo))
         return(NULL)
@@ -973,6 +983,7 @@ server <-
               easyClose = TRUE
             )
           )
+        return()
         }
         sankey$sankey_links <- tmp$links
         # print(sankey$args_history)
@@ -1203,7 +1214,7 @@ server <-
 
     observe({
       if (!is.null(values$phylo)) {
-        shinyjs::show(selector = "#study_title", anim =
+        shinyjs::show(selector = "#dataset li a[data-value='<div id=\"study_title\" class=\"shiny-html-output\"></div>", anim =
                         F)
         shinyjs::show(selector = "#dataset li a[data-value='Define sample grouping']", anim =
                         T)

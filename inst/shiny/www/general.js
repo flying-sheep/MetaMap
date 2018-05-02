@@ -1,6 +1,6 @@
 shinyjs.init = function(){
 	// 1) hide analysis tabs
-	$("#study_title").hide();
+	$("#dataset li a[data-value='<div id=\"study_title\" class=\"shiny-html-output\"></div>").hide();
 	$("#dataset li a[data-value='Define sample grouping']").hide();
 	$("#dataset li a[data-value='Analysis']").hide();
 	$(".hidden_tab").hide();
@@ -32,8 +32,11 @@ shinyjs.resetClick = function() {
 
 // write krona file
 shinyjs.writeKrona = function(input){
-	var doc = document.getElementById('krona-file').contentWindow.document; 
-	console.log("works");
+	krona = document.getElementById('krona-file');
+	if(krona == null){
+		return null;
+	}
+	var doc = krona.contentWindow.document;
 	doc.open(); 
 	doc.write(input); 
 	doc.close();

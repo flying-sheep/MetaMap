@@ -7,6 +7,10 @@ color: black;
 
 body {padding-top: 70px;}
 
+@media only screen and (max-width: 767.5px) {
+	body {padding-top: 400px;}
+}
+
 #study_title{
 	color: #ff4d4d;
 	font-weight: bold;
@@ -88,4 +92,12 @@ word-wrap: break-word;
 
 #krona_apply_button {
   padding:20px;
+}
+
+#sankey-div {
+  overflow-y: auto;
+  height: 600px; 
+  width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
 }

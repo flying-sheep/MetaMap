@@ -31,6 +31,7 @@ if (!is_in_package()) {
   library(DT)
   library(V8)
   require(psadd)
+  require(DESeq2)
 }
 
 pkg_file <- function(path = ".") {
