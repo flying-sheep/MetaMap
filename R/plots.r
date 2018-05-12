@@ -11,13 +11,50 @@
 #'
 #' @return A bar plot grouped by \code{attribute}.
 #' @export
-plot_top_species <- function(phylo, top_n = 10L, attribute) {
+plot_top_species <- function(phylo, top_n = 10L, attribute, level = "Species", test=F) {
+  # assign("attribute",attribute, global_env())
+  # assign("phylo",phylo, global_env())
+  # assign("level",level, global_env())
+  # assign("top_n",top_n, global_env())
+  # assign("test",test, global_env())
+
   if (is.null(phylo))
     return(NULL)
-  relativeCounts(phylo)%>%
+  dt <- as.data.frame(relativeCounts(phylo))
+
+  # Merge taxa of the same level
+  if(!level %in% c("Species", "TaxID")){
+    dt <- as.data.table(dt, keep.rownames=T)
+    dt[, level := (phylo@tax_table[, level] %>% as.character())]
+    dt <- dt[, as.data.table(t(colSums(.SD[,-1, with=F]))),by=level]
+    dt <- dt[!is.na(level)]
+    dt <- as.data.frame(dt)
+    rownames(dt) <- dt$level
+    dt$level <- NULL
+  } else{
+    rownames(dt) <- taxids2names(phylo, rownames(dt), level)
+  }
+
+  # to deal with the case that there is only one metafeature
+  dt <- dt <- rbind(dt, helper = rep(0, ncol(dt)))
+  dt <- dt %>%
     t %>%
     as.data.frame %>%
-    mutate(Selection = unlist(phylo@sam_data[, attribute])) %>%
+    mutate(Selection = unlist(phylo@sam_data[, attribute]))
+
+  # Perform an Wilcoxon test only at the Kingdom level
+  if(test & length(unique(dt$Selection)) == 2){
+    tmp <- as.data.table(dt)
+    tmp <- melt(tmp, id.vars = "Selection", variable.name = "Kingdom")
+
+    p.values <- tmp[, .(p.value = wilcox.test(value ~ Selection)$p.value), by = "Kingdom"]
+    p.values <- p.values$p.value %>% setNames(p.values$Kingdom)
+  } else {
+    test <- F
+  }
+
+
+  dt %>%
     group_by(Selection) %>%
     summarise_all(funs(mean, sd)) %>%
     gather(key, Value,-Selection) %>%
@@ -27,23 +64,40 @@ plot_top_species <- function(phylo, top_n = 10L, attribute) {
         Mean = Value[grep("_mean", key)],
         SD = Value[grep("_sd", key)],
         Selection = Selection[grep("_mean", key)],
-        TaxID = str_sub(key[grep("_mean", key)], 1,-6),
+        Mf = str_sub(key[grep("_mean", key)], 1,-6),
         stringsAsFactors = F
       )
     ) %>%
+    {
+      # replace nas from SD with 0. They can occure if ethere only 1 sample
+      .$SD[is.na(.$SD)] <- 0;.
+    }%>%
+    group_by(Mf) %>%
+    mutate(Mean1 = mean(Mean)) %>%
+    arrange(desc(Mean1)) %>%
+    ungroup %>%
+    filter(Mf %in% (unique(Mf)[1:min(top_n, n())])) %>%
+    group_by(Selection) %>%
     arrange(desc(Mean)) %>%
     group_by(Selection) %>%
     mutate(
-      SpeciesUnordered = taxids2names(phylo, TaxID),
-      Species = factor(SpeciesUnordered, SpeciesUnordered[order(Mean)])
+      Mf = factor(Mf, Mf[order(Mean1)])
     ) %>%
-    plotly::slice(seq_len(min(top_n, n()))) %>%
+    filter(Mf != "helper") %>%
+    {
+      tmp <- as.data.table(.)
+      tmp[, p.value := if (test)
+        p.values[as.character(Mf)]
+        else
+          NA, by = Mf]
+      tmp
+    } %>%
     #{View(.); .} %>%
-    ggplot(aes(Species, Mean, fill = Selection)) +
+    ggplot(aes(Mf, Mean, fill = Selection, label = p.value)) +
     geom_col(position = 'dodge') +
-    geom_errorbar(aes(ymin = ifelse((Mean - SD) < 0, 0, (Mean - SD)), ymax = Mean + SD), width = 0.2) +
+    geom_errorbar(aes(ymin = ifelse((Mean - SD) < 0, 0, (Mean - SD)), ymax = Mean + SD), width = 0.2, position=position_dodge(.9)) +
     scale_x_discrete(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) +
-    coord_flip() + labs(x = 'Species / Metafeature', y = 'Mean relative abundance (RPM)')
+    coord_flip() + labs(x = 'Metafeature', y = 'Mean relative abundance (RPM)') + xlab("")
 }
 
 #' Volcano plot
@@ -183,24 +237,35 @@ plot_sankey <-
 #' @return A barplot grouped by \code{attribute}.
 #' @export
 plot_taxa <- function(phylo, attribute, level, relative = T) {
+  # assign("phylo", phylo, globalenv())
+  # assign("attribute", attribute, globalenv())
+  # assign("level", level, globalenv())
+
   if (is.null(phylo))
     return(NULL)
+
   phylo@tax_table <- tax_table(as.matrix(clean_tax_table(phylo@tax_table)))
-  if(relative){
-    phylo@otu_table <- otu_table(relativeCounts(phylo), taxa_are_rows = T)
-  }
-  # trim to 10 most abundant taxa
+  phylo@otu_table <- otu_table(relativeCounts(phylo), taxa_are_rows = T)
+
+    # get top 10 most abundant taxa
   taxa_sums <- taxa_sums(phylo)
   taxa <- data.frame(Abundance = taxa_sums, Level = as.character(phylo@tax_table[names(taxa_sums),level]), stringsAsFactors=F) %>%
     group_by(Level) %>%
-    summarise(Abundance= sum(Abundance)) %>% arrange(desc(Abundance)) %>% .[1:min(nrow(.), 10), "Level"] %>% unlist
-  environment(subset_taxa) <- environment()
-  phylo <- subset_taxa(phylo, phylo@tax_table[,level] %in% taxa)
+    summarise(Abundance= sum(Abundance)) %>% arrange(desc(Abundance)) %>%
+    .[1:min(nrow(.), 10), "Level"] %>% unlist
+  # environment(subset_taxa) <- environment()
+  # phylo <- subset_taxa(phylo, phylo@tax_table[,level] %in% taxa)
   p <- plot_bar(phylo, x = attribute, fill = level) +
     aes(label = Species, y = Abundance) +
     geom_bar(stat = "identity") + coord_flip() +
     theme(axis.text.x = element_text(angle = 0, vjust = 1),
-          axis.title.y = element_blank())
+          axis.title.y = element_blank()) + ylab("Abundance (RPM)")
+
+  tmp <- as.data.table(p$data)
+  tmp[, top := unlist(tmp[, ..level]) %in% taxa]
+  tmp[ (!top), level ] <- "Other"
+  p$data <- as.data.frame(tmp)
+
   if (relative) {
     groups <-
       aggregate(as.formula(paste("Abundance ~", attribute)), p$data, sum) %>%
@@ -210,6 +275,7 @@ plot_taxa <- function(phylo, attribute, level, relative = T) {
     # p$data$Abundance <-
     p$data$Abundance <-
       p$data$Abundance / groups[p$data[, attribute]] * 100
+    p <- p + ylab("Abundance (percent)")
   }
   p$data <- subset(p$data, Abundance != 0)
   p
@@ -322,6 +388,9 @@ plot_mds <- function(phylo, color) {
 #' @return A ggplot2 object showing the alpha diversity plot.
 #' @export
 plot_alpha <- function(phylo, color) {
+  # assign("phylo",phylo, global_env())
+  # assign("color",color, global_env())
+
   if (is.null(phylo))
     return(NULL)
   sam_dt_names <- names(phylo@sam_data)
@@ -331,9 +400,16 @@ plot_alpha <- function(phylo, color) {
       sam_dt_names[!sam_dt_names %in% c("All", "sraID")]) %>% setNames(c("x", "y", paste0("label", 1:(length(
         .
       ) - 2)))) %>% as.list
-  p <- plot_richness(phylo, measures = "Shannon", color = color)
+  p <- plot_richness(phylo, measures = c("Shannon", "ACE"), color = color)
+
+  # sort by richness
+  p$data <- p$data[order(p$data$value),]
+
   if (!is.null(color)) {
-    newOrder <- p$data[order(p$data[, color]), "samples"]
+    tmp <- as.data.table(p$data)
+    newOrder <-
+      tmp[variable=="Shannon"][, cbind(.SD, max = max(value)), by = color
+          ][order(max, value), as.character(samples)]
     p$data$samples <- factor(p$data[["samples"]], levels = newOrder)
   }
   p <- p + do.call(aes_string, attrs) +
@@ -380,6 +456,7 @@ plot_de_heatmap <-
 #'
 #' @export
 mfPlot <- function(mf_tbl) {
+  # assign("mf_tbl", mf_tbl, global_env())
   mfMax <- apply(mf_tbl, 1, function(x) {
     study_nr <- which.max(x)
     c(study_nr, x[study_nr])
@@ -399,3 +476,28 @@ mfPlot <- function(mf_tbl) {
            label2 = maxStudy
          )) + geom_point() + labs(x = "Frequency of detection", y = "Log 10 maximum abundance (RPM)")
 }
+
+#' Plot two metafeatures against each other
+#'
+#' @param phylo
+#' @param level1
+#' @param mf1
+#' @param level2
+#' @param mf2
+#'
+#' @export
+plot_xy <- function(phylo, levelx, mfx, levely, mfy){
+  # assign("phylo", phylo, globalenv())
+  # assign("levelx", levelx, globalenv())
+  # assign("levely", levely, globalenv())
+  # assign("mfy", mfy, globalenv())
+  # assign("mfx", mfx, globalenv())
+
+
+  environment(subset_taxa) <- environment()
+  x <- mergeLevel(phylo, levelx)[mfx,] %>% unlist
+  y <- mergeLevel(subset_taxa(phylo, phylo@tax_table[,levelx] != mfx), levely)[mfy,] %>% unlist
+
+  qplot(x, y, xlab = mfx, ylab = mfy, main = "Relative Abundance")
+}
+

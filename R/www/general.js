@@ -1,7 +1,7 @@
 shinyjs.init = function(){
 	// 1) hide analysis tabs
 	$("#dataset li a[data-value='<div id=\"study_title\" class=\"shiny-html-output\"></div>").hide();
-	$("#dataset li a[data-value='Define sample grouping']").hide();
+	$("#dataset li a[data-value='Customize Data']").hide();
 	$("#dataset li a[data-value='Analysis']").hide();
 	$(".hidden_tab").hide();
 	$("#back_button").prop( "disabled", true );
@@ -23,6 +23,7 @@ shinyjs.init = function(){
 	$("#de_boxplot").addClass("download")
 	$("#taxa_plot").addClass("download")
 	$("#ntaxa_plot").addClass("download")
+	$("#cor_plot").addClass("download")
 } 
 
 // function to reset the click value of sankey plot

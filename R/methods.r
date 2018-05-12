@@ -27,8 +27,8 @@
 #' @return Species name
 #' @export
 taxids2names <-
-  function(phylo, TaxID)
-    phylo@tax_table[TaxID, "Species"]  %>% as.character
+  function(phylo, TaxID, level = "Species")
+    phylo@tax_table[TaxID, level]  %>% as.character
 
 #' Deal with NAs
 #'
@@ -43,6 +43,8 @@ clean_tax_table <- function(tax_table) {
   tax_table <- as.data.frame(tax_table)
   tax_table[] <- lapply(tax_table, as.character)
   inds <- which(is.na(tax_table), arr.ind = T)
+  if(length(inds)==0)
+    return(tax_table)
   inds1 <- aggregate(row ~ col, data = inds, list)
   # rownames(inds) <- inds$col
   # inds <- inds$row
@@ -62,42 +64,102 @@ clean_tax_table <- function(tax_table) {
   tax_table
 }
 
+
+#' Merge at level
+#'
+#' It returns the relative counts of each Metafeature in the level of interest.
+#'
+#' @param phylo \link[phyloseq]{phyloseq} object
+#' @param level Classification level to merge
+#'
+#' @return Merged otu table.
+#' @export
+mergeLevel <- function(phylo, level){
+  dt <- as.data.frame(relativeCounts(phylo))
+
+  # Merge taxa of the same level
+  if(!level %in% c("Species", "TaxID")){
+    dt <- as.data.table(dt, keep.rownames=T)
+    dt[, level := (phylo@tax_table[, level] %>% as.character())]
+    dt <- dt[, as.data.table(t(colSums(.SD[,-1, with=F]))),by=level]
+    dt <- dt[!is.na(level)]
+    dt <- as.data.frame(dt)
+    rownames(dt) <- dt$level
+    dt$level <- NULL
+  } else{
+    rownames(dt) <- taxids2names(phylo, rownames(dt), level)
+  }
+  dt
+}
+
+#' Correlation table
+#'
+#' Performs correlation test between a given
+#' metafeature and all other metafeatures of a given classification level.
+#'
+#' @param phylo \link[phyloseq]{phyloseq} object
+#' @param level1 Classification level of the metafeature of interest.
+#' @param level2 Classification level to test against
+#' @param mf Metafeature of interest
+#' @param method
+#'
+#' @return Correlation table.
+#' @export
+cor_table <- function(phylo, level1, level2, mf, method = "spearman"){
+  # assign("phylo", phylo, globalenv())
+  # assign("level1", level1, globalenv())
+  # assign("level2", level2, globalenv())
+  # assign("mf", mf, globalenv())
+  # assign("mfx", mfx, globalenv())
+
+  x <- mergeLevel(phylo, level1)[mf,] %>% unlist
+  environment(subset_taxa) <- environment()
+  Y <- mergeLevel(subset_taxa(phylo, phylo@tax_table[,level1] != mf), level2)
+
+  dt <- apply(Y, 1, function(y){
+    res <- cor.test(x,y, method = method)
+    c(res$estimate, p.value = res$p.value)
+  }) %>% t %>% as.data.frame()
+  dt$p.adj <- p.adjust(dt[,2])
+
+  dt <- with(dt, dt[order(dt$p.adj), ])
+  dt
+}
+
 #' DESeq2 table
 #'
 #' Performs differential expression analysis using DESeq2. If \code{cond1} and \code{cond2} are both NULL then all conditions are taken.
 #'
 #' @param phylo \link[phyloseq]{phyloseq} object
 #' @param attribute Column name of the sample table, obtained from \link[phyloseq]{sam_data}.
-#' @param cond1 first condition.
-#' @param cond2 second condition.
-#'
+#' @param conds conditions
 #'
 #' @return DESeq2 table returned from \link[DESeq2]{results}.
 #' @export
 deseq2_table <- function(phylo,
-                         attribute,
-                         cond1 = NULL,
-                         cond2 = NULL, parallel=F) {
+                         attribute, conds, formula = NULL,
+                         parallel=F) {
+
   if (is.null(phylo))
     return(NULL)
   environment(subset_samples) <- environment()
   tmp <- phylo
-  if (!is.null(cond1) && !is.null(cond2))
+  # if (!is.null(cond1) && !is.null(cond2))
     tmp <-
-    subset_samples(tmp, unlist(tmp@sam_data[, attribute]) %in% c(cond1, cond2))
+    subset_samples(tmp, unlist(tmp@sam_data[, attribute]) %in% conds)
 
   # Remove samples with NA
   tmp <- subset_samples(tmp,!is.na(tmp@sam_data[, attribute]))
   tmp <- prune_taxa(taxa_sums(tmp) > 0, tmp)
   # make valid condition names
-  conds <- if (all(!is.null(cond1),!is.null(cond2))) {
-    tmp1 <- setNames(list(1, 2), c(cond2, cond1))
+  conds <- if (length(conds)==2) {
+    tmp1 <- setNames(list(1, 2), c(conds[2], conds[1]))
     tmp1[unlist(tmp@sam_data[, attribute])]
   }  else{
     as.integer(factor(tmp@sam_data %>% data.frame %>% .[[attribute]]))
   }
-  if(length(unique(conds))>5)
-    stop("Too many conditions")
+  # if(length(unique(conds))>5)
+  #   stop("Too many conditions")
   tmp@sam_data[, attribute] <-
     paste0("cond", conds)
   deseq <-
@@ -157,11 +219,13 @@ diversity_test <- function(phylo, attribute) {
   if (length(unique(phylo@sam_data[[attribute]])) < 2) {
     stop("There is only 1 condition!")
   }
-  alpha.diversity <- estimate_richness(phylo, measures = "Shannon")
+  alpha.diversity <- estimate_richness(phylo, measures = c("Shannon", "ACE"))
   data <- cbind(sample_data(phylo), alpha.diversity)
-  anova <- aov(as.formula(paste("Shannon ~", attribute, "+ Total.Reads")), data)
-  summary(anova)
-  summary(anova)[[1]][, "Pr(>F)"][1]
+  shannon.anova <- aov(as.formula(paste("Shannon ~", attribute, "+ Total.Reads")), data)
+  ace.anova <- aov(as.formula(paste("ACE ~", attribute, "+ Total.Reads")), data)
+  ace.pval <- summary(ace.anova)[[1]][, "Pr(>F)"][1]
+  shannon.pval <- summary(shannon.anova)[[1]][, "Pr(>F)"][1]
+  c(ace.pval, shannon.pval)
 }
 
 #' Generate Phyloseq object

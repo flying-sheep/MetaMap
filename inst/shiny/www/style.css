@@ -16,7 +16,7 @@ body {padding-top: 70px;}
 	font-weight: bold;
 }
 
-#dataset li a[data-value='Define sample grouping']{color: #ff4d4d;}
+#dataset li a[data-value='Customize Data']{color: #ff4d4d;}
 
 #dataset li a[data-value='Analysis']{color: #ff4d4d;}
 
@@ -90,14 +90,31 @@ word-wrap: break-word;
   overflow: scroll;
 }
 
-#krona_apply_button {
-  padding:20px;
-}
-
 #sankey-div {
   overflow-y: auto;
+  width: 100%;
   height: 600px; 
-  width: 1400px;
-  margin-left: auto;
-  margin-right: auto;
+}
+
+.control-bar {
+  text-align: center;
+  background-color:whitesmoke;
+  padding-bottom: 15px;
+  padding-top: 15px;
+  margin-bottom: 10px;
+}
+
+#dataset li a[data-value='test']{
+  color:red;
+	
+}
+
+#reload_button{
+  color: white;
+  float:right;
+  margin-right:25%;
+  font-size: 10px;
+  border-radius: 100%;
+  outline: none;
+  position:sticky;
 }

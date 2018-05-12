@@ -40,3 +40,16 @@ pkg_file <- function(path = ".") {
   else
     file.path("../inst", path)
 }
+
+qstudy.name <- "Query by study"
+qmetafeature.name <- "Query by metafeature"
+ssamples.name <- "Subset samples"
+smf.name <- "Subset metafeatures"
+dimred.name <- "Dimension reduction"
+da.name <- "Diversity analysis"
+de.name <- "Differential expression"
+mc.name <- "Metafeature correlation"
+ma.name <- "Metafeature abundance"
+tbc.name <- "Taxonomy bar chart"
+sankey.name <- "Sankey diagram"
+krona.name <- "Krona chart"
