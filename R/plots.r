@@ -361,6 +361,8 @@ plot_diff <- function(phylo, taxids, attribute) {
 #' @return A ggplot2 object showing the MDS plot
 #' @export
 plot_mds <- function(phylo, color) {
+  # assign("phylo", phylo, globalenv())
+  # assign("color", color, globalenv())
   if (is.null(phylo))
     return(NULL)
   phylo@otu_table <- otu_table(relativeCounts(phylo), taxa_are_rows = T)
@@ -493,11 +495,10 @@ plot_xy <- function(phylo, levelx, mfx, levely, mfy){
   # assign("mfy", mfy, globalenv())
   # assign("mfx", mfx, globalenv())
 
-
   environment(subset_taxa) <- environment()
   x <- mergeLevel(phylo, levelx)[mfx,] %>% unlist
   y <- mergeLevel(subset_taxa(phylo, phylo@tax_table[,levelx] != mfx), levely)[mfy,] %>% unlist
 
-  qplot(x, y, xlab = mfx, ylab = mfy, main = "Relative Abundance")
+  qplot(x, y, xlab = mfx, ylab = mfy)
 }
 

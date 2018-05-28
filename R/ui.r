@@ -183,7 +183,7 @@ page <- fluidPage(
           )
         ),
         DT::dataTableOutput("cor_table"),
-        plotlyOutput("cor_plot", height = "600px")
+        plotOutput("cor_plot")
       ),
       tabPanel(
         ma.name,

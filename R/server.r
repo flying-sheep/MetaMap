@@ -477,7 +477,7 @@ server <-
           empty
       else
         values$attributes
-      selectInput('attribute_da', 'Color by', attributes)
+      selectInput('attribute_da', 'Color by', attributes, multiple = T, selected = attributes[1])
     })
 
     output$diversity <- renderPlotly({
@@ -492,6 +492,13 @@ server <-
         attribute <- NULL
       withProgress(session = session, value = 0.5, {
         setProgress(message = "Calculation in progress")
+        if(length(attribute) > 1){
+          dt <- data.frame(phylo@sam_data)
+          col.name <- paste(attribute, collapse = "__")
+          dt <- do.call(unite, list(dt, col.name, attribute, remove = F, sep="__"))
+          attribute <- col.name
+          phylo@sam_data <- sample_data(dt)
+        }
         p <- plot_alpha(phylo, attribute)
         isolate(plots$diversity <- p)
         p
@@ -506,6 +513,13 @@ server <-
       attribute <- input$attribute_da
       if (input$attribute_da == empty)
         return("")
+      if(length(attribute) > 1){
+        dt <- data.frame(phylo@sam_data)
+        col.name <- paste(attribute, collapse = "__")
+        dt <- do.call(unite, list(dt, col.name, attribute, remove = F, sep="__"))
+        attribute <- col.name
+        phylo@sam_data <- sample_data(dt)
+      }
       pval <- try(diversity_test(phylo, attribute), silent = T)
       if (class(pval) == "try-error")
         return()
@@ -522,20 +536,24 @@ server <-
         if (length(values$attributes) == 0L)
           empty
       else
-        c(empty, values$attributes)
-      selectInput('attribute_de', 'Select Attribute', attributes)
+        values$attributes
+      selectInput('attribute_de', 'Select Attribute', attributes, multiple = T, selected = attributes[1])
     })
 
     output$de_conds <- renderUI({
       phylo <- values$phylo
+      attribute <- input$attribute_de
       if (any(is.null(phylo), is.null(input$attribute_de)))
         return(NULL)
+      if(length(attribute) > 1){
+        dt <- data.frame(phylo@sam_data)
+        col.name <- paste(attribute, collapse = "__")
+        dt <- do.call(unite, list(dt, col.name, attribute, remove = F, sep="__"))
+        attribute <- col.name
+        phylo@sam_data <- sample_data(dt)
+      }
       conditions <-
-        if (length(values$attributes) == 0L ||
-            input$attribute_de == empty)
-          empty
-      else
-        unique(phylo@sam_data[, input$attribute_de])
+        unique(phylo@sam_data[, attribute])
       selectInput(
         'de_conds',
         label = 'Conditions',
@@ -592,8 +610,17 @@ server <-
       withProgress(session = session , value = 0.2, {
         setProgress(message = "Performing Differential Expression Analysis", detail = 'This may take a while...')
         conds <- input$de_conds
-        de_table <- try(deseq2_table(values$phylo,
-                                     input$attribute_de,
+        phylo <- values$phylo
+        attribute <- input$attribute_de
+        if(length(attribute) > 1){
+          dt <- data.frame(phylo@sam_data)
+          col.name <- paste(attribute, collapse = "__")
+          dt <- do.call(unite, list(dt, col.name, attribute, remove = F, sep="__"))
+          attribute <- col.name
+          phylo@sam_data <- sample_data(dt)
+        }
+        de_table <- try(deseq2_table(phylo,
+                                     attribute,
                                      conds,
                                      parallel = DESEQ_PARALLEL))
         if (class(de_table) == "try-error") {
@@ -631,7 +658,7 @@ server <-
                              ))
             ),
             selection = 'none',
-            rownames = taxids2names(values$phylo, rownames(values$de_table))
+            rownames = taxids2names(phylo, rownames(values$de_table))
           )
         })
 
@@ -703,9 +730,16 @@ server <-
 
     output$de_boxplot <- renderPlotly({
       species_diff <- values$species_diff
-      attribute <- isolate(input$attribute_de)
       conds <- input$de_conds
+      attribute <- isolate(input$attribute_de)
       phylo <- isolate(values$phylo)
+      if(length(attribute) > 1){
+        dt <- data.frame(phylo@sam_data)
+        col.name <- paste(attribute, collapse = "__")
+        dt <- do.call(unite, list(dt, col.name, attribute, remove = F, sep="__"))
+        attribute <- col.name
+        phylo@sam_data <- sample_data(dt)
+      }
       if (any(is.null(phylo),
               is.null(species_diff),
               species_diff == ""))
@@ -736,15 +770,16 @@ server <-
           empty
       else
         values$attributes
-      selectInput('attribute_dr', 'Color by', attributes)
+      selectInput('attribute_dr', 'Color by', attributes, multiple = T, selected = attributes[1])
     })
 
     output$dimred <- renderPlotly({
       input$reload_button
       phylo <- isolate(values$phylo)
+      color <- input$attribute_dr
       if (any(is.null(phylo),
-              is.null(input$attribute_dr),
-              input$attribute_dr == ""))
+              is.null(color),
+              color == ""))
         return(NULL)
 
       if (study_info[isolate(study_info$study) == isolate(values$study), "sample_size"] > MAX_SAMPLES) {
@@ -761,14 +796,21 @@ server <-
       }
       withProgress(session = session, value = 0.5, {
         setProgress(message = "Calculation in progress")
+        if(length(color) > 1){
+          dt <- data.frame(phylo@sam_data)
+          col.name <- paste(color, collapse = "__")
+          dt <- do.call(unite, list(dt, col.name, color, remove = F, sep="__"))
+          color <- col.name
+          phylo@sam_data <- sample_data(dt)
+        }
         if (is.null(isolate(plots$dimred))) {
-          p <- plot_mds(phylo, input$attribute_dr)
+          p <- plot_mds(phylo, color)
           isolate(plots$dimred <- p)
         } else{
-          isolate(plots$dimred$data$Selection <-
-                    values$phylo@sam_data$Selection)
+          isolate(plots$dimred$data[, color] <-
+                    phylo@sam_data[,color])
           p <-
-            isolate(plots$dimred + aes_string(colour = input$attribute_dr))
+            isolate(plots$dimred + aes_string(colour = color))
           isolate(plots$dimred <- p)
         }
         p
@@ -875,11 +917,12 @@ server <-
                            title = paste(values$study, "cor", sep="_")
                          ))
         ),
-        selection = list(mode = 'single'),
+        selection = list(mode = 'multiple'),
         rownames = F
       )
     })
-    output$cor_plot <- renderPlotly({
+
+    observeEvent(input$cor_table_rows_selected, {
       cor_table <- isolate(values$cor_table)
       row <- input$cor_table_rows_selected
       mfx <- values$mf_mc
@@ -887,18 +930,31 @@ server <-
       if (any(is.null(cor_table), is.null(row), is.null(mfx))) {
         return(NULL)
       }
-
-      withProgress(session = session, value = 0.5, {
-        setProgress(message = "Calculation in progress")
-
-        levely <- colnames(cor_table)[1]
-        mfy <- rownames(cor_table)[row]
-        levelx <- mfx[1]
-        mfx = mfx[2]
-        p <- plot_xy(phylo, levelx, mfx, levely, mfy)
-        plots$cor_plot <- p
-        p
-      })
+      levely <- colnames(cor_table)[1]
+      mfys <- rownames(cor_table)[row]
+      levelx <- mfx[1]
+      mfx = mfx[2]
+      ncols <- round(length(mfys) ^ 0.5)
+      # print(paste0(ncols * 200, "px"))
+      output$cor_plot <-
+        renderPlot({
+          withProgress(session = session, value = 0.5, {
+            setProgress(message = "Calculation in progress")
+            ps <-
+              lapply(
+                mfys,
+                plot_xy,
+                phylo = values$phylo,
+                levelx = levelx,
+                mfx = mfx,
+                levely = levely
+              )
+            plots$cor_plot <- ps
+            ps$cols = ncols
+            p <- do.call(multiplot, ps)
+            p
+          })
+        }, height = ncols * 300)
     })
 
     ### Metafeature abundance
@@ -924,7 +980,7 @@ server <-
           empty
       else
         c(empty, values$attributes)
-      selectInput('attribute_ma', 'Color by', attributes)
+      selectInput('attribute_ma', 'Color by', attributes, multiple = T, selected = attributes[1])
     })
 
     output$level_ma <- renderUI({
@@ -943,6 +999,16 @@ server <-
       phylo <- isolate(values$phylo)
       top_n <- as.numeric(input$top_n_ma)
       attribute <- input$attribute_ma
+      if(length(attribute) > 1){
+        if(empty %in% attribute) {
+          attribute <- attribute[-which(attribute == empty)]
+        }
+        dt <- data.frame(phylo@sam_data)
+        col.name <- paste(attribute, collapse = "__")
+        dt <- do.call(unite, list(dt, col.name, attribute, remove = F, sep="__"))
+        attribute <- col.name
+        phylo@sam_data <- sample_data(dt)
+      }
       level <- input$level_ma
       test <- level == "Kingdom"
       if (any(is.null(attribute),
@@ -976,8 +1042,8 @@ server <-
         if (length(values$attributes) == 0L)
           empty
       else
-        c(empty, values$attributes)
-      selectInput('attribute_tbc', 'Select Grouping', attributes)
+        c(values$attributes)
+      selectInput('attribute_tbc', 'Select Grouping', attributes, multiple = T, selected = "sraID")
     })
 
     output$level_tbc <- renderUI({
@@ -1018,6 +1084,14 @@ server <-
           easyClose = TRUE
         ))
         return(NULL)
+      }
+
+      if(length(attribute) > 1){
+        dt <- data.frame(phylo@sam_data)
+        col.name <- paste(attribute, collapse = "__")
+        dt <- do.call(unite, list(dt, col.name, attribute, remove = F, sep="__"))
+        attribute <- col.name
+        phylo@sam_data <- sample_data(dt)
       }
 
       output$taxa_plot <- renderPlotly({
