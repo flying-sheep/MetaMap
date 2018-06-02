@@ -338,6 +338,9 @@ plot_abundance <- function(phylo, taxids, attribute) {
 #' @return A ggplot2 object showing the boxplots.
 #' @export
 plot_diff <- function(phylo, taxids, attribute) {
+  # assign("phylo", phylo, globalenv())
+  # assign("taxids", taxids, globalenv())
+  # assign("attribute", attribute, globalenv())
   relativeCounts(phylo)[taxids, ] %>%
     t %>%
     as.data.frame %>%
@@ -347,7 +350,8 @@ plot_diff <- function(phylo, taxids, attribute) {
     # {View(.);.} %>%
     ggplot(aes(Selection, Transcript, colour = Species)) +
     geom_boxplot(position = 'dodge') +
-    labs(x = 'Grouping', y = 'Relative abundance')
+    labs(x = 'Grouping', y = 'Relative abundance') +
+    geom_jitter(width = 0.3)
 }
 
 #' MDS plot
