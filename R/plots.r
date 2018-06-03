@@ -256,7 +256,9 @@ plot_taxa <- function(phylo, attribute, level, relative = T) {
   # environment(subset_taxa) <- environment()
   # phylo <- subset_taxa(phylo, phylo@tax_table[,level] %in% taxa)
   p <- plot_bar(phylo, x = attribute, fill = level) +
-    aes(label = Species, y = Abundance) +
+    aes(label1 = Sample, y = Abundance) +
+    aes(label2 = Species)+
+    aes_string(fill = level) +
     geom_bar(stat = "identity") + coord_flip() +
     theme(axis.text.x = element_text(angle = 0, vjust = 1),
           axis.title.y = element_blank()) + ylab("Abundance (RPM)")
