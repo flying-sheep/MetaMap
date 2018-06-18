@@ -351,7 +351,7 @@ plot_diff <- function(phylo, taxids, attribute) {
     mutate(Species = taxids2names(phylo, TaxID)) %>%
     # {View(.);.} %>%
     ggplot(aes(Selection, Transcript, colour = Species)) +
-    geom_boxplot(position = 'dodge') +
+    geom_boxplot(position = 'dodge', outlier.shape=NA) +
     labs(x = 'Grouping', y = 'Relative abundance') +
     geom_jitter(width = 0.3)
 }
