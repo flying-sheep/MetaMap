@@ -10,6 +10,7 @@ If you are using a custom directory, instead of "R", make sure to include the fo
 * R/ui.R
 * R/server.R
 * R/methods.R
+* R/plots.R
 * R/www
 
 Package
