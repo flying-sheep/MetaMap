@@ -18,3 +18,8 @@ Package
 This app can also be built as a package.
 
 Call `MetaMap::launch()`.
+
+
+Note
+=======
+The krona plot will not work on windows.
