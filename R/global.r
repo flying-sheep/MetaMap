@@ -20,7 +20,14 @@ if (!is_in_package()) {
   library(dplyr)
   library(stringr)
   library(phyloseq)
-  # devtools::install_github('tidyverse/ggplot2@2b5b88dcc8ef73ec37459cd2b107b60693154884')
+  if(packageVersion("ggplo2") < "3.0.0") {
+    stop("Old ggplot2 version! Please install package:ggplot2 3.0.0!")
+  }
+  if(packageVersion("plotly") < "4.7.1.9000") {
+    stop("Please install the development version of plotly!
+         Last working version: 4.7.1.9000.
+         Run devtools::install_github('ropensci/plotly', force =T)")
+  }
   library(ggplot2)
   library(shiny)
   library(htmltools)
