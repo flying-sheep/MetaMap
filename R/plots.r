@@ -34,7 +34,6 @@ plot_top_species <- function(phylo, top_n = 10L, attribute, level = "Species", t
   } else{
     rownames(dt) <- taxids2names(phylo, rownames(dt), level)
   }
-
   # to deal with the case that there is only one metafeature
   dt <- dt <- rbind(dt, helper = rep(0, ncol(dt)))
   dt <- dt %>%
@@ -53,10 +52,20 @@ plot_top_species <- function(phylo, top_n = 10L, attribute, level = "Species", t
     test <- F
   }
 
+  # Implemented basically summarise_all using data.table to speed it up
+  dt <- as.data.table(dt)
+  means <- dt[, lapply(.SD, mean), by = Selection, .SDcols=colnames(dt)[-ncol(dt)]]
+  colnames(means)[-1] <- paste0(colnames(means)[-1], "_mean")
+  sds <- dt[, lapply(.SD, sd), by = Selection, .SDcols=colnames(dt)[-ncol(dt)]]
+  colnames(sds)[-1] <- paste0(colnames(sds)[-1], "_sd")
+  dt <- merge(means, sds, by = "Selection")
+  dt <- as.data.frame(dt)
+  rm(means, sds)
 
   dt %>%
-    group_by(Selection) %>%
-    summarise_all(funs(mean, sd)) %>%
+    #group_by(Selection) %>%
+    #summarise_all(c("mean", "sd")) %>%
+    #dt2 %>%
     gather(key, Value,-Selection) %>%
     with(
       .,
