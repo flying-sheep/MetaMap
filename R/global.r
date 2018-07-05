@@ -20,7 +20,7 @@ if (!is_in_package()) {
   library(dplyr)
   library(stringr)
   library(phyloseq)
-  if(packageVersion("ggplo2") < "3.0.0") {
+  if(packageVersion("ggplot2") < "3.0.0") {
     stop("Old ggplot2 version! Please install package:ggplot2 3.0.0!")
   }
   if(packageVersion("plotly") < "4.7.1.9000") {
