@@ -6,7 +6,8 @@
 
 Plot the relative abundance of the \code{top_n} most abundant species.}
 \usage{
-plot_top_species(phylo, top_n = 10L, attribute)
+plot_top_species(phylo, top_n = 10L, attribute, level = "Species",
+  test = F)
 }
 \arguments{
 \item{phylo}{\link[phyloseq]{phyloseq} object}

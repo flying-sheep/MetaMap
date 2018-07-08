@@ -6,7 +6,7 @@
 
 Transforms taxID to the corresponding Species name.}
 \usage{
-taxids2names(phylo, TaxID)
+taxids2names(phylo, TaxID, level = "Species")
 }
 \arguments{
 \item{phylo}{\link[phyloseq]{phyloseq} object}

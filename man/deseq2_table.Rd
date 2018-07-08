@@ -4,16 +4,14 @@
 \alias{deseq2_table}
 \title{DESeq2 table}
 \usage{
-deseq2_table(phylo, attribute, cond1 = NULL, cond2 = NULL, parallel = F)
+deseq2_table(phylo, attribute, conds, formula = NULL, parallel = F)
 }
 \arguments{
 \item{phylo}{\link[phyloseq]{phyloseq} object}
 
 \item{attribute}{Column name of the sample table, obtained from \link[phyloseq]{sam_data}.}
 
-\item{cond1}{first condition.}
-
-\item{cond2}{second condition.}
+\item{conds}{conditions}
 }
 \value{
 DESeq2 table returned from \link[DESeq2]{results}.
