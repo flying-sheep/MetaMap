@@ -1598,6 +1598,8 @@ server <-
     ########################
 
     ### Back button
+    shinyjs::disable("back_button")
+
     observeEvent(input$back_button, {
       # The initially selected tab acts as dummy element
       if (length(tabs$history) < 2L) {
@@ -1612,7 +1614,6 @@ server <-
         shinyjs::disable("back_button")
     })
 
-    shinyjs::disable("back_button")
     observeEvent(input$dataset, {
       if (identical(tail(tabs$history, 1L), input$dataset))
         return()
