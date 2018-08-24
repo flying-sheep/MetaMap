@@ -50,8 +50,9 @@ server <-
     #########################
     ###  Reactive values  ###
     #########################
-    tabs <- reactiveValues(last = NULL,
-                           current = NULL)
+
+    # Tabs: We have a back button activated once this list grows
+    tabs <- reactiveValues(history = c('Overview'))
 
     values <-
       reactiveValues(
@@ -1598,17 +1599,25 @@ server <-
 
     ### Back button
     observeEvent(input$back_button, {
-      last <- tabs$last
-      if (is.null(last))
+      # The initially selected tab acts as dummy element
+      if (length(tabs$history) < 2L) {
         return()
+      }
+      # end of stack: last, current
+      last <- tail(tabs$history, 2L)[[1L]]
+      # subtract 2 as we’ll add one again.
+      tabs$history <- head(tabs$history, -2L)
       updateNavbarPage(session, "dataset", selected = last)
+      if (length(tabs$history) == 0L)
+        shinyjs::disable("back_button")
     })
 
     shinyjs::disable("back_button")
     observeEvent(input$dataset, {
-      tabs$last <- tabs$current
-      tabs$current <- input$dataset
-      if (!is.null(tabs$last))
+      if (identical(tail(tabs$history, 1L), input$dataset))
+        return()
+      tabs$history[[length(tabs$history) + 1L]] <- input$dataset
+      if (length(tabs$history) > 1L)
         shinyjs::enable("back_button")
     })
 
