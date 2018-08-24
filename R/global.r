@@ -17,6 +17,7 @@ if (!is_in_package()) {
   library(purrr)
   library(tidyr)
   library(plyr)
+  library(magrittr)
   library(dplyr)
   library(stringr)
   library(phyloseq)
@@ -42,11 +43,15 @@ if (!is_in_package()) {
   require(DESeq2)
 }
 
-pkg_file <- function(path = ".") {
-  if (is_in_package())
-    system.file(path, package = "MetaMap", mustWork = TRUE)
-  else
-    file.path("../inst", path)
+pkg_file <- function(path = ".", validate = TRUE) {
+  resolved <-
+    if (is_in_package())
+      system.file(path, package = "MetaMap", mustWork = TRUE)
+    else
+      file.path("../inst", path)
+  if (validate && !file.exists(resolved))
+    stop('File ', resolved, ' does not exist. Full path: ', normalizePath(resolved))
+  resolved
 }
 
 qstudy.name <- "Query by study"
@@ -61,3 +66,5 @@ ma.name <- "Metafeature abundance"
 tbc.name <- "Taxonomy bar chart"
 sankey.name <- "Sankey diagram"
 krona.name <- "Krona chart"
+
+enableBookmarking('url')

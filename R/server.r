@@ -1604,11 +1604,12 @@ server <-
       updateNavbarPage(session, "dataset", selected = last)
     })
 
+    shinyjs::disable("back_button")
     observeEvent(input$dataset, {
       tabs$last <- tabs$current
       tabs$current <- input$dataset
       if (!is.null(tabs$last))
-        enable(selector = "#back_button")
+        shinyjs::enable("back_button")
     })
 
     ### Show analysis tabs on selection
