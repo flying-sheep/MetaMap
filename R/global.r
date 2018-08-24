@@ -26,7 +26,7 @@ if (!is_in_package()) {
   if(packageVersion("plotly") < "4.7.1.9000") {
     stop("Please install the development version of plotly!
          Last working version: 4.7.1.9000.
-         Run devtools::install_github('ropensci/plotly', force =T)")
+         Run devtools::install_github('ropensci/plotly', force = TRUE)")
   }
   library(ggplot2)
   library(shiny)
@@ -44,7 +44,7 @@ if (!is_in_package()) {
 
 pkg_file <- function(path = ".") {
   if (is_in_package())
-    system.file(path, package = "MetaMap", mustWork = T)
+    system.file(path, package = "MetaMap", mustWork = TRUE)
   else
     file.path("../inst", path)
 }

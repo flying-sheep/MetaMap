@@ -11,18 +11,18 @@
 #' @return A CSV file that will be written in the current directory.
 #' @export
 globalDA <- function(input_dir = pkg_file("data"), max_samples = 1000,
-                     log = F){
+                     log = FALSE){
   output_dir <- file.path("da_results")
-  dir.create(output_dir, showWarnings=F)
+  dir.create(output_dir, showWarnings = FALSE)
 
   r <- runGDA(input_dir, max_samples, log)
 
   r$Result %>%
     .[order(.$Pvalue),] %>%
-    write.csv(file.path(output_dir, "diversity_analysis.csv"), row.names=F)
+    write.csv(file.path(output_dir, "diversity_analysis.csv"), row.names = FALSE)
 
   if(log){
-    write.csv(r$Error, file.path(output_dir, "da_log.csv"), row.names = F)
+    write.csv(r$Error, file.path(output_dir, "da_log.csv"), row.names = FALSE)
   }
 }
 
@@ -33,7 +33,7 @@ runGDA <- function(input_dir, max_samples, log) {
   res <- do.call(rbind, lapply(studies, function(study){
     cls <- class(try(loadPhylo(study, dir = input_dir, envir = environment())))
     if(cls == "try-error" || length(sample_names(phylo)) > max_samples) {
-      error <- rbind(error, c(study, NA, geterrmessage()), stringsAsFactors = F)
+      error <- rbind(error, c(study, NA, geterrmessage()), stringsAsFactors = FALSE)
       if(log) assign("error", error, env)
       return(NULL)
     }
@@ -43,17 +43,17 @@ runGDA <- function(input_dir, max_samples, log) {
       print(paste0(study, "_", attribute))
       # replace NA with unknown
       phylo@sam_data[is.na(phylo@sam_data)] <- "unknown"
-      PVal <- try(diversity_test(phylo, attribute), silent = T)
+      PVal <- try(diversity_test(phylo, attribute), silent = TRUE)
       if(class(PVal) == "try-error"){
-        error <- rbind(error, c(study, attribute, geterrmessage()), stringsAsFactors = F)
+        error <- rbind(error, c(study, attribute, geterrmessage()), stringsAsFactors = FALSE)
         if(log) assign("error", error, env)
-        return(NA)
+        NA
       } else
-        return(PVal)
+        PVal
     }) %>%
       data.frame(Study = rep(study, length(attributes)), Phenotype = names(.), Pvalue = .)
   }))
   if(log)
     colnames(error) <- c("Study", "Phenotype", "Messsage")
-  return(list(Result = res, Error = error))
+  list(Result = res, Error = error)
 }

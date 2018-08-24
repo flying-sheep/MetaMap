@@ -18,7 +18,7 @@ getMetaSRA <- function(sample_info, metaSRA.file) {
 annotateDisease <- function(metaSRA.dt, doid.file) {
   # load and edit doid ontology
   # doid.file <- file.path(dir, "doid.json")
-  term.info <- jsonlite::fromJSON(doid.file, flatten = F)
+  term.info <- jsonlite::fromJSON(doid.file, flatten = FALSE)
   edges <- term.info$graphs$edges[[1]] %>% as.data.table %>%
     .[pred == "is_a"]
   edges[, pred := NULL]
@@ -61,7 +61,7 @@ annotateDisease <- function(metaSRA.dt, doid.file) {
   tmp$A <- NULL
   tmp[, term := as.integer(term)]
   diseaseRun.dt <-
-    tmp[order(term, decreasing = T), .SD[1], by = run]
+    tmp[order(term, decreasing = TRUE), .SD[1], by = run]
   diseaseRun.dt[, term := ifelse(is.na(term), NA, paste0("DOID:", term))]
   # convert some columns to factors
   diseaseRun.dt <-
@@ -75,7 +75,7 @@ annotateDisease <- function(metaSRA.dt, doid.file) {
     diseaseTerms.dt[, -3],
     by.y = c("ontology_term", "label"),
     by.x = c("term", "disease.status"),
-    all.x = T
+    all.x = TRUE
   )
   diseaseRun.dt[, inf_label := !is.na(inf_label)]
   # reorganize diseaseRun.dt
@@ -99,10 +99,10 @@ infectionTerm <- function(term, edges) {
     return(term)
   tmp <- edges[from == term, to]
   while (length(tmp) != 0) {
-    found <- F
+    found <- FALSE
     for (x in tmp) {
       if (x %in% iaKids.ids) {
-        found <- T
+        found <- TRUE
         tmp <- x
         break
       }
@@ -113,5 +113,5 @@ infectionTerm <- function(term, edges) {
   }
   if (length(tmp) == 0)
     tmp <- NA
-  return(tmp)
+  tmp
 }

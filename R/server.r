@@ -21,7 +21,7 @@ server <-
            session,
            DIR = pkg_file("data"),
            MAX_SAMPLES = 1000,
-           DESEQ_PARALLEL = F) {
+           DESEQ_PARALLEL = FALSE) {
     ####################
     ### Prepare data ###
     ####################
@@ -92,7 +92,7 @@ server <-
           source_filter = NULL
         ),
         args_history = list(),
-        undo = F,
+        undo = FALSE,
         cond = empty,
         attribute = empty
       )
@@ -122,7 +122,7 @@ server <-
         NULL
       })
       output$cond1 <- reactive({
-        F
+        FALSE
       })
     }
 
@@ -257,11 +257,11 @@ server <-
           autoWidth = TRUE,
           pageLength = 5,
           scrollX = TRUE,
-          searchHighlight = T
+          searchHighlight = TRUE
         ),
         rownames = FALSE,
         selection = list(mode = 'single', selected = selected),
-        escape = F
+        escape = FALSE
       )
     })
 
@@ -302,15 +302,15 @@ server <-
         setProgress(message = 'Plotting')
         p <- mfPlot(mf_tbl)
         isolate(plots$mfPlot <- p)
-        isolate(values$mf_selected <- rep(F, nrow(mf_tbl)))
+        isolate(values$mf_selected <- rep(FALSE, nrow(mf_tbl)))
         isolate(names(values$mf_selected) <-
                   rownames(mf_tbl))
         if (selected != "") {
-          p$data$Selected <- F
-          p$data[selected, "Selected"] <- T
+          p$data$Selected <- FALSE
+          p$data[selected, "Selected"] <- TRUE
           p <- p + aes(color = Selected) +
             scale_color_manual(values = c("black", "red"))
-          isolate(values$mf_selected[selected] <- T)
+          isolate(values$mf_selected[selected] <- TRUE)
 
           metafeature <- selected
 
@@ -321,7 +321,7 @@ server <-
           df <- study_info[inds, showColumns]
           df$`Relative Abundance` <-
             as.numeric(abundances[study_info$study[inds]])
-          df <- df[order(df$`Relative Abundance`, decreasing = T),]
+          df <- df[order(df$`Relative Abundance`, decreasing = TRUE),]
 
           output$mfName <-
             renderUI(HTML(
@@ -339,11 +339,11 @@ server <-
                 autoWidth = TRUE,
                 pageLength = 5,
                 scrollX = TRUE,
-                searchHighlight = T
+                searchHighlight = TRUE
               ),
               selection = 'single',
-              escape = F,
-              rownames = F
+              escape = FALSE,
+              rownames = FALSE
             )
           })
         } else {
@@ -413,7 +413,7 @@ server <-
             "Study alias:")
         rownames(df) <- paste0("<b>", rownames(df), "</b>")
         df
-      }, rownames = T, colnames = F, sanitize.text.function = function(x)
+      }, rownames = TRUE, colnames = FALSE, sanitize.text.function = function(x)
         x)
 
       # load phylo from .RData file
@@ -477,7 +477,7 @@ server <-
           empty
       else
         values$attributes
-      selectInput('attribute_da', 'Color by', attributes, multiple = T, selected = attributes[1])
+      selectInput('attribute_da', 'Color by', attributes, multiple = TRUE, selected = attributes[1])
     })
 
     output$diversity <- renderPlotly({
@@ -495,7 +495,7 @@ server <-
         if(length(attribute) > 1){
           dt <- data.frame(phylo@sam_data)
           col.name <- paste(attribute, collapse = "__")
-          dt <- do.call(unite, list(dt, col.name, attribute, remove = F, sep="__"))
+          dt <- do.call(unite, list(dt, col.name, attribute, remove = FALSE, sep = "__"))
           attribute <- col.name
           phylo@sam_data <- sample_data(dt)
         }
@@ -516,11 +516,11 @@ server <-
       if(length(attribute) > 1){
         dt <- data.frame(phylo@sam_data)
         col.name <- paste(attribute, collapse = "__")
-        dt <- do.call(unite, list(dt, col.name, attribute, remove = F, sep="__"))
+        dt <- do.call(unite, list(dt, col.name, attribute, remove = FALSE, sep = "__"))
         attribute <- col.name
         phylo@sam_data <- sample_data(dt)
       }
-      pval <- try(diversity_test(phylo, attribute), silent = T)
+      pval <- try(diversity_test(phylo, attribute), silent = TRUE)
       if (class(pval) == "try-error")
         return()
       HTML(paste0("<center><b><p>ACE p-value: ", round(pval[1], 10),
@@ -537,7 +537,7 @@ server <-
           empty
       else
         values$attributes
-      selectInput('attribute_de', 'Select Attribute', attributes, multiple = T, selected = attributes[1])
+      selectInput('attribute_de', 'Select Attribute', attributes, multiple = TRUE, selected = attributes[1])
     })
 
     output$de_conds <- renderUI({
@@ -548,7 +548,7 @@ server <-
       if(length(attribute) > 1){
         dt <- data.frame(phylo@sam_data)
         col.name <- paste(attribute, collapse = "__")
-        dt <- do.call(unite, list(dt, col.name, attribute, remove = F, sep="__"))
+        dt <- do.call(unite, list(dt, col.name, attribute, remove = FALSE, sep = "__"))
         attribute <- col.name
         phylo@sam_data <- sample_data(dt)
       }
@@ -557,7 +557,7 @@ server <-
       selectInput(
         'de_conds',
         label = 'Conditions',
-        multiple = T,
+        multiple = TRUE,
         choices = c(Conditions = '', conditions)
       )
     })
@@ -615,7 +615,7 @@ server <-
         if(length(attribute) > 1){
           dt <- data.frame(phylo@sam_data)
           col.name <- paste(attribute, collapse = "__")
-          dt <- do.call(unite, list(dt, col.name, attribute, remove = F, sep="__"))
+          dt <- do.call(unite, list(dt, col.name, attribute, remove = FALSE, sep = "__"))
           attribute <- col.name
           phylo@sam_data <- sample_data(dt)
         }
@@ -646,7 +646,7 @@ server <-
               pageLength = 50,
               scrollX = TRUE,
               scrollY = "500px",
-              searchHighlight = T,
+              searchHighlight = TRUE,
               dom = '<"top"Bf>rt<"bottom"lip><"clear">',
               buttons = list('print',
                              list(
@@ -676,12 +676,12 @@ server <-
               )
             )
           } else{
-            p$data$selected <- rep(F, nrow(p$data))
+            p$data$selected <- rep(FALSE, nrow(p$data))
             if (all(!is.null(values$species_diff),
                     values$species_diff != "")) {
               # print(taxids2names(values$phylo, values$species_diff))
               p$data[which(p$data$Species %in% taxids2names(values$phylo, values$species_diff)), "selected"] <-
-                T
+                TRUE
               p <-  p + aes(color = selected) +
                 scale_color_manual(values = c("black", "red"))
             }
@@ -692,7 +692,7 @@ server <-
           }
         })
       })
-      # output$de_stats <- renderTable(rownames = T, digits = 5, {
+      # output$de_stats <- renderTable(rownames = TRUE, digits = 5, {
       #   if(any(is.null(input$select_species_diff), input$select_species_diff == ""))
       #     return(NULL)
       #   # assign("ids", input$select_species_diff, global_env())
@@ -736,7 +736,7 @@ server <-
       if(length(attribute) > 1){
         dt <- data.frame(phylo@sam_data)
         col.name <- paste(attribute, collapse = "__")
-        dt <- do.call(unite, list(dt, col.name, attribute, remove = F, sep="__"))
+        dt <- do.call(unite, list(dt, col.name, attribute, remove = FALSE, sep = "__"))
         attribute <- col.name
         phylo@sam_data <- sample_data(dt)
       }
@@ -770,7 +770,7 @@ server <-
           empty
       else
         values$attributes
-      selectInput('attribute_dr', 'Color by', attributes, multiple = T, selected = attributes[1])
+      selectInput('attribute_dr', 'Color by', attributes, multiple = TRUE, selected = attributes[1])
     })
 
     output$dimred <- renderPlotly({
@@ -799,7 +799,7 @@ server <-
         if(length(color) > 1){
           dt <- data.frame(phylo@sam_data)
           col.name <- paste(color, collapse = "__")
-          dt <- do.call(unite, list(dt, col.name, color, remove = F, sep="__"))
+          dt <- do.call(unite, list(dt, col.name, color, remove = FALSE, sep = "__"))
           color <- col.name
           phylo@sam_data <- sample_data(dt)
         }
@@ -824,7 +824,7 @@ server <-
         return(NULL)
       }
       taxa_table <-
-        data.frame(phylo@tax_table, stringsAsFactors = F)
+        data.frame(phylo@tax_table, stringsAsFactors = FALSE)
       taxa_table[is.na(taxa_table)] <- "Unknown"
       choices <- lapply(colnames(taxa_table), function(level) {
         tmp <- taxa_table[, level] %>% unlist %>% unique
@@ -833,7 +833,7 @@ server <-
 
       selectInput(
         'mf_mc',
-        multiple = F,
+        multiple = FALSE,
         label = 'Select metafeature of interest',
         choices = c(Metafeatures = '', choices)
       )
@@ -847,7 +847,7 @@ server <-
 
       selectInput(
         'level_mc',
-        multiple = F,
+        multiple = FALSE,
         label = 'Select Classification level to test against',
         choices = c(Levels = '', phylo@tax_table %>% colnames)
       )
@@ -862,7 +862,7 @@ server <-
         showModal(modalDialog(
           titl = "Important Message",
           'Please give some input!',
-          easyClose = T
+          easyClose = TRUE
         ))
         return(NULL)
       }
@@ -880,7 +880,7 @@ server <-
           showModal(modalDialog(
             titl = "Important Message",
             'An error has occured!',
-            easyClose = T
+            easyClose = TRUE
           ))
           return(NULL)
         }
@@ -906,7 +906,7 @@ server <-
           pageLength = 50,
           scrollX = TRUE,
           scrollY = "500px",
-          searchHighlight = T,
+          searchHighlight = TRUE,
           dom = '<"top"Bf>rt<"bottom"lip><"clear">',
           buttons = list('print',
                          list(
@@ -918,7 +918,7 @@ server <-
                          ))
         ),
         selection = list(mode = 'multiple'),
-        rownames = F
+        rownames = FALSE
       )
     })
 
@@ -965,7 +965,7 @@ server <-
 
       selectInput(
         'select_species_diff',
-        multiple = T,
+        multiple = TRUE,
         label = 'Select Metafeatures',
         choices = c(Metafeatures = '', setNames(taxa_names(phylo), phylo@tax_table[, "Species"]))
       )
@@ -980,7 +980,7 @@ server <-
           empty
       else
         c(empty, values$attributes)
-      selectInput('attribute_ma', 'Color by', attributes, multiple = T, selected = attributes[1])
+      selectInput('attribute_ma', 'Color by', attributes, multiple = TRUE, selected = attributes[1])
     })
 
     output$level_ma <- renderUI({
@@ -1005,7 +1005,7 @@ server <-
         }
         dt <- data.frame(phylo@sam_data)
         col.name <- paste(attribute, collapse = "__")
-        dt <- do.call(unite, list(dt, col.name, attribute, remove = F, sep="__"))
+        dt <- do.call(unite, list(dt, col.name, attribute, remove = FALSE, sep = "__"))
         attribute <- col.name
         phylo@sam_data <- sample_data(dt)
       }
@@ -1043,7 +1043,7 @@ server <-
           empty
       else
         c(values$attributes)
-      selectInput('attribute_tbc', 'Select Grouping', attributes, multiple = T, selected = "sraID")
+      selectInput('attribute_tbc', 'Select Grouping', attributes, multiple = TRUE, selected = "sraID")
     })
 
     output$level_tbc <- renderUI({
@@ -1089,7 +1089,7 @@ server <-
       if(length(attribute) > 1){
         dt <- data.frame(phylo@sam_data)
         col.name <- paste(attribute, collapse = "__")
-        dt <- do.call(unite, list(dt, col.name, attribute, remove = F, sep="__"))
+        dt <- do.call(unite, list(dt, col.name, attribute, remove = FALSE, sep = "__"))
         attribute <- col.name
         phylo@sam_data <- sample_data(dt)
       }
@@ -1097,7 +1097,7 @@ server <-
       output$taxa_plot <- renderPlotly({
         withProgress(session = session, value = 0.5, {
           setProgress(message = 'Calculation in progress')
-          p <- plot_taxa(phylo, attribute, level, relative = F)
+          p <- plot_taxa(phylo, attribute, level, relative = FALSE)
           isolate(plots$taxa_plot <- p)
           p
         })
@@ -1106,13 +1106,13 @@ server <-
       output$ntaxa_plot <- renderPlotly({
         withProgress(session = session, value = 0.5, {
           setProgress(message = 'Calculation in progress')
-          p <- plot_taxa(phylo, attribute, level, relative = T)
+          p <- plot_taxa(phylo, attribute, level, relative = TRUE)
           isolate(plots$ntaxa_plot <- p)
           p
         })
       })
       output$cond1 <- reactive({
-        T
+        TRUE
       })
       outputOptions(output, "cond1", suspendWhenHidden = FALSE)
     })
@@ -1190,7 +1190,7 @@ server <-
           modalDialog(
             titl = "Important Message",
             'The "Target" should be a subclass of the "Source".',
-            easyClose = T
+            easyClose = TRUE
           )
         )
         return()
@@ -1234,7 +1234,7 @@ server <-
           modalDialog(
             title = "Important Message",
             'Can not go any deeper than the class "Species"',
-            easyClose = T
+            easyClose = TRUE
           )
         )
         return()
@@ -1282,7 +1282,7 @@ server <-
                     sankey$args)
         } else{
           # print("test")
-          sankey$undo <- F
+          sankey$undo <- FALSE
         }
         newArgs <- sankey$newArgs
         isolate(sankey$args <- newArgs)
@@ -1316,7 +1316,7 @@ server <-
     })
 
     observeEvent(input$sankey_undo_button, {
-      sankey$undo <- T
+      sankey$undo <- TRUE
       sankey$newArgs <-
         sankey$args_history[[length(sankey$args_history)]]
       sankey$args_history <-
@@ -1360,7 +1360,7 @@ server <-
         file <- tempfile()
         phylo@sam_data[, attribute] <-
           make.names(unlist(phylo@sam_data[, attribute]))
-        try(plot_krona(phylo, file, attribute, trim = T))
+        try(plot_krona(phylo, file, attribute, trim = TRUE))
         if (file.exists(paste0(file, ".html"))) {
           input <- sourcetools::read(paste0(file, ".html"))
         } else {
@@ -1395,7 +1395,7 @@ server <-
           pageLength = 25,
           scrollX = TRUE,
           scrollY = "100%",
-          searchHighlight = T,
+          searchHighlight = TRUE,
           dom = '<"top"Bf>rt<"bottom"lip><"clear">',
           buttons = list('print',
                          list(
@@ -1429,7 +1429,7 @@ server <-
       fun <- ifelse(action == "Keep", `==`, `!=`)
       fun2 <- ifelse(action == "Keep", any, all)
 
-      sam_data <- data.frame(phylo@sam_data, stringsAsFactors = F)
+      sam_data <- data.frame(phylo@sam_data, stringsAsFactors = FALSE)
       sam_data[is.na(sam_data)] <- "Unknown"
 
       environment(subset_samples) <- environment()
@@ -1444,7 +1444,7 @@ server <-
         showModal(modalDialog(
           titl = "Important Message",
           'Empty table. Try again!',
-          easyClose = T
+          easyClose = TRUE
         ))
         return(NULL)
       }
@@ -1459,7 +1459,7 @@ server <-
       if (is.na(phylo)) {
         return(NULL)
       }
-      sam_data <- data.frame(phylo@sam_data, stringsAsFactors = F)
+      sam_data <- data.frame(phylo@sam_data, stringsAsFactors = FALSE)
       sam_data[is.na(sam_data)] <- "Unknown"
 
       choices <- lapply(attributes, function(attribute) {
@@ -1469,7 +1469,7 @@ server <-
 
       selectInput(
         'ss_text',
-        multiple = T,
+        multiple = TRUE,
         label = '',
         choices = c(Attribute = '', choices)
       )
@@ -1517,7 +1517,7 @@ server <-
         return(DT::datatable(data.frame(Samples = "Empty"), selection = "none"))
       }
       taxa_table <-
-        values$phylo@tax_table %>% data.frame(stringsAsFactors = F)
+        values$phylo@tax_table %>% data.frame(stringsAsFactors = FALSE)
       taxa_table[is.na(taxa_table)] <- "Unknown"
       DT::datatable(
         taxa_table,
@@ -1525,7 +1525,7 @@ server <-
           pageLength = 25,
           scrollX = TRUE,
           scrollY = "100%",
-          searchHighlight = T
+          searchHighlight = TRUE
         ),
         rownames = FALSE,
         selection = "none"
@@ -1546,7 +1546,7 @@ server <-
       fun2 <- ifelse(action == "Keep", any, all)
 
       taxa_table <-
-        data.frame(phylo@tax_table, stringsAsFactors = F)
+        data.frame(phylo@tax_table, stringsAsFactors = FALSE)
       taxa_table[is.na(taxa_table)] <- "Unknown"
 
       environment(subset_taxa) <- environment()
@@ -1562,7 +1562,7 @@ server <-
         showModal(modalDialog(
           titl = "Important Message",
           'Empty table. Try again!',
-          easyClose = T
+          easyClose = TRUE
         ))
         return(NULL)
       }
@@ -1576,7 +1576,7 @@ server <-
         return(NULL)
       }
       taxa_table <-
-        data.frame(phylo@tax_table, stringsAsFactors = F)
+        data.frame(phylo@tax_table, stringsAsFactors = FALSE)
       taxa_table[is.na(taxa_table)] <- "Unknown"
       choices <- lapply(colnames(taxa_table), function(level) {
         tmp <- taxa_table[, level] %>% unlist %>% unique
@@ -1585,7 +1585,7 @@ server <-
 
       selectInput(
         'sm_text',
-        multiple = T,
+        multiple = TRUE,
         label = '',
         choices = c(Metafeatures = '', choices)
       )
@@ -1615,10 +1615,10 @@ server <-
     observe({
       if (!is.null(values$phylo)) {
         shinyjs::show(selector = "#dataset li a[data-value='<div id=\"study_title\" class=\"shiny-html-output\"></div>", anim =
-                        F)
+                        FALSE)
         shinyjs::show(selector = "#dataset li a[data-value='Customize Data']", anim =
-                        T)
-        shinyjs::show(selector = "#dataset li a[data-value='Analysis']", anim = T)
+                        TRUE)
+        shinyjs::show(selector = "#dataset li a[data-value='Analysis']", anim = TRUE)
       }
     })
 
@@ -1659,8 +1659,8 @@ server <-
             phylo@sam_data %>% data.frame() %>% .[, c("sraID", unlist(attributes), "Total.Reads")]
           write.csv(samples,
                     samples_fileName,
-                    row.names = F,
-                    col.names = T)
+                    row.names = FALSE,
+                    col.names = TRUE)
           files <- c(files, samples_fileName)
         }
         if ("OTU Counts" %in% checkList) {
@@ -1672,8 +1672,8 @@ server <-
           counts_fileName <- paste0(values$study, "_counts.csv")
           write.csv(counts,
                     counts_fileName,
-                    row.names = T,
-                    col.names = T)
+                    row.names = TRUE,
+                    col.names = TRUE)
           files <- c(files, counts_fileName)
         }
         if ("Feature info" %in% checkList) {
@@ -1682,8 +1682,8 @@ server <-
             paste0(values$study, "_feature_info.csv")
           write.csv(taxa,
                     taxa_fileName,
-                    row.names = F,
-                    col.names = T)
+                    row.names = FALSE,
+                    col.names = TRUE)
           files <- c(files, taxa_fileName)
         }
         zip(file, files)
@@ -1696,7 +1696,7 @@ server <-
       } else{
         enable("download_samples")
       }
-    }, ignoreNULL = F)
+    }, ignoreNULL = FALSE)
 
     ### Reload button
     output$reload_button <- renderUI({

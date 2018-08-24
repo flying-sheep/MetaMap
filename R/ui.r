@@ -11,7 +11,7 @@
 navbar <- navbarPage(
   theme = shinytheme("flatly"),
   position = "fixed-top",
-  fluid = T,
+  fluid = TRUE,
   # inverse = TRUE,
   title = div(id="title-section", actionButton(
     "back_button", "", icon = icon("arrow-left", "fa-2x")
@@ -202,7 +202,7 @@ navbar <- navbarPage(
       # ,uiOutput('select_species_abundance'),
       # plotOutput("abundances_plot")
     ),
-    #attribute, level, relative = T
+    #attribute, level, relative = TRUE
     tabPanel(
       tbc.name,
       fluidRow(

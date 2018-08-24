@@ -11,7 +11,7 @@
 #'
 #' @return A bar plot grouped by \code{attribute}.
 #' @export
-plot_top_species <- function(phylo, top_n = 10L, attribute, level = "Species", test=F) {
+plot_top_species <- function(phylo, top_n = 10L, attribute, level = "Species", test = FALSE) {
   # assign("attribute",attribute, global_env())
   # assign("phylo",phylo, global_env())
   # assign("level",level, global_env())
@@ -24,9 +24,9 @@ plot_top_species <- function(phylo, top_n = 10L, attribute, level = "Species", t
 
   # Merge taxa of the same level
   if(!level %in% c("Species", "TaxID")){
-    dt <- as.data.table(dt, keep.rownames=T)
+    dt <- as.data.table(dt, keep.rownames = TRUE)
     dt[, level := (phylo@tax_table[, level] %>% as.character())]
-    dt <- dt[, as.data.table(t(colSums(.SD[,-1, with=F]))),by=level]
+    dt <- dt[, as.data.table(t(colSums(.SD[,-1, with = FALSE]))), by = level]
     dt <- dt[!is.na(level)]
     dt <- as.data.frame(dt)
     rownames(dt) <- dt$level
@@ -49,7 +49,7 @@ plot_top_species <- function(phylo, top_n = 10L, attribute, level = "Species", t
     p.values <- tmp[, .(p.value = wilcox.test(value ~ Selection)$p.value), by = "Kingdom"]
     p.values <- p.values$p.value %>% setNames(p.values$Kingdom)
   } else {
-    test <- F
+    test <- FALSE
   }
 
   # Implemented basically summarise_all using data.table to speed it up
@@ -74,7 +74,7 @@ plot_top_species <- function(phylo, top_n = 10L, attribute, level = "Species", t
         SD = Value[grep("_sd", key)],
         Selection = Selection[grep("_mean", key)],
         Mf = str_sub(key[grep("_mean", key)], 1,-6),
-        stringsAsFactors = F
+        stringsAsFactors = FALSE
       )
     ) %>%
     {
@@ -85,7 +85,7 @@ plot_top_species <- function(phylo, top_n = 10L, attribute, level = "Species", t
     mutate(Mean1 = mean(Mean)) %>%
     arrange(desc(Mean1)) %>%
     ungroup %>%
-    filter(Mf %in% (unique(Mf)[1:min(top_n, n())])) %>%
+    filter(Mf %in% head(unique(Mf), min(top_n, n()))) %>%
     group_by(Selection) %>%
     arrange(desc(Mean)) %>%
     group_by(Selection) %>%
@@ -170,7 +170,7 @@ plot_sankey <-
            target = "Phylum",
            level_filter = NULL,
            source_filter = NULL,
-           normalized = F) {
+           normalized = FALSE) {
     if (is.null(phylo))
       return(NULL)
 
@@ -252,7 +252,7 @@ plot_sankey <-
 #'
 #' @return A barplot grouped by \code{attribute}.
 #' @export
-plot_taxa <- function(phylo, attribute, level, relative = T) {
+plot_taxa <- function(phylo, attribute, level, relative = TRUE) {
   # assign("phylo", phylo, globalenv())
   # assign("attribute", attribute, globalenv())
   # assign("level", level, globalenv())
@@ -261,13 +261,13 @@ plot_taxa <- function(phylo, attribute, level, relative = T) {
     return(NULL)
 
   phylo@tax_table <- tax_table(as.matrix(clean_tax_table(phylo@tax_table)))
-  phylo@otu_table <- otu_table(relativeCounts(phylo), taxa_are_rows = T)
+  phylo@otu_table <- otu_table(relativeCounts(phylo), taxa_are_rows = TRUE)
 
     # get top 10 most abundant taxa
   taxa_sums <- taxa_sums(phylo)
-  taxa <- data.frame(Abundance = taxa_sums, Level = as.character(phylo@tax_table[names(taxa_sums),level]), stringsAsFactors=F) %>%
+  taxa <- data.frame(Abundance = taxa_sums, Level = as.character(phylo@tax_table[names(taxa_sums),level]), stringsAsFactors = FALSE) %>%
     group_by(Level) %>%
-    summarise(Abundance= sum(Abundance)) %>% arrange(desc(Abundance)) %>%
+    summarise(Abundance = sum(Abundance)) %>% arrange(desc(Abundance)) %>%
     .[1:min(nrow(.), 10), "Level"] %>% unlist
   # environment(subset_taxa) <- environment()
   # phylo <- subset_taxa(phylo, phylo@tax_table[,level] %in% taxa)
@@ -387,14 +387,14 @@ plot_mds <- function(phylo, color) {
   # assign("color", color, globalenv())
   if (is.null(phylo))
     return(NULL)
-  phylo@otu_table <- otu_table(relativeCounts(phylo), taxa_are_rows = T)
+  phylo@otu_table <- otu_table(relativeCounts(phylo), taxa_are_rows = TRUE)
   sam_dt_names <- names(phylo@sam_data)
   attrs <-
     c("Axis.1",
       "Axis.2",
-      sam_dt_names[sam_dt_names != "All"]) %>% setNames(c("x", "y", paste0("label", 1:(length(
-        .
-      ) - 2)))) %>% as.list
+      sam_dt_names[sam_dt_names != "All"]) %>%
+        setNames(c("x", "y", paste0("label", seq_len(length(.) - 2)))) %>%
+        as.list()
   p <-
     phyloseq::plot_ordination(phylo, ordinate(phylo, 'MDS', phyloseq::distance(phylo, 'jsd')), color = color) +
     do.call(aes_string, attrs)
@@ -421,9 +421,9 @@ plot_alpha <- function(phylo, color) {
   attrs <-
     c("samples",
       "value",
-      sam_dt_names[!sam_dt_names %in% c("All", "sraID")]) %>% setNames(c("x", "y", paste0("label", 1:(length(
-        .
-      ) - 2)))) %>% as.list
+      sam_dt_names[!sam_dt_names %in% c("All", "sraID")]) %>%
+        setNames(c("x", "y", paste0("label", seq_len(length(.) - 2)))) %>%
+        as.list()
   p <- plot_richness(phylo, measures = c("Shannon", "ACE"), color = color)
 
   # sort by richness
