@@ -1608,7 +1608,7 @@ server <-
       # subtract 2 as we’ll add one again.
       tabs$history <- head(tabs$history, -2L)
       updateNavbarPage(session, "dataset", selected = last)
-      if (length(tabs$history) == 0L)
+      if (length(tabs$history) <= 1L)
         shinyjs::disable("back_button")
     })
 
