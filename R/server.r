@@ -161,7 +161,7 @@ server <-
       renderUI(
         HTML(
           '<h1 style="color: #5e9ca0;"><span style="color: #000000;">MetaMap - exploring the unexplored</span></h1>
-          <p><span style="color: #000000;">This interactive web tool facilitates exploration of the MetaMap resource (<a href="https://www.biorxiv.org/content/early/2018/02/22/269092">Simon et al. bioRxiv</a>). In this large scale analysis raw human RNA-seq data from over 400 studies relevant to human disease were screened for microbial and viral reads. The data were generated using a two-step alignment pipeline outlined below:</span></p>
+          <p><span style="color: #000000;">This interactive web tool facilitates exploration of the MetaMap resource (<a href="https://academic.oup.com/gigascience/article/7/6/giy070/5036539">Simon et al.</a>). In this large scale re-analysis raw archived RNA-seq data from over 400 studies relevant to human disease were screened for microbial and viral reads. The data were generated using a two-step alignment pipeline outlined below:</span></p>
           <h2 style="color: #2e6c80;">&nbsp;</h2>
           <p>&nbsp;</p>'
         )
@@ -185,39 +185,42 @@ server <-
 
     help[[dimred.name]] <-
       HTML(
-        '<p style="text-align: center"><strong>Multi-dimensional scaling plot visualized metafeatures counts of samples in reduced dimensions. To change the coloring select sample attribute from <em>Color by</em> drop-down menu.</strong></p>'
+        '<p style="text-align: center"><strong>The multi-dimensional scaling plot visualizes samples in reduced dimensions based on metafeature abundance levels. To change the coloring the user can select sample attribute from <em>Color by</em> drop-down menu.</strong></p>'
       )
     help[[da.name]] <-
       HTML(
-        '<p style="text-align: center"><strong>To change the coloring select sample attribute from <em>Color by</em> drop-down menu. The displayed p-value is calculated from an analysis of variance between the diversity values and the selected sample attribute.</strong></p>'
+        '<p style="text-align: center"><strong>The diversity analysis plots visualize alpha diversity measures across the samples. To change the coloring select sample attribute from <em>Color by</em> drop-down menu. The displayed p-value is calculated from an analysis of variance between the diversity values and the selected sample attribute.</strong></p>'
       )
     help[[de.name]] <-
       HTML(
-        '<p style="text-align: center"><strong>To plot metafeature expression select a metafeature using the <em>Species</em> textfield. To group samples by attibute select attribute from <em>Select Attribute</em> drop-down menu. To statistically evaluate differential expression of all metafeatures select the conditions you wish to compare by using the <em>Conditions</em> textfield. To run differential expression analysis click on the <em>Analyze</em> button. Please note this may take a couple of minutes depending on the data set size. You can also select points on the resulting volcano-plot to plot the expression of the respective metafeature.</strong></p>'
+        '<p style="text-align: center"><strong>To plot metafeature abundance the user can select a metafeature using the <em>Species</em> textfield. To define a sample grouping the user can select an attribute from <em>Select Attribute</em> drop-down menu. To perform global differential metafeature abundance analysis the user can define the conditions for comparison by using the <em>Conditions</em> textfield. To execute the differential metafeature abundance analysis click on the <em>Analyze</em> button. Please note that this analysis may take a couple of minutes depending on the data set size. The user can select metafeatures by clicking on the resulting volcano-plot.</strong></p>'
       )
 
     help[[mc.name]] <-
       HTML(
-        '<p style="text-align: center"><strong>To statistically test the correlation between a given metafeature and all other metafeatures at a specific classification level, use the <em>Select metafeature</em> textfield and the <em>Select Classification level</em> drop-down menu respectively. A correlation table will be given as output. By selecting a metafeature from the table, you can view a scatter plot of the relative abundance of the given metafeatures in each sample.</strong></p>'
+        '<p style="text-align: center"><strong>To statistically test the correlation between a given metafeature and all other metafeatures at a speciifc classification level, use the <em>Select metafeature</em> textfield and the <em>Select Classification level</em> drop-down menu respectively. The resulting table contains the correlation statistics. By clicking on a row in the table, a scatter plot will be produced showing the abundance levels for the two metafeatures across all samples.</strong></p>'
       )
 
     help[[ma.name]] <-
       HTML(
-        '<p style="text-align: center"><strong>The barplot shows the mean relative abundance levels of the top 10 metafeatures. To change the amount of metafeatures to show select a number from the <em>Top N</em> drop-down menu. To change the grouping select sample attribute from <em>Color by</em> drop-down menu. To change the classification level of the metafeatures use the <em>Select Classification Level</em> drop-down menu.</strong></p>'
+        '<p style="text-align: center"><strong>The barplot shows the mean relative abundance levels of the top 10 metafeatures. To change the number of metafeatures to be displayed, the user can select a number from the <em>Top N</em> drop-down menu. To change the sample grouping, the user can select an attribute from <em>Color by</em> drop-down menu. To change the classification level of the metafeatures use the <em>Select Classification Level</em> drop-down menu.</strong></p>'
       )
     help[[tbc.name]] <-
       HTML(
-        '<p style="text-align: center"><strong>To plot the Taxonomy Bar Chart click on <em>Generate</em>. To group samples together select sample attribute from <em>Select Grouping</em> drop-down menu. To change the coloring select a classification level from <em>Select Classification Level</em> drop-down menu. You can toggle between displaying absolute sequence abundances (by clicking the <em>Value</em> button) or normalized/proportional abundances (by clicking the <em>%</em> button).</strong></p>'
+        '<p style="text-align: center"><strong>To plot the Taxonomy Bar Chart click on <em>Generate</em>. To group samples together, the user can select an attribute from the <em>Select Grouping</em> drop-down menu. To change the classification level, the user can select from the <em>Select Classification Level</em> drop-down menu. The user can switch between displaying absolute abundance levels and proportions by clicking the <em>Absolute counts</em> an <em>Relative proportion</em> tabs.</strong></p>'
       )
     help[[qmetafeature.name]] <-
       HTML(
-        '<p style="text-align: center"><strong>The scatter plot shows frequency of detection and maximal metafeature abundance across all studies on X and Y axes, respectively. The user can select a metafeature by 1) searching for the species name in the text field or 2) clicking on a data point in the plot. After selection of metafeature studies detecting the selected metafeature are listed below the plot. By clicking on the row in the list study is selected for further analysis.</strong></p>'
+        '<p style="text-align: center"><strong>The scatter plot shows the frequency of detection and maximal metafeature abundance across all studies on X and Y axes, respectively. The user can select a metafeature by 1) searching for the species name in the text field at the top left or 2) by clicking on a data point in the plot. After selecting a specific metafeature, a table of studies detecting the selected metafeature will appear below the plot. The user can select a study by clicking on a row in the table.</strong></p>'
       )
     help[[sankey.name]] <-
       HTML(
-        '<p style="text-align: center"><strong>Sankey diagram shows the average metafeature abundance across samples or selected grouping. The user can "walk" through the Sankey tree by 1) clicking on the graph or 2) selecting <em>Source</em> and <em>Target</em> phylogenetic levels and clicking on <em>Apply</em>.</strong></p>'
+        '<p style="text-align: center"><strong>The Sankey diagram shows the average metafeature abundance across all samples or a selected grouping. The user can "walk" through the Sankey tree by 1) clicking on the graph or 2) selecting <em>Source</em> and <em>Target</em> phylogenetic levels and clicking on <em>Apply</em>.</strong></p>'
       )
-
+help[[krona.name]] <-
+      HTML(
+        '<p style="text-align: center"><strong>The user can generate Krona plots for all samples or a selected grouping by using the <em>Select attribute</em> drop-down menu and clicking on the <em>Plot</em> button.</strong></p>'
+      )
     output$help <- renderUI({
       tab <- input$dataset
       help[[tab]]
