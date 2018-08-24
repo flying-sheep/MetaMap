@@ -13,7 +13,7 @@
 transformData <-
   function(tables,
            output_dir = pkg_file("data"),
-           log = F) {
+           log = FALSE) {
     metaSRA.file <- ""
     doid.file <- ""
     if (class(tables) == "character") {
@@ -33,7 +33,7 @@ transformData <-
     load(tables$counts)
     load(tables$feature_info)
 
-    dir.create(output_dir, showWarnings = F)
+    dir.create(output_dir, showWarnings = FALSE)
 
     # Use metaSRA annotation
     if(file.exists(metaSRA.file)){
@@ -54,7 +54,7 @@ transformData <-
       }
     }
 
-    dir.create(file.path(output_dir, "studies"), showWarnings = F)
+    dir.create(file.path(output_dir, "studies"), showWarnings = FALSE)
 
     lineage <- generateLineage(feature_info)
 
@@ -66,7 +66,7 @@ transformData <-
              log)
 
     if (log) {
-      write.table(r, file.path(output_dir, "errors.txt"), row.names = F)
+      write.table(r, file.path(output_dir, "errors.txt"), row.names = FALSE)
     }
     #add column sample_size to study_info
     study_info$sample_size <-
@@ -115,7 +115,7 @@ runDG <-
         try(generatePhylo(study, counts, sample_info, lineage))
       if (class(phylo) == "try-error") {
         error <-
-          rbind(error, c(study, geterrmessage()), stringsAsFactors = F)
+          rbind(error, c(study, geterrmessage()), stringsAsFactors = FALSE)
         if (log)
           assign("error", error, env)
       } else{
@@ -123,6 +123,6 @@ runDG <-
       }
       # print(phylo)
     })
-    try(colnames(error) <- c("Study", "Message"), silent = T)
+    try(colnames(error) <- c("Study", "Message"), silent = TRUE)
     error
   }

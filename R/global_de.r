@@ -11,14 +11,14 @@
 #' @return CSV files containing DESeq2 tables.
 #' @export
 globalDE <- function(input_dir = pkg_file("data"), max_samples = 1000,
-                     log = F){
+                     log = FALSE){
   output_dir <- file.path("de_results")
-  dir.create(output_dir, showWarnings=F)
+  dir.create(output_dir, showWarnings = FALSE)
 
   r <- runGDE(input_dir, output_dir, max_samples, log)
 
   if(log){
-    write.csv(r, file.path(output_dir, "de_log.csv"), row.names = F)
+    write.csv(r, file.path(output_dir, "de_log.csv"), row.names = FALSE)
   }
 }
 
@@ -29,7 +29,7 @@ runGDE <- function(input_dir, output_dir, max_samples, log) {
   lapply(studies, function(study){
     cls <- class(try(loadPhylo(study, dir = input_dir, envir = environment())))
     if(cls == "try-error" || length(sample_names(phylo)) > max_samples) {
-      error <- rbind(error, c(study, NA, geterrmessage()), stringsAsFactors = F)
+      error <- rbind(error, c(study, NA, geterrmessage()), stringsAsFactors = FALSE)
       if(log) assign("error", error, env)
       return(NULL)
     }
@@ -39,15 +39,15 @@ runGDE <- function(input_dir, output_dir, max_samples, log) {
       file_path <- file.path(output_dir,paste0(study,"_", attribute, ".csv"))
       print(file_path)
       if(file.exists(file_path)) return()
-      de_table <- try(deseq2_table(phylo, attribute), silent = T)
+      de_table <- try(deseq2_table(phylo, attribute), silent = TRUE)
       if(class(de_table) == "try-error"){
-        error <- rbind(error, c(study, attribute, geterrmessage()), stringsAsFactors = F)
+        error <- rbind(error, c(study, attribute, geterrmessage()), stringsAsFactors = FALSE)
         if(log) assign("error", error, env)
         return(NULL)
       } else {
-          rownames(de_table) <- taxids2names(phylo, rownames(de_table))
-          write.csv(de_table, file_path)
-          print("written")
+        rownames(de_table) <- taxids2names(phylo, rownames(de_table))
+        write.csv(de_table, file_path)
+        print("written")
       }
     })
   })

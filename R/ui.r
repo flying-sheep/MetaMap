@@ -8,14 +8,16 @@
 #
 
 # include global.r
-navbar <- navbarPage(
+navbar <- function() navbarPage(
   theme = shinytheme("flatly"),
   position = "fixed-top",
-  fluid = T,
+  fluid = TRUE,
   # inverse = TRUE,
-  title = div(id="title-section", actionButton(
-    "back_button", "", icon = icon("arrow-left", "fa-2x")
-  ), "MetaMap"),
+  title = div(
+    id = "title-section",
+    actionButton("back_button", "", icon = icon("arrow-left", "fa-2x")),
+    "MetaMap"
+  ),
   id = 'dataset',
   header = fluidRow(column(11, htmlOutput('help')), column(
     1,
@@ -202,7 +204,7 @@ navbar <- navbarPage(
       # ,uiOutput('select_species_abundance'),
       # plotOutput("abundances_plot")
     ),
-    #attribute, level, relative = T
+    #attribute, level, relative = TRUE
     tabPanel(
       tbc.name,
       fluidRow(
@@ -289,21 +291,24 @@ navbar <- navbarPage(
 )
 
 # Add github link to the navbar
-# navbar[[3]][[1]]$children[[1]] <- htmltools::tagAppendChild(
-#   navbar[[3]][[1]]$children[[1]], HTML("<a id='github-btn'href='https://github.com/gtsitsiridis/MetaMap' target='_blank'><i class='fa fa-github'></i></a>"))
+add_gh <- function(nav) {
+  nav[[3]][[1]]$children[[1]] %<>% htmltools::tagAppendChild(
+    HTML("<a id='github-btn'href='https://github.com/gtsitsiridis/MetaMap' target='_blank'><i class='fa fa-github'></i></a>"))
+  nav
+}
 
 
-page <- fluidPage(
+page <- function(gh) fluidPage(
   titlePanel(title = "", windowTitle = "MetaMap"),
-  navbar
+  if (gh) add_gh(navbar()) else navbar()
 )
 
 #' @export
-ui <- function() {
-  # addResourcePath("www", pkg_file("shiny/www"))
+ui <- function(request) {
+  addResourcePath("www", pkg_file("shiny/www"))
   tagList(
-    page,
-    includeCSS("www/style.css"),
+    page(gh = FALSE),
+    tags$link(rel = "stylesheet", href = "www/style.css"),
     # add contextmenu on plots
     tags$nav(tags$ul(
       tags$li(

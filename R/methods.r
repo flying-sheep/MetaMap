@@ -43,7 +43,7 @@ taxids2names <-
 clean_tax_table <- function(tax_table) {
   tax_table <- as.data.frame(tax_table)
   tax_table[] <- lapply(tax_table, as.character)
-  inds <- which(is.na(tax_table), arr.ind = T)
+  inds <- which(is.na(tax_table), arr.ind = TRUE)
   if(length(inds)==0)
     return(tax_table)
   inds1 <- aggregate(row ~ col, data = inds, list)
@@ -80,9 +80,9 @@ mergeLevel <- function(phylo, level){
 
   # Merge taxa of the same level
   if(!level %in% c("Species", "TaxID")){
-    dt <- as.data.table(dt, keep.rownames=T)
+    dt <- as.data.table(dt, keep.rownames = TRUE)
     dt[, level := (phylo@tax_table[, level] %>% as.character())]
-    dt <- dt[, as.data.table(t(colSums(.SD[,-1, with=F]))),by=level]
+    dt <- dt[, as.data.table(t(colSums(.SD[,-1, with = FALSE]))), by = level]
     dt <- dt[!is.na(level)]
     dt <- as.data.frame(dt)
     rownames(dt) <- dt$level
@@ -139,7 +139,7 @@ cor_table <- function(phylo, level1, level2, mf, method = "spearman"){
 #' @export
 deseq2_table <- function(phylo,
                          attribute, conds, formula = NULL,
-                         parallel=F) {
+                         parallel = FALSE) {
 
   if (is.null(phylo))
     return(NULL)
@@ -243,20 +243,18 @@ diversity_test <- function(phylo, attribute) {
 #' @export
 generatePhylo <- function(study, counts, sample_info, lineage) {
   ok <- sample_info$study == study
-  otu <-
-    otu_table(round(as.data.table(counts)[, ok, with = F]), taxa_are_rows =
-                TRUE)
+  otu <- otu_table(round(as.data.table(counts)[, ok, with = FALSE]), taxa_are_rows = TRUE)
   sam <- sample_data(sample_info[ok, ])
   rownames(sam) <- colnames(otu)
   tax <- tax_table(lineage)
   rownames(tax) <- rownames(otu)
   tmp <- phyloseq(otu, tax, sam)
   bla <-
-    strsplit(sample_data(tmp)$sample_attribute, " || ", fixed = T)
+    strsplit(sample_data(tmp)$sample_attribute, " || ", fixed = TRUE)
   bla <- try(do.call(rbind.fill,
                      lapply(bla, function(x)
                        str_split(x, ": ", n = 2) %>%
-                         data.frame(stringsAsFactors = F) %>%
+                         data.frame(stringsAsFactors = FALSE) %>%
                          {
                            colnames(.) <- .[1, ]
                            as.data.table(.)[2, ]
@@ -326,7 +324,7 @@ loadPhylo <-
 generateLineage <- function(feature_info) {
   lineage <-
     do.call(rbind, lapply(as.character(feature_info[, 'Lineage']), function(x)
-      strsplit(x, ";", fixed = T)[[1]]))
+      strsplit(x, ";", fixed = TRUE)[[1]]))
   lineage <- cbind(lineage, as.character(feature_info[, 'Name']))
   lineage <- cbind(lineage, as.character(feature_info[, 'TaxID']))
   lineage[which(lineage[, 1] == ''), 1] <- "Viruses"
@@ -381,14 +379,14 @@ makeSankey_links <-
     }
 
     links <-
-      tax_table[, c(source, target)] %>% data.frame(stringsAsFactors = F) %>%
+      tax_table[, c(source, target)] %>% data.frame(stringsAsFactors = FALSE) %>%
       distinct %>% setNames(c("Source", "Target")) %>%
       mutate(
         Value = target_means[.$Target],
         Source_level = rep(source, nrow(.)),
         Target_level = rep(target, nrow(.))
       ) %>%
-      .[order(.$Value, decreasing = T),] %>% .[which(.$Value > 0.5),] %>%
+      .[order(.$Value, decreasing = TRUE),] %>% .[which(.$Value > 0.5),] %>%
       .[1:min(10, nrow(.)),]
 
 
