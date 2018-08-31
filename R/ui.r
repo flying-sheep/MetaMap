@@ -158,7 +158,7 @@ navbar <- function() navbarPage(
         column(2, offset = 2, uiOutput('select_species_diff')),
         column(2, uiOutput("attribute_de")),
         column(2, uiOutput('de_conds')),
-        column(2, uiOutput('de_button', width = "100%"), style = "padding-top:19px")
+        column(2,      actionButton('de_button', "Analyze", class = "btn-primary"), style = "padding-top:19px")
       ),
       plotlyOutput("de_boxplot"),
       tags$div(
@@ -211,7 +211,7 @@ navbar <- function() navbarPage(
         class = "control-bar",
         column(4, offset = 1, uiOutput("attribute_tbc")),
         column(4, uiOutput("level_tbc")),
-        column(2, uiOutput('tbc_button'), style = "padding-top:19px")
+        column(2, actionButton('tbc_button', "Generate", class = "btn-primary"), style = "padding-top:19px")
       ),
       conditionalPanel(condition = "output.cond1",
                        tabsetPanel(
@@ -293,21 +293,34 @@ navbar <- function() navbarPage(
 # Add github link to the navbar
 add_gh <- function(nav) {
   nav[[3]][[1]]$children[[1]] %<>% htmltools::tagAppendChild(
-    HTML("<a id='github-btn'href='https://github.com/gtsitsiridis/MetaMap' target='_blank'><i class='fa fa-github'></i></a>"))
+    # bookmarkButton())
+    HTML("<a id='github-btn' class='nav-btn' href='https://github.com/gtsitsiridis/MetaMap' target='_blank'><i class='fa fa-github'></i></a>"))
+  nav
+}
+
+# Add bookmarking capability
+add_nav_buttons <- function(nav, gh, bookmarking) {
+  container <- "<div id='nav-btn-container'>"
+  if(bookmarking)
+      container %<>% paste(sep = "\n", bookmarkButton(class = "nav-btn", id="bookmark-btn", label="Bookmark"))
+  if (gh)
+      container %<>% paste(sep = "\n", "<a id='github-btn' class='nav-btn' href='https://github.com/theislab/MetaMap' target='_blank'><i class='fa fa-github'></i></a>")
+  container <- HTML(paste(container, sep="\n","</div>"))
+  nav[[3]][[1]]$children[[1]] %<>% htmltools::tagAppendChild(container)
   nav
 }
 
 
-page <- function(gh) fluidPage(
-  titlePanel(title = "", windowTitle = "MetaMap"),
-  if (gh) add_gh(navbar()) else navbar()
-)
+page <- function(gh, bookmarking)
+  fluidPage(titlePanel(title = "", windowTitle = "MetaMap"),
+           add_nav_buttons(navbar(), gh = gh, bookmarking = bookmarking)
+            )
 
 #' @export
 ui <- function(request) {
   addResourcePath("www", pkg_file("shiny/www"))
   tagList(
-    page(gh = FALSE),
+    page(gh = TRUE, bookmarking = TRUE),
     tags$link(rel = "stylesheet", href = "www/style.css"),
     # add contextmenu on plots
     tags$nav(tags$ul(

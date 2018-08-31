@@ -67,4 +67,4 @@ tbc.name <- "Taxonomy bar chart"
 sankey.name <- "Sankey diagram"
 krona.name <- "Krona chart"
 
-enableBookmarking('url')
+enableBookmarking('server')

@@ -119,6 +119,7 @@ server <-
       output$taxa_plot <- renderPlotly({
         NULL
       })
+      output$sankey.ui <- renderUI(NULL)
       output$ntaxa_plot <- renderPlotly({
         NULL
       })
@@ -138,6 +139,7 @@ server <-
     }
 
     resetWidgets <- function() {
+      print("resetWIDGETS")
       updateSelectInput(session, 'attribute_dr', 'Color by', "")
       updateSelectInput(session, 'attribute_da', 'Color by', "")
       updateSelectInput(session, 'attribute_ma', 'Color by', "")
@@ -228,7 +230,6 @@ server <-
     ###############
     ###  Query  ###
     ###############
-
     ### Query by study
     observeEvent(input$dataset, {
       if (all(!(
@@ -279,7 +280,7 @@ server <-
           mf_tbl <- mf_tbl[, STUDIES]
           mf_tbl <-
             mf_tbl[which(apply(mf_tbl, 1, function(x)
-              ! all(is.na(x)))), ]
+              ! all(is.na(x)))),]
           values$mf_tbl <- mf_tbl
         } else
           withProgress(session = session, value = 0.5, {
@@ -316,13 +317,14 @@ server <-
           metafeature <- selected
 
           mf_tbl <- as.data.frame(mf_tbl)
-          abundances <- mf_tbl[metafeature, ]
+          abundances <- mf_tbl[metafeature,]
           abundances <- abundances[which(!is.na(abundances))]
           inds <- which(study_info$study %in% names(abundances))
           df <- study_info[inds, showColumns]
           df$`Relative Abundance` <-
             as.numeric(abundances[study_info$study[inds]])
-          df <- df[order(df$`Relative Abundance`, decreasing = TRUE),]
+          df <-
+            df[order(df$`Relative Abundance`, decreasing = TRUE), ]
 
           output$mfName <-
             renderUI(HTML(
@@ -374,7 +376,7 @@ server <-
       isolate(mf_tbl <- as.data.frame(values$mf_tbl))
       selected <- event$curveNumber == 1
       isolate(mf_tbl <-
-                mf_tbl[which(values$mf_selected == selected), ])
+                mf_tbl[which(values$mf_selected == selected),])
 
       row <- event$pointNumber + 1
       metafeature <- rownames(mf_tbl)[row]
@@ -399,7 +401,7 @@ server <-
     observeEvent(values$study, {
       resetPlots()
       resetValues()
-      resetWidgets()
+      #resetWidgets()
 
       study <- values$study
 
@@ -419,7 +421,8 @@ server <-
 
       # load phylo from .RData file
       cls <-
-        class(try(loadPhylo(study, DIR, environment())))
+        class(try(loadPhylo(study, DIR, environment()))
+        )
       if (cls == "try-error")
       {
         values$phylo <- NULL
@@ -477,8 +480,14 @@ server <-
         if (length(values$attributes) == 0L)
           empty
       else
-        values$attributes
-      selectInput('attribute_da', 'Color by', attributes, multiple = TRUE, selected = attributes[1])
+        c(Attributes = "", empty, values$attributes)
+      selectInput(
+        'attribute_da',
+        'Color by',
+        attributes,
+        multiple = TRUE,
+        selected = attributes[1]
+      )
     })
 
     output$diversity <- renderPlotly({
@@ -489,14 +498,22 @@ server <-
               input$attribute_da == ""))
         return(NULL)
       attribute <- input$attribute_da
-      if (input$attribute_da == empty)
+      if (input$attribute_da %in% c("", empty))
         attribute <- NULL
       withProgress(session = session, value = 0.5, {
         setProgress(message = "Calculation in progress")
-        if(length(attribute) > 1){
+        if (length(attribute) > 1) {
           dt <- data.frame(phylo@sam_data)
           col.name <- paste(attribute, collapse = "__")
-          dt <- do.call(unite, list(dt, col.name, attribute, remove = FALSE, sep = "__"))
+          dt <-
+            do.call(unite,
+                    list(
+                      dt,
+                      col.name,
+                      attribute,
+                      remove = FALSE,
+                      sep = "__"
+                    ))
           attribute <- col.name
           phylo@sam_data <- sample_data(dt)
         }
@@ -514,18 +531,33 @@ server <-
       attribute <- input$attribute_da
       if (input$attribute_da == empty)
         return("")
-      if(length(attribute) > 1){
+      if (length(attribute) > 1) {
         dt <- data.frame(phylo@sam_data)
         col.name <- paste(attribute, collapse = "__")
-        dt <- do.call(unite, list(dt, col.name, attribute, remove = FALSE, sep = "__"))
+        dt <-
+          do.call(unite,
+                  list(
+                    dt,
+                    col.name,
+                    attribute,
+                    remove = FALSE,
+                    sep = "__"
+                  ))
         attribute <- col.name
         phylo@sam_data <- sample_data(dt)
       }
       pval <- try(diversity_test(phylo, attribute), silent = TRUE)
       if (class(pval) == "try-error")
         return()
-      HTML(paste0("<center><b><p>ACE p-value: ", round(pval[1], 10),
-                  "</p><p>Shannon p-value: ", round(pval[2], 10), "</p></b></center>"))
+      HTML(
+        paste0(
+          "<center><b><p>ACE p-value: ",
+          round(pval[1], 10),
+          "</p><p>Shannon p-value: ",
+          round(pval[2], 10),
+          "</p></b></center>"
+        )
+      )
     })
 
     ### Differential expression
@@ -537,8 +569,15 @@ server <-
         if (length(values$attributes) == 0L)
           empty
       else
-        values$attributes
-      selectInput('attribute_de', 'Select Attribute', attributes, multiple = TRUE, selected = attributes[1])
+        c(Attributes = "", values$attributes)
+
+      selectInput(
+        'attribute_de',
+        'Select Attribute',
+        attributes,
+        multiple = TRUE,
+        selected = attributes[1]
+      )
     })
 
     output$de_conds <- renderUI({
@@ -546,10 +585,18 @@ server <-
       attribute <- input$attribute_de
       if (any(is.null(phylo), is.null(input$attribute_de)))
         return(NULL)
-      if(length(attribute) > 1){
+      if (length(attribute) > 1) {
         dt <- data.frame(phylo@sam_data)
         col.name <- paste(attribute, collapse = "__")
-        dt <- do.call(unite, list(dt, col.name, attribute, remove = FALSE, sep = "__"))
+        dt <-
+          do.call(unite,
+                  list(
+                    dt,
+                    col.name,
+                    attribute,
+                    remove = FALSE,
+                    sep = "__"
+                  ))
         attribute <- col.name
         phylo@sam_data <- sample_data(dt)
       }
@@ -561,12 +608,6 @@ server <-
         multiple = TRUE,
         choices = c(Conditions = '', conditions)
       )
-    })
-
-    output$de_button <- renderUI({
-      if (is.null(values$phylo))
-        return(NULL)
-      actionButton('de_button', "Analyze", class = "btn-primary")
     })
 
     observeEvent(input$select_species_diff, {
@@ -613,10 +654,18 @@ server <-
         conds <- input$de_conds
         phylo <- values$phylo
         attribute <- input$attribute_de
-        if(length(attribute) > 1){
+        if (length(attribute) > 1) {
           dt <- data.frame(phylo@sam_data)
           col.name <- paste(attribute, collapse = "__")
-          dt <- do.call(unite, list(dt, col.name, attribute, remove = FALSE, sep = "__"))
+          dt <-
+            do.call(unite,
+                    list(
+                      dt,
+                      col.name,
+                      attribute,
+                      remove = FALSE,
+                      sep = "__"
+                    ))
           attribute <- col.name
           phylo@sam_data <- sample_data(dt)
         }
@@ -649,14 +698,17 @@ server <-
               scrollY = "500px",
               searchHighlight = TRUE,
               dom = '<"top"Bf>rt<"bottom"lip><"clear">',
-              buttons = list('print',
-                             list(
-                               extend =  "csv",
-                               title = paste0(values$study,"_de")
-                             ), list(
-                               extend =  "pdf",
-                               title = paste0(values$study,"_de")
-                             ))
+              buttons = list(
+                'print',
+                list(
+                  extend =  "csv",
+                  title = paste0(values$study, "_de")
+                ),
+                list(
+                  extend =  "pdf",
+                  title = paste0(values$study, "_de")
+                )
+              )
             ),
             selection = 'none',
             rownames = taxids2names(phylo, rownames(values$de_table))
@@ -710,11 +762,11 @@ server <-
       if (length(selected_rows) != 0) {
         de_table <-
           if (event$curveNumber == 0)
-            de_table[-selected_rows,]
+            de_table[-selected_rows, ]
         else
-          de_table[selected_rows,]
+          de_table[selected_rows, ]
       }
-      species <- de_table[event$pointNumber + 1,]
+      species <- de_table[event$pointNumber + 1, ]
       values$species_diff <-
         unique(c(values$species_diff, rownames(species)))
       updateSelectInput(
@@ -734,10 +786,18 @@ server <-
       conds <- input$de_conds
       attribute <- isolate(input$attribute_de)
       phylo <- isolate(values$phylo)
-      if(length(attribute) > 1){
+      if (length(attribute) > 1) {
         dt <- data.frame(phylo@sam_data)
         col.name <- paste(attribute, collapse = "__")
-        dt <- do.call(unite, list(dt, col.name, attribute, remove = FALSE, sep = "__"))
+        dt <-
+          do.call(unite,
+                  list(
+                    dt,
+                    col.name,
+                    attribute,
+                    remove = FALSE,
+                    sep = "__"
+                  ))
         attribute <- col.name
         phylo@sam_data <- sample_data(dt)
       }
@@ -764,14 +824,21 @@ server <-
     ### Dimension reduction
     output$attribute_dr <- renderUI({
       if (is.null(values$phylo))
-        NULL
+        return(NULL)
       phylo <- values$phylo
       attributes <-
         if (length(values$attributes) == 0L)
           empty
       else
-        values$attributes
-      selectInput('attribute_dr', 'Color by', attributes, multiple = TRUE, selected = attributes[1])
+        c(Attributes = "", empty, values$attributes)
+      print(attributes)
+      selectInput(
+        'attribute_dr',
+        'Color by',
+        attributes,
+        multiple = TRUE,
+        selected = attributes[1]
+      )
     })
 
     output$dimred <- renderPlotly({
@@ -797,10 +864,12 @@ server <-
       }
       withProgress(session = session, value = 0.5, {
         setProgress(message = "Calculation in progress")
-        if(length(color) > 1){
+        if (length(color) > 1) {
           dt <- data.frame(phylo@sam_data)
           col.name <- paste(color, collapse = "__")
-          dt <- do.call(unite, list(dt, col.name, color, remove = FALSE, sep = "__"))
+          dt <-
+            do.call(unite,
+                    list(dt, col.name, color, remove = FALSE, sep = "__"))
           color <- col.name
           phylo@sam_data <- sample_data(dt)
         }
@@ -809,7 +878,7 @@ server <-
           isolate(plots$dimred <- p)
         } else{
           isolate(plots$dimred$data[, color] <-
-                    phylo@sam_data[,color])
+                    phylo@sam_data[, color])
           p <-
             isolate(plots$dimred + aes_string(colour = color))
           isolate(plots$dimred <- p)
@@ -860,11 +929,13 @@ server <-
       phylo <- isolate(values$phylo)
 
       if (any(is.null(level2), is.null(phylo), is.null(mf))) {
-        showModal(modalDialog(
-          titl = "Important Message",
-          'Please give some input!',
-          easyClose = TRUE
-        ))
+        showModal(
+          modalDialog(
+            titl = "Important Message",
+            'Please give some input!',
+            easyClose = TRUE
+          )
+        )
         return(NULL)
       }
 
@@ -878,11 +949,13 @@ server <-
         cor_table <- try(cor_table(phylo, level1, level2, mf))
 
         if (class(cor_table) == "try-error") {
-          showModal(modalDialog(
-            titl = "Important Message",
-            'An error has occured!',
-            easyClose = TRUE
-          ))
+          showModal(
+            modalDialog(
+              titl = "Important Message",
+              'An error has occured!',
+              easyClose = TRUE
+            )
+          )
           return(NULL)
         }
 
@@ -898,25 +971,29 @@ server <-
     })
     output$cor_table <- DT::renderDataTable({
       cor_table <- values$cor_table
-      if(is.null(cor_table)){
+      if (is.null(cor_table)) {
         return(NULL)
       }
       DT::datatable(
-        cor_table, extensions = "Buttons",
+        cor_table,
+        extensions = "Buttons",
         options = list(
           pageLength = 50,
           scrollX = TRUE,
           scrollY = "500px",
           searchHighlight = TRUE,
           dom = '<"top"Bf>rt<"bottom"lip><"clear">',
-          buttons = list('print',
-                         list(
-                           extend =  "csv",
-                           title = paste(values$study, "cor", sep="_")
-                         ), list(
-                           extend =  "pdf",
-                           title = paste(values$study, "cor", sep="_")
-                         ))
+          buttons = list(
+            'print',
+            list(
+              extend =  "csv",
+              title = paste(values$study, "cor", sep = "_")
+            ),
+            list(
+              extend =  "pdf",
+              title = paste(values$study, "cor", sep = "_")
+            )
+          )
         ),
         selection = list(mode = 'multiple'),
         rownames = FALSE
@@ -980,8 +1057,14 @@ server <-
         if (length(values$attributes) == 0L)
           empty
       else
-        c(empty, values$attributes)
-      selectInput('attribute_ma', 'Color by', attributes, multiple = TRUE, selected = attributes[1])
+        c(Attributes = "", empty, values$attributes)
+      selectInput(
+        'attribute_ma',
+        'Color by',
+        attributes,
+        multiple = TRUE,
+        selected = attributes[1]
+      )
     })
 
     output$level_ma <- renderUI({
@@ -1000,13 +1083,21 @@ server <-
       phylo <- isolate(values$phylo)
       top_n <- as.numeric(input$top_n_ma)
       attribute <- input$attribute_ma
-      if(length(attribute) > 1){
-        if(empty %in% attribute) {
+      if (length(attribute) > 1) {
+        if (empty %in% attribute) {
           attribute <- attribute[-which(attribute == empty)]
         }
         dt <- data.frame(phylo@sam_data)
         col.name <- paste(attribute, collapse = "__")
-        dt <- do.call(unite, list(dt, col.name, attribute, remove = FALSE, sep = "__"))
+        dt <-
+          do.call(unite,
+                  list(
+                    dt,
+                    col.name,
+                    attribute,
+                    remove = FALSE,
+                    sep = "__"
+                  ))
         attribute <- col.name
         phylo@sam_data <- sample_data(dt)
       }
@@ -1043,8 +1134,14 @@ server <-
         if (length(values$attributes) == 0L)
           empty
       else
-        c(values$attributes)
-      selectInput('attribute_tbc', 'Select Grouping', attributes, multiple = TRUE, selected = "sraID")
+        c(Attributes = "", empty, values$attributes)
+      selectInput(
+        'attribute_tbc',
+        'Select Grouping',
+        attributes,
+        multiple = TRUE,
+        selected = "sraID"
+      )
     })
 
     output$level_tbc <- renderUI({
@@ -1087,10 +1184,18 @@ server <-
         return(NULL)
       }
 
-      if(length(attribute) > 1){
+      if (length(attribute) > 1) {
         dt <- data.frame(phylo@sam_data)
         col.name <- paste(attribute, collapse = "__")
-        dt <- do.call(unite, list(dt, col.name, attribute, remove = FALSE, sep = "__"))
+        dt <-
+          do.call(unite,
+                  list(
+                    dt,
+                    col.name,
+                    attribute,
+                    remove = FALSE,
+                    sep = "__"
+                  ))
         attribute <- col.name
         phylo@sam_data <- sample_data(dt)
       }
@@ -1127,7 +1232,7 @@ server <-
         if (length(values$attributes) == 0L)
           empty
       else
-        c(empty, values$attributes)
+        c(Attributes = "", empty, values$attributes)
       selectInput('attribute_sankey', 'Select attribute', attributes)
     })
 
@@ -1137,7 +1242,8 @@ server <-
         return(NULL)
       conditions <-
         if (length(values$attributes) == 0L ||
-            input$attribute_sankey == empty)
+            input$attribute_sankey == empty ||
+            input$attribute_sankey == "")
           empty
       else
         unique(phylo@sam_data[, input$attribute_sankey])
@@ -1184,7 +1290,6 @@ server <-
       levls <- colnames(phylo@tax_table)
       source <- input$sankey_source
       target <- input$sankey_target
-
       if (source == target ||
           (which(levls == source) > which(levls == target))) {
         showModal(
@@ -1206,6 +1311,18 @@ server <-
         )
       sankey$cond <- input$sankey_condition
       sankey$attribute <- input$attribute_sankey
+
+      # Dynamically change the heigth of the sankey plot
+      output$sankey.ui <- renderUI({
+        links <- sankey$sankey_links
+        height <- 500
+        if (!is.null(links)) {
+          height <- height + (10 * nrow(links))
+        }
+        plotlyOutput("sankey_plot",
+                     height = paste0(height, "px"),
+                     width = "1300px")
+      })
     })
 
     observeEvent(input$sankey_reset_button, {
@@ -1258,20 +1375,20 @@ server <-
         )
     })
 
-    # Dynamically change the heigth of the sankey plot
-    output$sankey.ui <- renderUI({
-      links <- sankey$sankey_links
-      height <- 500
-      if (!is.null(links)) {
-        height <- height + (10 * nrow(links))
-      }
-      plotlyOutput("sankey_plot",
-                   height = paste0(height, "px"),
-                   width = "1300px")
-    })
+    # output$sankey.ui <- renderUI({
+    #   links <- sankey$sankey_links
+    #   height <- 500
+    #   if (!is.null(links)) {
+    #     height <- height + (10 * nrow(links))
+    #   }
+    #   plotlyOutput("sankey_plot",
+    #                height = paste0(height, "px"),
+    #                width = "1300px")
+    # })
 
     output$sankey_plot <- renderPlotly({
-      if (is.null(values$phylo))
+      phylo <- isolate(values$phylo)
+      if (is.null(phylo))
         return(NULL)
       withProgress(session = session, value = 0.5, {
         setProgress(message = "Calculation in progress")
@@ -1288,8 +1405,6 @@ server <-
         newArgs <- sankey$newArgs
         isolate(sankey$args <- newArgs)
         isolate(args <- sankey$args)
-        phylo <- values$phylo
-
         # filter phylo
         attribute <- isolate(sankey$attribute)
         cond <- isolate(sankey$cond)
@@ -1333,7 +1448,7 @@ server <-
         if (length(values$attributes) == 0L)
           empty
       else
-        c(empty, values$attributes)
+        c(Attributes = "", empty, values$attributes)
       selectInput('attribute_krona', 'Select attribute', attributes)
     })
 
@@ -1357,7 +1472,7 @@ server <-
         attribute <-
           ifelse(attribute == "none", "sraID", attribute)
         phylo <- values$phylo
-        tax_table(phylo) <- tax_table(phylo)[,-8]
+        tax_table(phylo) <- tax_table(phylo)[, -8]
         file <- tempfile()
         phylo@sam_data[, attribute] <-
           make.names(unlist(phylo@sam_data[, attribute]))
@@ -1389,23 +1504,27 @@ server <-
         return(DT::datatable(data.frame(Samples = "Empty"), selection = "none"))
       }
       sam_data <-
-        values$phylo@sam_data[, -which(values$phylo@sam_data %>% colnames == "All")]
+        values$phylo@sam_data[,-which(values$phylo@sam_data %>% colnames == "All")]
       DT::datatable(
-        data.frame(sam_data),extensions = 'Buttons',
+        data.frame(sam_data),
+        extensions = 'Buttons',
         options = list(
           pageLength = 25,
           scrollX = TRUE,
           scrollY = "100%",
           searchHighlight = TRUE,
           dom = '<"top"Bf>rt<"bottom"lip><"clear">',
-          buttons = list('print',
-                         list(
-            extend =  "csv",
-            title = paste0(values$study,"_samples")
-          ), list(
-            extend =  "pdf",
-            title = paste0(values$study,"_samples")
-          ))
+          buttons = list(
+            'print',
+            list(
+              extend =  "csv",
+              title = paste0(values$study, "_samples")
+            ),
+            list(
+              extend =  "pdf",
+              title = paste0(values$study, "_samples")
+            )
+          )
         ),
         rownames = FALSE,
         selection = list(
@@ -1430,7 +1549,8 @@ server <-
       fun <- ifelse(action == "Keep", `==`, `!=`)
       fun2 <- ifelse(action == "Keep", any, all)
 
-      sam_data <- data.frame(phylo@sam_data, stringsAsFactors = FALSE)
+      sam_data <-
+        data.frame(phylo@sam_data, stringsAsFactors = FALSE)
       sam_data[is.na(sam_data)] <- "Unknown"
 
       environment(subset_samples) <- environment()
@@ -1442,11 +1562,13 @@ server <-
 
       phylo <- try(subset_samples(phylo, tmp))
       if (class(phylo) == "try-error") {
-        showModal(modalDialog(
-          titl = "Important Message",
-          'Empty table. Try again!',
-          easyClose = TRUE
-        ))
+        showModal(
+          modalDialog(
+            titl = "Important Message",
+            'Empty table. Try again!',
+            easyClose = TRUE
+          )
+        )
         return(NULL)
       }
 
@@ -1460,7 +1582,8 @@ server <-
       if (is.na(phylo)) {
         return(NULL)
       }
-      sam_data <- data.frame(phylo@sam_data, stringsAsFactors = FALSE)
+      sam_data <-
+        data.frame(phylo@sam_data, stringsAsFactors = FALSE)
       sam_data[is.na(sam_data)] <- "Unknown"
 
       choices <- lapply(attributes, function(attribute) {
@@ -1560,11 +1683,13 @@ server <-
       phylo <- try(subset_taxa(phylo, tmp))
 
       if (class(phylo) == "try-error") {
-        showModal(modalDialog(
-          titl = "Important Message",
-          'Empty table. Try again!',
-          easyClose = TRUE
-        ))
+        showModal(
+          modalDialog(
+            titl = "Important Message",
+            'Empty table. Try again!',
+            easyClose = TRUE
+          )
+        )
         return(NULL)
       }
       values$phylo <- phylo
@@ -1608,7 +1733,7 @@ server <-
       # end of stack: last, current
       last <- tail(tabs$history, 2L)[[1L]]
       # subtract 2 as we’ll add one again.
-      tabs$history <- head(tabs$history, -2L)
+      tabs$history <- head(tabs$history,-2L)
       updateNavbarPage(session, "dataset", selected = last)
       if (length(tabs$history) <= 1L)
         shinyjs::disable("back_button")
@@ -1739,6 +1864,128 @@ server <-
                                      }) %>% unlist
         values$attributes <-
           values$attributes[!values$attributes %in% c("Total.Reads")]
+      })
+    })
+
+    ########################
+    ###    Bookmarking   ###
+    ########################
+    setBookmarkExclude(
+      c(
+        "mc_apply_button",
+        "top_n_ma",
+        "tbc_button",
+        "de_button",
+        "krona_apply_button",
+        "sankey_reset_button",
+        "sankey_apply_button",
+        "sankey_undo_button",
+        "reload_button"
+      )
+    )
+    onBookmark(function(state) {
+      state$values$study <- values$study
+    })
+    onRestore(function(state) {
+      print(state$dataset)
+      str(state)
+      values$study <- state$values$study
+      # updateNavbarPage(session, "dataset", selected = "Dimension reduction")
+    })
+    onRestored(function(state) {
+      print(state$input$attribute_dr)
+      tab <- state$input$dataset
+      delay(200, {
+        if (tab == da.name) {
+          # diversity analysis tab
+          updateSelectInput(session,
+                            "attribute_da",
+                            selected = state$input$attribute_da)
+        }
+        # query by metafeature tab
+        else if (tab ==  qmetafeature.name) {
+          updateSelectInput(session, "mfInput", selected = state$input$mfInput)
+        }
+
+
+        # dimension reduction tab
+        else if (tab == dimred.name) {
+          updateSelectInput(session,
+                            "attribute_dr",
+                            selected = state$input$attribute_dr)
+          print("yoooo")
+        }
+
+        # differential expression tab
+        else if (tab ==        de.name) {
+          updateSelectInput(session,
+                            "attribute_de",
+                            selected = state$input$attribute_de)
+          delay(
+            200,
+            updateSelectInput(session, "de_conds", selected = state$input$de_conds)
+          )
+          delay(
+            200,
+            updateSelectInput(
+              session,
+              "select_species_diff",
+              selected = state$input$select_species_diff
+            )
+          )
+          delay(200, shinyjs::click("de_button"))
+        }
+        # metafeature correlation
+        else if (tab == mc.name) {
+          updateSelectInput(session, "mf_mc", selected = state$input$mf_mc)
+          updateSelectInput(session, "level_mc", selected = state$input$level_mc)
+          delay(200, shinyjs::click("mc_apply_button"))
+        }
+        # top species
+        else if (tab == ma.name) {
+          updateSelectInput(session,
+                            "attribute_ma",
+                            selected = state$input$attribute_ma)
+          updateSelectInput(session, "level_ma", selected = state$input$level_ma)
+        }
+        # taxonomy bar chart
+        else if (tab == tbc.name) {
+          updateSelectInput(session,
+                            "attribute_tbc",
+                            selected = state$input$attribute_tbc)
+          updateSelectInput(session, "level_tbc", selected = state$input$level_tbc)
+          updateTabsetPanel(session, "tbc_panel", selected = state$input$tbc_panel)
+          delay(200, shinyjs::click("tbc_button"))
+        }
+        # Sankey diagram
+        else if (tab == sankey.name) {
+          updateSelectInput(session,
+                            "sankey_source",
+                            selected = state$input$sankey_source)
+          updateSelectInput(session,
+                            "sankey_target",
+                            selected = state$input$sankey_target)
+          updateSelectInput(session,
+                            "attribute_sankey",
+                            selected = state$input$attribute_sankey)
+          delay(
+            200,
+            updateSelectInput(
+              session,
+              "sankey_condition",
+              selected = state$input$sankey_condition
+            )
+          )
+          delay(200, shinyjs::click("sankey_apply_button"))
+        }
+        # Krona chart
+        else if (tab == krona.name) {
+          updateSelectInput(session,
+                            "attribute_krona",
+                            selected = state$input$attribute_krona)
+          delay(200, shinyjs::click("krona_apply_button"))
+        }
+
       })
     })
   }

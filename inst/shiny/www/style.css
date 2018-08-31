@@ -121,16 +121,30 @@ body {padding-top: 70px;}
   outline: none;
   position: sticky;
 }
-#github-btn {
+#nav-btn-container {
+  top:0;
+  right:0;
+  position: absolute;
+  height: 100%;
+}
+
+.nav-btn {
+  display: inline-block;
   color: white;
-  padding-bottom:19.5px;
-  padding-top:19.5px;
-  line-height:45px;
-  display:block;
-  font-size: 40px;
-  float: right; 
+  vertical-align:middle;
+  margin: 20px;
+  line-height:10px;
+  height: 50%;
   background-color:#2c3e50;
 }
+
+#bookmark-btn {
+  outline: none;
+}
+
+#github-btn {
+  font-size: 40px;
+}	
 
 #github-btn:hover {
   opacity:.5 !important;
