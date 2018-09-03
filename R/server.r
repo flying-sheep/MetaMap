@@ -139,7 +139,6 @@ server <-
     }
 
     resetWidgets <- function() {
-      print("resetWIDGETS")
       updateSelectInput(session, 'attribute_dr', 'Color by', "")
       updateSelectInput(session, 'attribute_da', 'Color by', "")
       updateSelectInput(session, 'attribute_ma', 'Color by', "")
@@ -834,7 +833,6 @@ help[[krona.name]] <-
           empty
       else
         c(Attributes = "", empty, values$attributes)
-      print(attributes)
       selectInput(
         'attribute_dr',
         'Color by',
@@ -1890,13 +1888,10 @@ help[[krona.name]] <-
       state$values$study <- values$study
     })
     onRestore(function(state) {
-      print(state$dataset)
-      str(state)
       values$study <- state$values$study
       # updateNavbarPage(session, "dataset", selected = "Dimension reduction")
     })
     onRestored(function(state) {
-      print(state$input$attribute_dr)
       tab <- state$input$dataset
       delay(200, {
         if (tab == da.name) {
@@ -1916,7 +1911,6 @@ help[[krona.name]] <-
           updateSelectInput(session,
                             "attribute_dr",
                             selected = state$input$attribute_dr)
-          print("yoooo")
         }
 
         # differential expression tab
