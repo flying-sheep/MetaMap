@@ -19,11 +19,12 @@ navbar <- function() navbarPage(
     "MetaMap"
   ),
   id = 'dataset',
-  header = fluidRow(column(11, htmlOutput('help')), column(
-    1,
-    uiOutput("reload_button")
+  header = fluidRow(
+    column(10, htmlOutput('help')),
+    column(1, uiOutput("reload_button")),
+    column(1, bookmarkButton(NULL)),
+    style = "margin-bottom:20px"
   ),
-  style = "margin-bottom:20px"),
   tabPanel(
     "Overview",
     htmlOutput("overviewText"),
