@@ -302,7 +302,7 @@ add_gh <- function(nav) {
 add_nav_buttons <- function(nav, gh, bookmarking) {
   container <- "<div id='nav-btn-container'>"
   if(bookmarking)
-      container %<>% paste(sep = "\n", bookmarkButton(class = "nav-btn", id="bookmark-btn", label="Bookmark"))
+      container %<>% paste(sep = "\n", bookmarkButton(class = "nav-btn", label = "Bookmark"))
   if (gh)
       container %<>% paste(sep = "\n", "<a id='github-btn' class='nav-btn' href='https://github.com/theislab/MetaMap' target='_blank'><i class='fa fa-github'></i></a>")
   container <- HTML(paste(container, sep="\n","</div>"))

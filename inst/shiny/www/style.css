@@ -138,7 +138,7 @@ body {padding-top: 70px;}
   background-color:#2c3e50;
 }
 
-#bookmark-btn {
+[id='._bookmark_'] {
   outline: none;
 }
 
