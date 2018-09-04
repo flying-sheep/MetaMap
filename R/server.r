@@ -216,7 +216,7 @@ server <-
       HTML(
         '<p style="text-align: center"><strong>The Sankey diagram shows the average metafeature abundance across all samples or a selected grouping. The user can "walk" through the Sankey tree by 1) clicking on the graph or 2) selecting <em>Source</em> and <em>Target</em> phylogenetic levels and clicking on <em>Apply</em>.</strong></p>'
       )
-help[[krona.name]] <-
+    help[[krona.name]] <-
       HTML(
         '<p style="text-align: center"><strong>The user can generate Krona plots for all samples or a selected grouping by using the <em>Select attribute</em> drop-down menu and clicking on the <em>Plot</em> button.</strong></p>'
       )
@@ -282,7 +282,7 @@ help[[krona.name]] <-
           mf_tbl <- mf_tbl[, STUDIES]
           mf_tbl <-
             mf_tbl[which(apply(mf_tbl, 1, function(x)
-              ! all(is.na(x)))),]
+              ! all(is.na(x)))), ]
           values$mf_tbl <- mf_tbl
         } else
           withProgress(session = session, value = 0.5, {
@@ -319,14 +319,14 @@ help[[krona.name]] <-
           metafeature <- selected
 
           mf_tbl <- as.data.frame(mf_tbl)
-          abundances <- mf_tbl[metafeature,]
+          abundances <- mf_tbl[metafeature, ]
           abundances <- abundances[which(!is.na(abundances))]
           inds <- which(study_info$study %in% names(abundances))
           df <- study_info[inds, showColumns]
           df$`Relative Abundance` <-
             as.numeric(abundances[study_info$study[inds]])
           df <-
-            df[order(df$`Relative Abundance`, decreasing = TRUE), ]
+            df[order(df$`Relative Abundance`, decreasing = TRUE),]
 
           output$mfName <-
             renderUI(HTML(
@@ -378,7 +378,7 @@ help[[krona.name]] <-
       isolate(mf_tbl <- as.data.frame(values$mf_tbl))
       selected <- event$curveNumber == 1
       isolate(mf_tbl <-
-                mf_tbl[which(values$mf_selected == selected),])
+                mf_tbl[which(values$mf_selected == selected), ])
 
       row <- event$pointNumber + 1
       metafeature <- rownames(mf_tbl)[row]
@@ -423,8 +423,7 @@ help[[krona.name]] <-
 
       # load phylo from .RData file
       cls <-
-        class(try(loadPhylo(study, DIR, environment()))
-        )
+        class(try(loadPhylo(study, DIR, environment())))
       if (cls == "try-error")
       {
         values$phylo <- NULL
@@ -505,6 +504,9 @@ help[[krona.name]] <-
       withProgress(session = session, value = 0.5, {
         setProgress(message = "Calculation in progress")
         if (length(attribute) > 1) {
+          if (empty %in% attribute) {
+            attribute <- attribute[-which(attribute == empty)]
+          }
           dt <- data.frame(phylo@sam_data)
           col.name <- paste(attribute, collapse = "__")
           dt <-
@@ -525,7 +527,6 @@ help[[krona.name]] <-
       })
     })
 
-
     output$diversity_stats <- renderUI({
       phylo <- isolate(values$phylo)
       if (any(is.null(phylo), is.null(input$attribute_da)))
@@ -534,6 +535,9 @@ help[[krona.name]] <-
       if (input$attribute_da == empty)
         return("")
       if (length(attribute) > 1) {
+        if (empty %in% attribute) {
+            attribute <- attribute[-which(attribute == empty)]
+        }
         dt <- data.frame(phylo@sam_data)
         col.name <- paste(attribute, collapse = "__")
         dt <-
@@ -764,11 +768,11 @@ help[[krona.name]] <-
       if (length(selected_rows) != 0) {
         de_table <-
           if (event$curveNumber == 0)
-            de_table[-selected_rows, ]
+            de_table[-selected_rows,]
         else
-          de_table[selected_rows, ]
+          de_table[selected_rows,]
       }
-      species <- de_table[event$pointNumber + 1, ]
+      species <- de_table[event$pointNumber + 1,]
       values$species_diff <-
         unique(c(values$species_diff, rownames(species)))
       updateSelectInput(
@@ -850,7 +854,6 @@ help[[krona.name]] <-
               is.null(color),
               color == ""))
         return(NULL)
-
       if (study_info[isolate(study_info$study) == isolate(values$study), "sample_size"] > MAX_SAMPLES) {
         showModal(modalDialog(
           title = "Important message",
@@ -866,6 +869,9 @@ help[[krona.name]] <-
       withProgress(session = session, value = 0.5, {
         setProgress(message = "Calculation in progress")
         if (length(color) > 1) {
+          if (empty %in% color) {
+            color <- color[-which(color == empty)]
+          }
           dt <- data.frame(phylo@sam_data)
           col.name <- paste(color, collapse = "__")
           dt <-
@@ -1167,38 +1173,39 @@ help[[krona.name]] <-
               is.null(phylo),
               is.null(level)))
         return(NULL)
-      attribute <-
-        ifelse(attribute == empty,
-               "Sample",
-               attribute)
+
 
       if (study_info[study_info$study == values$study, "sample_size"] > MAX_SAMPLES) {
         showModal(modalDialog(
           title = "Important message",
-          paste(
-            "Please select a study with less than",
-            MAX_SAMPLES,
-            "samples!"
-          ),
+          paste("Please select a study with less than",
+                MAX_SAMPLES,
+                "samples!"),
           easyClose = TRUE
         ))
         return(NULL)
       }
 
       if (length(attribute) > 1) {
+        if (empty %in% attribute) {
+          attribute <- attribute[-which(attribute == empty)]
+        }
         dt <- data.frame(phylo@sam_data)
         col.name <- paste(attribute, collapse = "__")
         dt <-
           do.call(unite,
-                  list(
-                    dt,
-                    col.name,
-                    attribute,
-                    remove = FALSE,
-                    sep = "__"
-                  ))
+                  list(dt,
+                       col.name,
+                       attribute,
+                       remove = FALSE,
+                       sep = "__"))
         attribute <- col.name
         phylo@sam_data <- sample_data(dt)
+      } else {
+        attribute <-
+          ifelse(attribute == empty,
+                 "Sample",
+                 attribute)
       }
 
       output$taxa_plot <- renderPlotly({
@@ -1473,7 +1480,7 @@ help[[krona.name]] <-
         attribute <-
           ifelse(attribute == "none", "sraID", attribute)
         phylo <- values$phylo
-        tax_table(phylo) <- tax_table(phylo)[, -8]
+        tax_table(phylo) <- tax_table(phylo)[,-8]
         file <- tempfile()
         phylo@sam_data[, attribute] <-
           make.names(unlist(phylo@sam_data[, attribute]))
@@ -1505,7 +1512,7 @@ help[[krona.name]] <-
         return(DT::datatable(data.frame(Samples = "Empty"), selection = "none"))
       }
       sam_data <-
-        values$phylo@sam_data[,-which(values$phylo@sam_data %>% colnames == "All")]
+        values$phylo@sam_data[, -which(values$phylo@sam_data %>% colnames == "All")]
       DT::datatable(
         data.frame(sam_data),
         extensions = 'Buttons',
@@ -1733,7 +1740,7 @@ help[[krona.name]] <-
       }
       last <- tail(tabs$fwd, 1L)
       updateNavbarPage(session, "dataset", selected = last)
-      tabs$fwd <- head(tabs$fwd, -1L)
+      tabs$fwd <- head(tabs$fwd,-1L)
       if (length(tabs$fwd) == 0)
         shinyjs::disable("fwd_button")
     })
@@ -1749,11 +1756,11 @@ help[[krona.name]] <-
       # save current tab for fwd navigation
       tabs$fwd[length(tabs$fwd) + 1] <- tail(tabs$history, 2L)[[2L]]
       # subtract 2 as we’ll add one again.
-      tabs$history <- head(tabs$history,-2L)
+      tabs$history <- head(tabs$history, -2L)
       updateNavbarPage(session, "dataset", selected = last)
       if (length(tabs$history) <= 1L)
         shinyjs::disable("back_button")
-      if(length(tabs$fwd) != 0)
+      if (length(tabs$fwd) != 0)
         shinyjs::enable("fwd_button")
     })
 
