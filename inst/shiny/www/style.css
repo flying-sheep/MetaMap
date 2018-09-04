@@ -27,7 +27,7 @@ body {padding-top: 70px;}
   width: 50px;
 }
 
-#back_button {
+.nav-history-btn {
   border-radius: 50%;
   border: 0;
   color: white;

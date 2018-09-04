@@ -52,7 +52,7 @@ server <-
     #########################
 
     # Tabs: We have a back button activated once this list grows
-    tabs <- reactiveValues(history = c('Overview'))
+    tabs <- reactiveValues(history = c('Overview'), fwd = NULL)
 
     values <-
       reactiveValues(
@@ -1724,7 +1724,20 @@ help[[krona.name]] <-
     ########################
 
     ### Back button
-    shinyjs::disable("back_button")
+    # The history buttons are disabled in general.js
+    # shinyjs::disable("back_button")
+
+    observeEvent(input$fwd_button, {
+      if (length(tabs$fwd) == 0) {
+        return()
+      }
+      last <- tail(tabs$fwd, 1L)
+      updateNavbarPage(session, "dataset", selected = last)
+      tabs$fwd <- head(tabs$fwd, -1L)
+      if (length(tabs$fwd) == 0)
+        shinyjs::disable("fwd_button")
+    })
+
 
     observeEvent(input$back_button, {
       # The initially selected tab acts as dummy element
@@ -1733,11 +1746,15 @@ help[[krona.name]] <-
       }
       # end of stack: last, current
       last <- tail(tabs$history, 2L)[[1L]]
+      # save current tab for fwd navigation
+      tabs$fwd[length(tabs$fwd) + 1] <- tail(tabs$history, 2L)[[2L]]
       # subtract 2 as we’ll add one again.
       tabs$history <- head(tabs$history,-2L)
       updateNavbarPage(session, "dataset", selected = last)
       if (length(tabs$history) <= 1L)
         shinyjs::disable("back_button")
+      if(length(tabs$fwd) != 0)
+        shinyjs::enable("fwd_button")
     })
 
     observeEvent(input$dataset, {

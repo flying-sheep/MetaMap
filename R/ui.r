@@ -15,7 +15,8 @@ navbar <- function() navbarPage(
   # inverse = TRUE,
   title = div(
     id = "title-section",
-    actionButton("back_button", "", icon = icon("arrow-left", "fa-2x")),
+    actionButton("back_button", "",class="nav-history-btn", icon = icon("arrow-left", "fa-2x")),
+    actionButton("fwd_button", "", class="nav-history-btn", icon = icon("arrow-right", "fa-2x")),
     "MetaMap"
   ),
   id = 'dataset',
@@ -27,7 +28,7 @@ navbar <- function() navbarPage(
   tabPanel(
     "Overview",
     htmlOutput("overviewText"),
-    img(src = 'PipelineImage.png', align = "center")
+    img(src = 'www/PipelineImage.png', align = "center")
   ),
   navbarMenu(
     "Query",
@@ -337,7 +338,7 @@ ui <- function(request) {
     ),
     class = "context-menu"),
     useShinyjs(),
-    extendShinyjs(script = "www/contextmenu.js"),
-    extendShinyjs(script = "www/general.js")
+    extendShinyjs(script = pkg_file("shiny/www/contextmenu.js")),
+    extendShinyjs(script = pkg_file("shiny/www/general.js"))
   )
 }

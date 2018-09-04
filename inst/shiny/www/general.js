@@ -4,6 +4,7 @@ shinyjs.init = function(){
 	$("#dataset li a[data-value='Customize Data']").hide();
 	$("#dataset li a[data-value='Analysis']").hide();
 	$(".hidden_tab").hide();
+	$("#fwd_button").prop( "disabled", true );
 	$("#back_button").prop( "disabled", true );
 	$("#download_samples").prop( "disabled", true );
 	
