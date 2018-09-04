@@ -356,9 +356,9 @@ plot_abundance <- function(phylo, taxids, attribute) {
 #' @return A ggplot2 object showing the boxplots.
 #' @export
 plot_diff <- function(phylo, taxids, attribute) {
-  assign("phylo", phylo, globalenv())
-  assign("taxids", taxids, globalenv())
-  assign("attribute", attribute, globalenv())
+  # assign("phylo", phylo, globalenv())
+  # assign("taxids", taxids, globalenv())
+  # assign("attribute", attribute, globalenv())
   relativeCounts(phylo) %>%
     subset(rownames(.) %in% taxids) %>%
     t %>%
