@@ -73,3 +73,34 @@ bookmarks <- if (file.exists(bookmark_file)) {
   message('Info: Bookmark file ', bookmark_file, ' not found.')
   NULL
 }
+
+bookmark_redirect <- function(req) {
+  if (!identical(req$REQUEST_METHOD, 'GET'))
+    return(NULL)
+
+  path <- URLdecode(req$PATH_INFO)
+
+  if (is.null(path))
+    return(shiny:::httpResponse(400, content = "<h1>Bad Request</h1>"))
+  if (!grepl('.*/bookmark/\\w+', path))
+    return(NULL)
+
+  bookmark <- sub('.*/bookmark/(\\w+)', '\\1', path)
+  state_id <- bookmarks[[bookmark]]
+
+  bm_url <- function(sid) paste0('../../?_state_id_=', sid)
+
+  if (is.null(state_id)) {
+    bm_html <- sprintf("<li><a href='%s'>%s</a>", bm_url(bookmarks), names(bookmarks))
+    return(shiny:::httpResponse(404, content = sprintf(
+      "<h1>404 Bookmark not found</h1>
+      No bookmark with name %s<br>
+      Available bookmarks: <ul>%s</ul>",
+      bookmark, paste(bm_html, collapse = '\n')
+    )))
+  }
+
+  shiny:::httpResponse(302, headers = list(Location = bm_url(state_id)))
+}
+
+shiny:::handlerManager$addHandler(bookmark_redirect, '/bookmark/')
