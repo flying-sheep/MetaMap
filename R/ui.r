@@ -234,7 +234,7 @@ navbar <- function() navbarPage(
         )
       ),
       fluidRow(
-        column(12, style = "margin-bottom:1500px", uiOutput("krona_iframe"))
+        column(12, style = "margin-bottom:1500px", uiOutput("krona_iframe", style = "margin-bottom:1500px"))
       )
     )
   )
