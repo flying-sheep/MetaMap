@@ -260,7 +260,7 @@ generatePhylo <- function(study, counts, sample_info, lineage) {
                            as.data.table(.)[2, ]
                          })))
   bla <-
-    if (class(bla) == "try-error")
+    if (inherits(bla,  "try-error"))
       data.frame(Attribute = rep(NA, ncol(otu_table(tmp))))
   else
     data.frame(bla)

@@ -40,7 +40,7 @@ runGDE <- function(input_dir, output_dir, max_samples, log) {
       print(file_path)
       if(file.exists(file_path)) return()
       de_table <- try(deseq2_table(phylo, attribute), silent = TRUE)
-      if(class(de_table) == "try-error"){
+      if (inherits(de_table,  "try-error")) {
         error <- rbind(error, c(study, attribute, geterrmessage()), stringsAsFactors = FALSE)
         if(log) assign("error", error, env)
         return(NULL)

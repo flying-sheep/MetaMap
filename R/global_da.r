@@ -44,9 +44,9 @@ runGDA <- function(input_dir, max_samples, log) {
       # replace NA with unknown
       phylo@sam_data[is.na(phylo@sam_data)] <- "unknown"
       PVal <- try(diversity_test(phylo, attribute), silent = TRUE)
-      if(class(PVal) == "try-error"){
+      if (inherits(PVal, "try-error")) {
         error <- rbind(error, c(study, attribute, geterrmessage()), stringsAsFactors = FALSE)
-        if(log) assign("error", error, env)
+        if (log) assign("error", error, env)
         NA
       } else
         PVal

@@ -16,13 +16,13 @@ transformData <-
            log = FALSE) {
     metaSRA.file <- ""
     doid.file <- ""
-    if (class(tables) == "character") {
+    if (inherits(tables, "character")) {
       metaSRA.file <- file.path(tables, "metasra.json")
       doid.file <- file.path(tables, "doid.json")
       tmp <- c("study_info", "sample_info", "counts", "feature_info")
       tables <- as.list(file.path(tables, paste0(tmp, ".RData")))
       names(tables) <- tmp
-    } else if (class(tables) != "list") {
+    } else if (!inherits(tables, "list")) {
       message("Invalid argument tables!")
       return()
     }
@@ -36,7 +36,7 @@ transformData <-
     dir.create(output_dir, showWarnings = FALSE)
 
     # Use metaSRA annotation
-    if(file.exists(metaSRA.file)){
+    if (file.exists(metaSRA.file)){
       metaSRA.tables <- getMetaSRA(sample_info, metaSRA.file)
       metaSRA.dt <- metaSRA.tables[[1]]
       ontologyInfo.dt <- metaSRA.tables[[2]]
@@ -113,7 +113,7 @@ runDG <-
         return()
       phylo <-
         try(generatePhylo(study, counts, sample_info, lineage))
-      if (class(phylo) == "try-error") {
+      if (inherits(phylo, "try-error")) {
         error <-
           rbind(error, c(study, geterrmessage()), stringsAsFactors = FALSE)
         if (log)

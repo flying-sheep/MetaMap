@@ -553,7 +553,7 @@ server <-
         phylo@sam_data <- sample_data(dt)
       }
       pval <- try(diversity_test(phylo, attribute), silent = TRUE)
-      if (class(pval) == "try-error")
+      if (inherits(pval, "try-error"))
         return()
       HTML(
         paste0(
@@ -679,7 +679,7 @@ server <-
                                      attribute,
                                      conds,
                                      parallel = DESEQ_PARALLEL))
-        if (class(de_table) == "try-error") {
+        if (inherits(de_table,  "try-error")) {
           showModal(
             modalDialog(
               title = "Important message",
@@ -726,7 +726,7 @@ server <-
             return(NULL)
           p <- try(plot_volcano(values$phylo@tax_table,
                                 values$de_table))
-          if (class(p) == "try-error") {
+          if (inherits(p, "try-error")) {
             showModal(
               modalDialog(
                 title = "Important message",
@@ -955,7 +955,7 @@ server <-
 
         cor_table <- try(cor_table(phylo, level1, level2, mf))
 
-        if (class(cor_table) == "try-error") {
+        if (inherits(cor_table,  "try-error")) {
           showModal(
             modalDialog(
               titl = "Important Message",
@@ -1423,7 +1423,7 @@ server <-
         }
         args$phylo <- phylo
         tmp <- try(do.call(plot_sankey, args))
-        if (class(tmp) == "try-error") {
+        if (inherits(tmp,  "try-error")) {
           showModal(
             modalDialog(
               title = "Important message",
@@ -1569,7 +1569,7 @@ server <-
       }) %>% apply(1, fun2)
 
       phylo <- try(subset_samples(phylo, tmp))
-      if (class(phylo) == "try-error") {
+      if (inherits(phylo, "try-error")) {
         showModal(
           modalDialog(
             titl = "Important Message",
@@ -1587,7 +1587,7 @@ server <-
     output$ss_text <- renderUI({
       phylo <- values$phylo
       attributes <- isolate(values$attributes)
-      if (is.na(phylo)) {
+      if (is.null(phylo)) {
         return(NULL)
       }
       sam_data <-
@@ -1690,7 +1690,7 @@ server <-
 
       phylo <- try(subset_taxa(phylo, tmp))
 
-      if (class(phylo) == "try-error") {
+      if (inherits(phylo, "try-error")) {
         showModal(
           modalDialog(
             titl = "Important Message",
