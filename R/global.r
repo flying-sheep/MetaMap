@@ -64,3 +64,12 @@ sankey.name <- "Sankey diagram"
 krona.name <- "Krona chart"
 
 enableBookmarking('server')
+
+# structure of the bookmark file: {"Name": "382e2cdc6e855a84"}
+bookmark_file <- pkg_file("data/bookmarks.json")
+bookmarks <- if (file.exists(bookmark_file)) {
+  jsonlite::read_json(bookmark_file)
+} else {
+  message('Info: Bookmark file ', bookmark_file, ' not found.')
+  NULL
+}

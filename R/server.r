@@ -13,6 +13,10 @@ if (!is_in_package()) {
 
 empty <- "none"
 
+redirect <- function(state_id) {
+  shinyjs::runjs(sprintf('location.href = "?_state_id_=%s"', state_id))
+}
+
 
 #' @export
 server <-
@@ -22,6 +26,26 @@ server <-
            DIR = pkg_file("data"),
            MAX_SAMPLES = 1000,
            DESEQ_PARALLEL = FALSE) {
+
+    ################
+    ### Redirect ###
+    ################
+
+    if (!is.null(bookmarks)) {
+      isolate({
+        search <- parseQueryString(session$clientData$url_search)
+        if ('example' %in% names(search) && search$example %in% names(bookmarks)) {
+          redirect(bookmarks[[search$example]])
+          return()
+        }
+      })
+
+      observeEvent(input$bookmark_select, {
+        if (!identical(input$bookmark_select, ""))
+          redirect(input$bookmark_select)
+      })
+    }
+
     ####################
     ### Prepare data ###
     ####################
@@ -1917,6 +1941,7 @@ server <-
     })
     onRestored(function(state) {
       tab <- state$input$dataset
+      if (is.null(tab)) return()
       delay(200, {
         if (tab == da.name) {
           # diversity analysis tab
@@ -1925,7 +1950,7 @@ server <-
                             selected = state$input$attribute_da)
         }
         # query by metafeature tab
-        else if (tab ==  qmetafeature.name) {
+        else if (tab == qmetafeature.name) {
           updateSelectInput(session, "mfInput", selected = state$input$mfInput)
         }
 

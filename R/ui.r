@@ -26,8 +26,11 @@ navbar <- function() navbarPage(
     style = "margin-bottom:20px"
   ),
   tabPanel("Overview",
-    htmlOutput("overviewText"),
-    img(src = 'www/PipelineImage.png', align = "center")
+    tags$h1("MetaMap - exploring the unexplored"),
+    tags$p("This interactive webtools enables the exploration of viral and microbial traits extracted from human RNA-seq data of over 500 studies relevant to human disease. The data was generated using a two-step alignment pipeline outlined below:"),
+    img(src = 'www/PipelineImage.png', align = "center"),
+    if (!is.null(bookmarks))
+      selectInput("bookmark_select", "Choose an example", c(list(""), bookmarks))
   ),
   navbarMenu("Query",
     tabPanel(qmetafeature.name,

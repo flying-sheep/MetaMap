@@ -2,3 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
+
+/R/shiny_bookmarks/
+/inst/data/bookmarks.json
