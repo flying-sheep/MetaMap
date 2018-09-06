@@ -7,9 +7,7 @@
 #    http://shiny.rstudio.com/
 #
 
-is_in_package <-
-  function()
-    ! identical(environment(is_in_package), .GlobalEnv)
+is_in_package <- function() !identical(environment(is_in_package), .GlobalEnv)
 
 if (!is_in_package()) {
   library(data.table)
@@ -21,14 +19,13 @@ if (!is_in_package()) {
   library(dplyr)
   library(stringr)
   library(phyloseq)
-  if(packageVersion("ggplot2") < "3.0.0") {
+  if (packageVersion("ggplot2") < "3.0.0")
     stop("Old ggplot2 version! Please install package:ggplot2 3.0.0!")
-  }
-  if(packageVersion("plotly") < "4.7.1.9000") {
-    stop("Please install the development version of plotly!
-         Last working version: 4.7.1.9000.
-         Run devtools::install_github('ropensci/plotly', force = TRUE)")
-  }
+  if (packageVersion("plotly") < "4.7.1.9000") stop(
+    "Please install the development version of plotly!\n",
+    "Last working version: 4.7.1.9000.\n",
+    "Run devtools::install_github('ropensci/plotly', force = TRUE)"
+  )
   library(ggplot2)
   library(shiny)
   library(htmltools)
@@ -37,7 +34,6 @@ if (!is_in_package()) {
   library(shinyjs)
   library(shinythemes)
   library(DT)
-  library(V8)
   library(grid)
   require(psadd)
   require(DESeq2)

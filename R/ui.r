@@ -15,171 +15,141 @@ navbar <- function() navbarPage(
   # inverse = TRUE,
   title = div(
     id = "title-section",
-    actionButton("back_button", "",class="nav-history-btn", icon = icon("arrow-left", "fa-2x")),
-    actionButton("fwd_button", "", class="nav-history-btn", icon = icon("arrow-right", "fa-2x")),
+    actionButton("back_button", "", class = "nav-history-btn", icon = icon("arrow-left", "fa-2x")),
+    actionButton("fwd_button",  "", class = "nav-history-btn", icon = icon("arrow-right", "fa-2x")),
     "MetaMap"
   ),
   id = 'dataset',
-  header = fluidRow(column(11, htmlOutput('help')), column(
-    1,
-    uiOutput("reload_button")
+  header = fluidRow(
+    column(11, htmlOutput('help')),
+    column(1, uiOutput("reload_button")),
+    style = "margin-bottom:20px"
   ),
-  style = "margin-bottom:20px"),
-  tabPanel(
-    "Overview",
+  tabPanel("Overview",
     htmlOutput("overviewText"),
     img(src = 'www/PipelineImage.png', align = "center")
   ),
-  navbarMenu(
-    "Query",
-    tabPanel(
-      qmetafeature.name,
+  navbarMenu("Query",
+    tabPanel(qmetafeature.name,
       uiOutput("mfInput"),
       plotlyOutput("mfPlot"),
-      HTML(
-        '<hr style="height:1px;border:none;color:#333;background-color:#333;"/>'
-      ),
+      tags$hr(),
       htmlOutput("mfName"),
       DT::dataTableOutput("mfTable")
     ),
     tabPanel(qstudy.name,
-             DT::dataTableOutput("mystudies"))
+      DT::dataTableOutput("mystudies")
+    )
   ),
   tabPanel(
     uiOutput("study_title"),
     tableOutput("studyinfo"),
-    HTML(
-      '<hr style="height:1px;border:none;color:#333;background-color:#333;"/>'
-    ),
-    checkboxGroupInput(
-      "check_file",
+    tags$hr(),
+    checkboxGroupInput("check_file",
       label = "Select files",
       choices = c("OTU Counts", "Sample info", "Feature info")
     ),
     downloadButton("download_samples", "Download", class = "btn-primary")
   ),
-  navbarMenu(
-    "Customize Data",
-    tabPanel(
-      ssamples.name,
+  navbarMenu("Customize Data",
+    tabPanel(ssamples.name, style = "margin-bottom:100px;",
       sidebarLayout(
-        sidebarPanel(
-          style = "margin-top:73px; position:fixed; width: inherit; overflow-y:auto; max-height:50%; z-index:1",
+        sidebarPanel(width = 2, style = "margin-top:73px; position:fixed; width: inherit; overflow-y:auto; max-height:50%; z-index:1",
           h4("Subset samples"),
           radioButtons("ss_radio_button", "Action", choices = c("Keep", "Exclude")),
           uiOutput("ss_text"),
-          actionButton(
-            "ss_apply_button",
-            "Apply",
+          actionButton("ss_apply_button",
+            label = "Apply",
             width = "100%",
             class = "btn-primary"
           ),
-          HTML(
-            '<hr style="height:1px;border:none;color:#333;background-color:#333;"/>'
-          ),
+          tags$hr(),
           h4("Define Groups"),
           radioButtons("groups_button", "Groups", choices = c("Group_0")),
           textInput("group_name", "Group Name", width = "100%"),
-          actionButton(
-            "groupName_button",
-            "Change Name",
+          actionButton("groupName_button",
+            label = "Change Name",
             width = "100%",
             class = "btn-primary"
           ),
-          actionButton(
-            "sel_button",
-            "Select samples",
+          actionButton("sel_button",
+            label = "Select samples",
             width = "100%",
             class = "btn-primary",
             style = "margin-bottom: 5px; margin-top: 5px"
           ),
-          actionButton(
-            "addGroup_button",
-            "Add Group",
+          actionButton("addGroup_button",
+            label = "Add Group",
             width = "100%",
             class = "btn-primary"
-          ),
-          width = 2
+          )
         ),
         mainPanel(
           DT::dataTableOutput("mysamples", width = "100%"),
           width = 10,
           style = "padding-left:30px"
         )
-      ),
-      style = "margin-bottom:100px;"
+      )
     ),
-    tabPanel(smf.name,
-             sidebarLayout(
-               sidebarPanel(
-                 style = "margin-top:73px; position: fixed; width: inherit;",
-                 h4("Subset metafeatures"),
-                 radioButtons("sm_radio_button", "Action", choices = c("Keep", "Exclude")),
-                 uiOutput("sm_text"),
-                 actionButton(
-                   "sm_apply_button",
-                   "Apply",
-                   width = "100%",
-                   class = "btn-primary"
-                 ),
-                 width = 2
-               ),
-               mainPanel(
-                 DT::dataTableOutput("taxa_table", width = "100%"),
-                 width = 10,
-                 style = "padding-left:30px"
-               )
-             ),
-             style = "margin-bottom:100px;")
+    tabPanel(smf.name, style = "margin-bottom:100px;",
+      sidebarLayout(
+        sidebarPanel(width = 2, style = "margin-top:73px; position: fixed; width: inherit;",
+          h4("Subset metafeatures"),
+          radioButtons("sm_radio_button", "Action", choices = c("Keep", "Exclude")),
+          uiOutput("sm_text"),
+          actionButton("sm_apply_button",
+            label = "Apply",
+            width = "100%",
+            class = "btn-primary"
+          )
+        ),
+        mainPanel(width = 10, style = "padding-left:30px",
+          DT::dataTableOutput("taxa_table", width = "100%")
+        )
+      )
+    )
   ),
-  navbarMenu(
-    "Analysis",
-    tabPanel(
-      dimred.name,
+  navbarMenu("Analysis",
+    tabPanel(dimred.name,
       fluidRow(class = "control-bar",
-               column(4, offset = 4, uiOutput("attribute_dr"))),
+        column(4, offset = 4, uiOutput("attribute_dr"))
+      ),
       tags$div(style = "margin-bottom:100px;",
-               plotlyOutput("dimred"))
+        plotlyOutput("dimred")
+      )
     ),
-    tabPanel(
-      da.name,
+    tabPanel(da.name,
       fluidRow(class = "control-bar",
-               column(4, offset = 4,
-                      uiOutput("attribute_da"))),
-      tags$div(
-        style = "margin-bottom:100px;",
+        column(4, offset = 4,
+          uiOutput("attribute_da")
+        )
+      ),
+      tags$div(style = "margin-bottom:100px;",
         uiOutput('diversity_stats'),
         plotlyOutput("diversity")
       )
     ),
-    tabPanel(
-      de.name,
-      fluidRow(
-        class = "control-bar",
+    tabPanel(de.name,
+      fluidRow(class = "control-bar",
         column(2, offset = 2, uiOutput('select_species_diff')),
         column(2, uiOutput("attribute_de")),
         column(2, uiOutput('de_conds')),
-        column(2,      actionButton('de_button', "Analyze", class = "btn-primary"), style = "padding-top:19px")
+        column(2, style = "padding-top:19px",
+          actionButton('de_button', "Analyze", class = "btn-primary")
+        )
       ),
       plotlyOutput("de_boxplot"),
-      tags$div(
-        style = "margin-bottom:100px;",
-        condition = "output.cond" ,
-        tabPanel("Global",
-                 DT::dataTableOutput("deseq_table")),
+      tags$div(style = "margin-bottom:100px;",
+        tabPanel("Global", DT::dataTableOutput("deseq_table")),
         plotlyOutput("de_plot", height = "600px")
       )
     ),
-    tabPanel(
-      mc.name,
-      fluidRow(
-        class = "control-bar",
+    tabPanel(mc.name,
+      fluidRow(class = "control-bar",
         column(2, offset = 3, uiOutput("mf_mc")),
         column(2, uiOutput(("level_mc"))),
-        column(
-          2,
-          actionButton("mc_apply_button", "Analyze",  class = "btn-primary"),
-          style = "padding-top:19px"
+        column(2, style = "padding-top:19px",
+          actionButton("mc_apply_button", "Analyze",  class = "btn-primary")
         )
       ),
       DT::dataTableOutput("cor_table"),
@@ -187,14 +157,11 @@ navbar <- function() navbarPage(
     ),
     tabPanel(
       ma.name,
-      fluidRow(
-        class = "control-bar",
+      fluidRow(class = "control-bar",
         column(2, offset = 3, uiOutput("level_ma")),
         column(2, uiOutput("attribute_ma")),
-        column(
-          2,
-          selectInput(
-            "top_n_ma",
+        column(2,
+          selectInput("top_n_ma",
             label = "Top N",
             choices = 1:50,
             selected = 10
@@ -206,116 +173,88 @@ navbar <- function() navbarPage(
       # plotOutput("abundances_plot")
     ),
     #attribute, level, relative = TRUE
-    tabPanel(
-      tbc.name,
-      fluidRow(
-        class = "control-bar",
+    tabPanel(tbc.name,
+      fluidRow(class = "control-bar",
         column(4, offset = 1, uiOutput("attribute_tbc")),
         column(4, uiOutput("level_tbc")),
-        column(2, actionButton('tbc_button', "Generate", class = "btn-primary"), style = "padding-top:19px")
+        column(2, style = "padding-top:19px", actionButton('tbc_button', "Generate", class = "btn-primary"))
       ),
       conditionalPanel(condition = "output.cond1",
-                       tabsetPanel(
-                         id = "tbc_panel",
-                         # ntaxa_plot is normalized
-                         tabPanel("Relative proportion", plotlyOutput("ntaxa_plot")),
-                         tabPanel("Absolute counts", plotlyOutput("taxa_plot"))
-                       ))
+        tabsetPanel(id = "tbc_panel",
+          # ntaxa_plot is normalized
+          tabPanel("Relative proportion", plotlyOutput("ntaxa_plot")),
+          tabPanel("Absolute counts", plotlyOutput("taxa_plot"))
+        )
+      )
     ),
-    tabPanel(
-      sankey.name,
-      div(
-        class = "control-bar",
+    tabPanel(sankey.name, style = "margin-bottom:100px;",
+      div(class = "control-bar",
         fluidRow(
           column(1, offset = 2, selectInput('sankey_source', 'Source', c())),
           column(1, selectInput('sankey_target', 'Target', c())),
           column(2, uiOutput('attribute_sankey')),
           column(2, uiOutput('sankey_condition')),
-          column(
-            1,
-            style = "padding-top:19px",
-            actionButton(
-              "sankey_apply_button",
+          column(1, style = "padding-top:19px",
+            actionButton("sankey_apply_button",
               label = "Apply",
-              class =
-                "btn-primary",
+              class = "btn-primary",
               width = "100%"
             )
           ),
-          column(
-            1,
-            style = "padding-top:19px",
-            actionButton(
-              "sankey_reset_button",
+          column(1, style = "padding-top:19px",
+            actionButton("sankey_reset_button",
               label = "Reset",
               class = "btn-primary",
               width = "100%"
             )
           ),
-          column(
-            1,
-            style = "padding-top:19px",
-            conditionalPanel(
-              condition = "output.sankey_cond",
-              actionButton(
-                "sankey_undo_button",
-                HTML("<b>Undo</b>")
-                ,
+          column(1, style = "padding-top:19px",
+            conditionalPanel(condition = "output.sankey_cond",
+              actionButton("sankey_undo_button",
                 class = "btn-primary",
-                width = "100%"
+                width = "100%",
+                tags$b("Undo")
               )
             )
           )
         )
       ),
       fluidRow(id = "sankey-div",
-               column(12, align = "center", uiOutput("sankey.ui"))),
-      style = "margin-bottom:100px;"
+        column(12, align = "center", uiOutput("sankey.ui"))
+      )
     ),
-    tabPanel(
-      krona.name,
-      fluidRow(
-        class = "control-bar",
+    tabPanel(krona.name,
+      fluidRow(class = "control-bar",
         column(3, offset = 4, uiOutput('attribute_krona')),
-        column(
-          1,
-          actionButton("krona_apply_button", label = "Plot", class = "btn-primary"),
-          style = "padding-top:19px"
+        column(1, style = "padding-top:19px",
+          actionButton("krona_apply_button", label = "Plot", class = "btn-primary")
         )
       ),
-      fluidRow(column(
-        12,
-        uiOutput("krona_iframe", style = "margin-bottom:1500px")
-      ))
+      fluidRow(
+        column(12, style = "margin-bottom:1500px", uiOutput("krona_iframe"))
+      )
     )
   )
 )
 
-# Add github link to the navbar
-add_gh <- function(nav) {
-  nav[[3]][[1]]$children[[1]] %<>% htmltools::tagAppendChild(
-    # bookmarkButton())
-    HTML("<a id='github-btn' class='nav-btn' href='https://github.com/gtsitsiridis/MetaMap' target='_blank'><i class='fa fa-github'></i></a>"))
-  nav
-}
-
 # Add bookmarking capability
 add_nav_buttons <- function(nav, gh, bookmarking) {
-  container <- "<div id='nav-btn-container'>"
-  if(bookmarking)
-      container %<>% paste(sep = "\n", bookmarkButton(class = "nav-btn", label = "Bookmark"))
+  container <- tags$div(id = 'nav-btn-container')
+  if (bookmarking)
+    container %<>% htmltools::tagAppendChild(bookmarkButton(class = "nav-btn", label = "Bookmark"))
   if (gh)
-      container %<>% paste(sep = "\n", "<a id='github-btn' class='nav-btn' href='https://github.com/theislab/MetaMap' target='_blank'><i class='fa fa-github'></i></a>")
-  container <- HTML(paste(container, sep="\n","</div>"))
+    container %<>% htmltools::tagAppendChild(tags$a(id = 'github-btn', class = 'nav-btn', href = 'https://github.com/theislab/MetaMap', target = '_blank', tags$i(class = 'fa fa-github')))
+
   nav[[3]][[1]]$children[[1]] %<>% htmltools::tagAppendChild(container)
   nav
 }
 
 
 page <- function(gh, bookmarking)
-  fluidPage(titlePanel(title = "", windowTitle = "MetaMap"),
-           add_nav_buttons(navbar(), gh = gh, bookmarking = bookmarking)
-            )
+  fluidPage(
+    titlePanel(title = "", windowTitle = "MetaMap"),
+    add_nav_buttons(navbar(), gh = gh, bookmarking = bookmarking)
+  )
 
 #' @export
 ui <- function(request) {
@@ -324,21 +263,19 @@ ui <- function(request) {
     page(gh = TRUE, bookmarking = TRUE),
     tags$link(rel = "stylesheet", href = "www/style.css"),
     # add contextmenu on plots
-    tags$nav(tags$ul(
-      tags$li(
-        downloadLink(
-          "ggplot_link",
-          label = HTML(as.character(tags$i(class = "fa fa-download")), "Download ggplot"),
-          class = "context-menu__link",
-          `plot-action` = "download ggplot"
-        ),
-        class = "context-menu__item"
-      ),
-      class = "context-menu__items"
+    tags$nav(class = "context-menu",
+      tags$ul(class = "context-menu__items",
+        tags$li(class = "context-menu__item",
+          downloadLink("ggplot_link",
+            label = HTML(as.character(tags$i(class = "fa fa-download")), "Download ggplot"),
+            class = "context-menu__link",
+            `plot-action` = "download ggplot"
+          )
+        )
+      )
     ),
-    class = "context-menu"),
     useShinyjs(),
-    extendShinyjs(script = pkg_file("shiny/www/contextmenu.js")),
-    extendShinyjs(script = pkg_file("shiny/www/general.js"))
+    extendShinyjs(script = pkg_file("shiny/www/contextmenu.js"), functions = c('contextmenu')),
+    extendShinyjs(script = pkg_file("shiny/www/general.js"), functions = c('init', 'resetclick', 'writeKrona'))
   )
 }
