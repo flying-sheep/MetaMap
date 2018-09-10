@@ -31,20 +31,10 @@ server <-
     ### Redirect ###
     ################
 
-    if (!is.null(bookmarks)) {
-      isolate({
-        search <- parseQueryString(session$clientData$url_search)
-        if ('example' %in% names(search) && search$example %in% names(bookmarks)) {
-          redirect(bookmarks[[search$example]])
-          return()
-        }
-      })
-
-      observeEvent(input$bookmark_select, {
-        if (!identical(input$bookmark_select, ""))
-          redirect(input$bookmark_select)
-      })
-    }
+    observeEvent(input$bookmark_select, {
+      if (!identical(input$bookmark_select, ""))
+        redirect(input$bookmark_select)
+    })
 
     ####################
     ### Prepare data ###
